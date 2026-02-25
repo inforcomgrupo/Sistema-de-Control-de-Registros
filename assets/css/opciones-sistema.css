@@ -1,0 +1,499 @@
+/* =====================================================
+   Sistema de Control de Registros
+   Escuela Internacional de Psicología
+   Estilos: Opciones de Sistema
+   ===================================================== */
+
+/* =====================================================
+   LAYOUT PRINCIPAL
+   ===================================================== */
+.opciones-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 2px 20px 0;
+}
+
+.opciones-container::-webkit-scrollbar { width: 5px; }
+.opciones-container::-webkit-scrollbar-track { background: transparent; }
+.opciones-container::-webkit-scrollbar-thumb { background: var(--gris-borde); border-radius: 5px; }
+
+/* =====================================================
+   SECCIÓN (CARD)
+   ===================================================== */
+.opc-section {
+    background: var(--blanco);
+    border: 1px solid var(--gris-medio);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px var(--sombra);
+}
+
+.opc-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, var(--azul2) 0%, var(--azul3) 100%);
+    color: var(--blanco);
+    border-radius: var(--radius) var(--radius) 0 0;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+}
+
+.opc-section-header:hover {
+    background: linear-gradient(135deg, var(--azul1) 0%, var(--azul3) 100%);
+}
+
+.opc-section-header h3 {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.opc-section-header h3 i {
+    font-size: 14px;
+    color: var(--celeste);
+}
+
+.opc-section-header .toggle-icon {
+    font-size: 11px;
+    transition: transform 0.2s ease;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.opc-section-header.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.opc-section-body {
+    padding: 16px;
+    display: block;
+}
+
+.opc-section-body.collapsed {
+    display: none;
+}
+
+/* =====================================================
+   FILAS DE OPCIONES
+   ===================================================== */
+.opc-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.opc-row:last-child { border-bottom: none; }
+
+.opc-row-label {
+    flex: 0 0 180px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gris-oscuro);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.opc-row-label i {
+    color: var(--azul3);
+    font-size: 13px;
+    width: 16px;
+    text-align: center;
+}
+
+.opc-row-control { flex: 1; }
+
+.opc-row-control input[type="text"],
+.opc-row-control textarea {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--gris-oscuro);
+    transition: border-color 0.2s ease;
+    background: var(--blanco);
+}
+
+.opc-row-control input[type="text"]:focus,
+.opc-row-control textarea:focus {
+    outline: none;
+    border-color: var(--celeste);
+    box-shadow: 0 0 0 2px rgba(0, 188, 255, 0.1);
+}
+
+.opc-row-control textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* =====================================================
+   TOGGLE SWITCH
+   ===================================================== */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+}
+
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--gris-borde);
+    border-radius: 22px;
+    transition: 0.25s ease;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 16px; width: 16px;
+    left: 3px; bottom: 3px;
+    background: var(--blanco);
+    border-radius: 50%;
+    transition: 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider { background: var(--celeste); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+.toggle-status { font-size: 11px; margin-left: 8px; font-weight: 500; }
+.toggle-status.on { color: var(--celeste); }
+.toggle-status.off { color: var(--rojo); }
+
+/* =====================================================
+   SELECTOR DE USUARIO
+   ===================================================== */
+.opc-user-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid var(--gris-medio);
+    margin-bottom: 14px;
+}
+
+.opc-user-selector label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gris-oscuro);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.opc-user-selector label i { color: var(--azul3); }
+
+.opc-user-selector select {
+    flex: 1;
+    max-width: 360px;
+    padding: 7px 10px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--gris-oscuro);
+    background: var(--blanco);
+    cursor: pointer;
+}
+
+.opc-user-selector select:focus {
+    outline: none;
+    border-color: var(--celeste);
+}
+
+/* =====================================================
+   PERMISOS POR SECCIÓN
+   ===================================================== */
+.opc-permisos-wrapper { display: none; }
+.opc-permisos-wrapper.active { display: block; }
+
+.opc-perm-group { margin-bottom: 14px; }
+
+.opc-perm-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--azul3);
+    padding: 6px 10px;
+    background: #f0f7ff;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-left: 3px solid var(--celeste);
+}
+
+.opc-perm-group-title i { font-size: 12px; color: var(--celeste); }
+
+.opc-perm-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px;
+    border-bottom: 1px solid #f9fafb;
+    transition: background 0.15s ease;
+}
+
+.opc-perm-item:hover { background: #fafbfc; }
+.opc-perm-item:last-child { border-bottom: none; }
+
+.opc-perm-item-label {
+    font-size: 12px;
+    color: var(--gris-oscuro);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.opc-perm-item-label i {
+    color: #9ca3af;
+    font-size: 11px;
+    width: 14px;
+    text-align: center;
+}
+
+/* =====================================================
+   SUBGRUPOS DE PERMISOS (COLUMNAS Y FILTROS)
+   ===================================================== */
+.opc-perm-subgroup {
+    margin: 6px 0 10px 0;
+    padding: 8px 12px;
+    background: #fafbfc;
+    border-radius: 4px;
+    border: 1px solid #f0f1f3;
+}
+
+.opc-perm-subgroup-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--azul3);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.opc-perm-subgroup-title i {
+    font-size: 11px;
+    color: var(--celeste);
+}
+
+/* =====================================================
+   GRID DE CHECKBOXES (COMPACTO)
+   ===================================================== */
+.opc-perm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 4px 8px;
+}
+
+.opc-perm-item-mini {
+    padding: 3px 0;
+}
+
+.opc-perm-item-mini label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--gris-oscuro);
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 3px;
+    transition: background 0.15s ease;
+    user-select: none;
+}
+
+.opc-perm-item-mini label:hover {
+    background: #e8f4fd;
+}
+
+.opc-perm-item-mini input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--celeste);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* =====================================================
+   API KEYS TABLE
+   ===================================================== */
+.opc-api-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.opc-api-table th {
+    background: var(--gris-claro);
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--gris-oscuro);
+    border-bottom: 2px solid var(--gris-medio);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.opc-api-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f3f4f6;
+    color: var(--gris-oscuro);
+    vertical-align: middle;
+}
+
+.opc-api-table tr:hover td { background: #fafbfc; }
+
+.api-key-text {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    background: #f3f4f6;
+    padding: 3px 6px;
+    border-radius: 3px;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.api-key-text:hover { background: var(--gris-medio); }
+
+.api-status-active { color: #059669; font-weight: 600; }
+.api-status-inactive { color: var(--rojo); font-weight: 600; }
+
+.opc-api-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.opc-api-form input {
+    flex: 1;
+    max-width: 350px;
+    padding: 7px 10px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: inherit;
+}
+
+.opc-api-form input:focus {
+    outline: none;
+    border-color: var(--celeste);
+}
+
+/* =====================================================
+   BOTONES
+   ===================================================== */
+.opc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.opc-btn-primary { background: var(--azul3); color: var(--blanco); }
+.opc-btn-primary:hover { background: var(--azul1); }
+.opc-btn-success { background: #059669; color: var(--blanco); }
+.opc-btn-success:hover { background: #047857; }
+.opc-btn-danger { background: var(--rojo); color: var(--blanco); }
+.opc-btn-danger:hover { background: #e63200; }
+.opc-btn-sm { padding: 4px 8px; font-size: 11px; }
+.opc-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* =====================================================
+   ACCIONES DE SECCIÓN
+   ===================================================== */
+.opc-section-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+    margin-top: 12px;
+}
+
+/* =====================================================
+   INFO / WARNING
+   ===================================================== */
+.opc-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f0f7ff;
+    border-radius: 4px;
+    border-left: 3px solid var(--celeste);
+    font-size: 11px;
+    color: var(--gris-oscuro);
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.opc-info i { color: var(--celeste); margin-top: 1px; flex-shrink: 0; }
+
+.opc-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fff7ed;
+    border-radius: 4px;
+    border-left: 3px solid var(--amarillo);
+    font-size: 11px;
+    color: #92400e;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.opc-warning i { color: var(--amarillo); margin-top: 1px; flex-shrink: 0; }
+
+/* =====================================================
+   EMPTY STATE
+   ===================================================== */
+.opc-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: #9ca3af;
+}
+
+.opc-empty i {
+    font-size: 28px;
+    display: block;
+    margin-bottom: 8px;
+    color: var(--gris-borde);
+}
+
+.opc-empty p { font-size: 12px; }

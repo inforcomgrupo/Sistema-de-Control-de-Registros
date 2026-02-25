@@ -1,0 +1,829 @@
+<?php
+/**
+ * Página: Opciones de Sistema
+ * Solo accesible por Administrador
+ */
+if (!defined('SISTEMA_REGISTROS')) {
+    define('SISTEMA_REGISTROS', true);
+    require_once __DIR__ . '/../config/database.php';
+    require_once __DIR__ . '/../config/app.php';
+    require_once __DIR__ . '/../includes/auth.php';
+}
+
+// Verificar sesión y permisos (sin redirect, porque se carga vía AJAX)
+iniciarSesionSegura();
+if (!estaAutenticado() || !esAdministrador()) {
+    echo '<div style="text-align:center;padding:40px;color:#FF3600;">
+        <i class="fas fa-lock" style="font-size:30px;margin-bottom:10px;display:block;"></i>
+        <p>No tiene permisos para acceder a esta sección.</p>
+    </div>';
+    return;
+}
+?>
+
+<link rel="stylesheet" href="assets/css/opciones-sistema.css?v=<?php echo SYSTEM_VERSION; ?>">
+
+<!-- =====================================================
+     MODAL: CONFIRMAR SUSPENDER / ACTIVAR CONSULTOR
+     ===================================================== -->
+<div class="modal-overlay" id="modalConfirmConsultor">
+    <div class="modal" style="max-width:400px;">
+        <div class="modal-header" id="modalConfirmHeader">
+            <div class="modal-header-left">
+                <i class="fas fa-user-slash" id="modalConfirmIcon"></i>
+                <h3 id="modalConfirmTitle">Confirmar acción</h3>
+            </div>
+            <button class="modal-close-btn" id="btnCloseConfirm"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" style="text-align:center;padding:24px 20px;">
+            <p id="modalConfirmMsg" style="font-size:13px;color:var(--gris-oscuro);line-height:1.6;margin:0;">¿Está seguro?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancelar" id="btnConfirmCancelar">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="button" class="btn" id="btnConfirmAceptar" style="background:var(--rojo);color:var(--blanco);">
+                <i class="fas fa-check" id="btnConfirmIconAction"></i>
+                <span id="btnConfirmTexto">Confirmar</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="opciones-container" id="opcionesContainer">
+
+    <!-- =====================================================
+         SECCIÓN 1: OPCIONES GLOBALES (INDEX / LOGIN)
+         ===================================================== -->
+    <div class="opc-section">
+        <div class="opc-section-header" onclick="OPC.toggleSection(this)">
+            <h3><i class="fas fa-globe"></i> Opciones Globales del Sistema</h3>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="opc-section-body" id="secGlobales">
+            <div class="opc-info">
+                <i class="fas fa-info-circle"></i>
+                <span>Estas opciones afectan al sistema completo. El nombre del sistema aparece en el Header y el control de login permite habilitar o deshabilitar el acceso al formulario de ingreso.</span>
+            </div>
+
+            <div class="opc-row">
+                <div class="opc-row-label"><i class="fas fa-heading"></i> Nombre del Sistema</div>
+                <div class="opc-row-control">
+                    <input type="text" id="optSistemaNombre" placeholder="Escuela Internacional de Psicología | Sistema de Registros">
+                </div>
+            </div>
+
+            <div class="opc-row">
+                <div class="opc-row-label"><i class="fas fa-sign-in-alt"></i> Login Habilitado</div>
+                <div class="opc-row-control" style="display:flex;align-items:center;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="optLoginHabilitado" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-status on" id="optLoginStatus">Habilitado</span>
+                </div>
+            </div>
+
+            <div class="opc-row" id="rowLoginMensaje" style="display:none;">
+                <div class="opc-row-label"><i class="fas fa-comment-alt"></i> Mensaje de Bloqueo</div>
+                <div class="opc-row-control">
+                    <textarea id="optLoginMensaje" placeholder="Mensaje que se mostrará cuando el login esté deshabilitado..."></textarea>
+                </div>
+            </div>
+
+            <div class="opc-section-actions">
+                <button class="opc-btn opc-btn-primary" id="btnGuardarGlobales">
+                    <i class="fas fa-save"></i> Guardar Opciones Globales
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         SECCIÓN 2: GESTIÓN DE API KEYS
+         ===================================================== -->
+    <div class="opc-section">
+        <div class="opc-section-header" onclick="OPC.toggleSection(this)">
+            <h3><i class="fas fa-key"></i> API Keys (Conexión WordPress)</h3>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="opc-section-body" id="secApiKeys">
+            <div class="opc-info">
+                <i class="fas fa-info-circle"></i>
+                <span>Cada dominio de WordPress necesita una API Key y Secret para enviar datos al sistema. Al crear una API Key, copie el <strong>Secret</strong> ya que no se mostrará de nuevo.</span>
+            </div>
+
+            <div class="opc-api-form">
+                <input type="text" id="apiNewDominio" placeholder="Ej: www.psicologiaenvivo.com">
+                <button class="opc-btn opc-btn-success" id="btnCrearApiKey">
+                    <i class="fas fa-plus"></i> Crear API Key
+                </button>
+            </div>
+
+            <div id="apiKeysTableWrapper">
+                <table class="opc-api-table">
+                    <thead>
+                        <tr>
+                            <th>Dominio</th>
+                            <th>API Key</th>
+                            <th>Estado</th>
+                            <th>Creada</th>
+                            <th>Último Uso</th>
+                            <th style="width:130px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apiKeysBody">
+                        <tr><td colspan="6"><div class="opc-empty"><i class="fas fa-spinner fa-spin"></i><p>Cargando...</p></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         SECCIÓN 3: PERMISOS POR USUARIO (DETALLADOS)
+         ===================================================== -->
+    <div class="opc-section">
+        <div class="opc-section-header" onclick="OPC.toggleSection(this)">
+            <h3><i class="fas fa-user-cog"></i> Permisos por Usuario</h3>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="opc-section-body" id="secPermisos">
+            <div class="opc-info">
+                <i class="fas fa-info-circle"></i>
+                <span>Configure permisos individuales para cada usuario. Elija qué columnas, filtros y funciones puede ver cada usuario. Los cambios se aplican <strong>en tiempo real</strong> sin que el usuario necesite recargar la página.</span>
+            </div>
+
+            <div class="opc-user-selector">
+                <label><i class="fas fa-user"></i> Seleccionar Usuario:</label>
+                <select id="permUserSelect">
+                    <option value="">— Seleccione un usuario —</option>
+                </select>
+            </div>
+
+            <div class="opc-permisos-wrapper" id="permisosWrapper">
+
+                <!-- ========== DASHBOARD ========== -->
+                <div class="opc-perm-group">
+                    <div class="opc-perm-group-title"><i class="fas fa-th-large"></i> Dashboard</div>
+
+                    <!-- Columnas individuales -->
+                    <div class="opc-perm-subgroup">
+                        <div class="opc-perm-subgroup-title"><i class="fas fa-columns"></i> Columnas visibles</div>
+                        <div class="opc-perm-grid">
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_nombre" checked> Nombre</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_apellidos" checked> Apellidos</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_telefono" checked> Teléfono</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_correo" checked> Correo</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_asesor" checked> Asesor</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_delegado" checked> Delegado</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_curso" checked> Curso</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_pais" checked> País</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_ciudad" checked> Ciudad</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_moneda" checked> Moneda</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_metodo_pago" checked> Método de Pago</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_ip" checked> IP</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_fecha" checked> Fecha</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_hora" checked> Hora</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_categoria" checked> Categoría</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_file_url" checked> File</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_formulario_id" checked> ID</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.col_web" checked> Web</label></div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros individuales -->
+                    <div class="opc-perm-subgroup">
+                        <div class="opc-perm-subgroup-title"><i class="fas fa-filter"></i> Filtros visibles</div>
+                        <div class="opc-perm-grid">
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_asesor" checked> Asesor</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_delegado" checked> Delegado</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_curso" checked> Curso</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_pais" checked> País</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_ciudad" checked> Ciudad</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_moneda" checked> Moneda</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_metodo_pago" checked> Método de Pago</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_web" checked> Web</label></div>
+                        </div>
+                    </div>
+
+                    <!-- Opciones generales -->
+                    <div class="opc-perm-item">
+                        <span class="opc-perm-item-label"><i class="fas fa-sort"></i> Reordenar Columnas</span>
+                        <label class="toggle-switch"><input type="checkbox" data-perm="dashboard.reordenar_columnas" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="opc-perm-item">
+                        <span class="opc-perm-item-label"><i class="fas fa-file-excel"></i> Descargar Excel</span>
+                        <label class="toggle-switch"><input type="checkbox" data-perm="dashboard.descargar_excel" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="opc-perm-item">
+                        <span class="opc-perm-item-label"><i class="fas fa-pencil-alt"></i> Edición Inline</span>
+                        <label class="toggle-switch"><input type="checkbox" data-perm="dashboard.edicion_inline" checked><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+
+                <!-- ========== ASESORES / DELEGADOS ========== -->
+                <div class="opc-perm-group">
+                    <div class="opc-perm-group-title"><i class="fas fa-headset"></i> Asesores / Delegados</div>
+
+                    <!-- Columnas individuales -->
+                    <div class="opc-perm-subgroup">
+                        <div class="opc-perm-subgroup-title"><i class="fas fa-columns"></i> Columnas visibles</div>
+                        <div class="opc-perm-grid">
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_nombre" checked> Nombre</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_apellidos" checked> Apellidos</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_telefono" checked> Teléfono</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_correo" checked> Correo</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_asesor" checked> Asesor</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_delegado" checked> Delegado</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_curso" checked> Curso</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_pais" checked> País</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_ciudad" checked> Ciudad</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_moneda" checked> Moneda</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_metodo_pago" checked> Método de Pago</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_ip" checked> IP</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_fecha" checked> Fecha</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_hora" checked> Hora</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_categoria" checked> Categoría</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_file_url" checked> File</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_formulario_id" checked> ID</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.col_web" checked> Web</label></div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros individuales -->
+                    <div class="opc-perm-subgroup">
+                        <div class="opc-perm-subgroup-title"><i class="fas fa-filter"></i> Filtros visibles</div>
+                        <div class="opc-perm-grid">
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_curso" checked> Curso</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_pais" checked> País</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_ciudad" checked> Ciudad</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_moneda" checked> Moneda</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_metodo_pago" checked> Método de Pago</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_web" checked> Web</label></div>
+                        </div>
+                    </div>
+
+                    <!-- Opciones generales -->
+                    <div class="opc-perm-item">
+                        <span class="opc-perm-item-label"><i class="fas fa-sort"></i> Reordenar Columnas</span>
+                        <label class="toggle-switch"><input type="checkbox" data-perm="asesores_delegados.reordenar_columnas" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="opc-perm-item">
+                        <span class="opc-perm-item-label"><i class="fas fa-file-excel"></i> Descargar Excel</span>
+                        <label class="toggle-switch"><input type="checkbox" data-perm="asesores_delegados.descargar_excel" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="opc-perm-item">
+                        <span class="opc-perm-item-label"><i class="fas fa-pencil-alt"></i> Edición Inline</span>
+                        <label class="toggle-switch"><input type="checkbox" data-perm="asesores_delegados.edicion_inline" checked><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+
+                <!-- ========== ESTADÍSTICAS ========== -->
+                <div class="opc-perm-group">
+                    <div class="opc-perm-group-title"><i class="fas fa-chart-bar"></i> Estadísticas</div>
+                    <div class="opc-perm-item">
+                        <span class="opc-perm-item-label"><i class="fas fa-chart-pie"></i> Acceso a Estadísticas</span>
+                        <label class="toggle-switch"><input type="checkbox" data-perm="estadisticas.acceso_estadisticas" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="opc-perm-subgroup">
+                        <div class="opc-perm-subgroup-title"><i class="fas fa-sliders-h"></i> Filtros/Gráficos visibles</div>
+                        <div class="opc-perm-grid">
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_fecha" checked> Fecha/Hora</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_asesor" checked> Asesor</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_delegado" checked> Delegado</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_curso" checked> Curso</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_pais" checked> País</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_ciudad" checked> Ciudad</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_moneda" checked> Moneda</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_metodo_pago" checked> Método de Pago</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_categoria" checked> Categoría</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_id" checked> ID</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="opc-section-actions">
+                    <button class="opc-btn opc-btn-primary" id="btnGuardarPermisos">
+                        <i class="fas fa-save"></i> Guardar Permisos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         SECCIÓN 4: SUSPENDER / ACTIVAR CONSULTORES
+         ===================================================== -->
+    <div class="opc-section">
+        <div class="opc-section-header" onclick="OPC.toggleSection(this)">
+            <h3><i class="fas fa-user-slash"></i> Suspender / Activar Consultores</h3>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="opc-section-body" id="secConsultores">
+            <div class="opc-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Al suspender un consultor, este no podrá ingresar al sistema. Sus datos no se eliminan. Puede volver a activarlo en cualquier momento.</span>
+            </div>
+            <div id="consultoresListOpc">
+                <div class="opc-empty"><i class="fas fa-spinner fa-spin"></i><p>Cargando consultores...</p></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/**
+ * Opciones de Sistema - Script
+ * Namespace OPC para evitar conflictos
+ * Permisos detallados por columna y filtro
+ */
+var OPC = (function () {
+    'use strict';
+
+    var CSRF = document.getElementById('csrfTokenDash') ? document.getElementById('csrfTokenDash').value : '';
+    var selectedUserId = 0;
+
+    // Datos pendientes del modal de confirmación
+    var pendingConfirm = { uid: 0, estado: '' };
+
+    // =====================================================
+    // TOGGLE SECCIONES
+    // =====================================================
+    function toggleSection(header) {
+        header.classList.toggle('collapsed');
+        var body = header.nextElementSibling;
+        body.classList.toggle('collapsed');
+    }
+
+    // =====================================================
+    // ESCAPE HTML
+    // =====================================================
+    function esc(str) {
+        if (!str) return '';
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+    }
+
+    // =====================================================
+    // INICIALIZACIÓN
+    // =====================================================
+    function init() {
+        cargarOpcionesGlobales();
+        cargarApiKeys();
+        cargarUsuarios();
+        cargarConsultoresOpc();
+        bindEvents();
+    }
+
+    function bindEvents() {
+        // Toggle login habilitado
+        var toggleLogin = document.getElementById('optLoginHabilitado');
+        if (toggleLogin) {
+            toggleLogin.addEventListener('change', function () {
+                var status = document.getElementById('optLoginStatus');
+                var rowMsg = document.getElementById('rowLoginMensaje');
+                if (this.checked) {
+                    status.textContent = 'Habilitado';
+                    status.className = 'toggle-status on';
+                    rowMsg.style.display = 'none';
+                } else {
+                    status.textContent = 'Deshabilitado';
+                    status.className = 'toggle-status off';
+                    rowMsg.style.display = '';
+                }
+            });
+        }
+
+        // Guardar globales
+        var btnG = document.getElementById('btnGuardarGlobales');
+        if (btnG) btnG.addEventListener('click', guardarGlobales);
+
+        // Crear API Key
+        var btnA = document.getElementById('btnCrearApiKey');
+        if (btnA) btnA.addEventListener('click', crearApiKey);
+
+        // Selector de usuario
+        var sel = document.getElementById('permUserSelect');
+        if (sel) sel.addEventListener('change', function () {
+            selectedUserId = parseInt(this.value) || 0;
+            if (selectedUserId > 0) {
+                cargarPermisosUsuario(selectedUserId);
+                document.getElementById('permisosWrapper').classList.add('active');
+            } else {
+                document.getElementById('permisosWrapper').classList.remove('active');
+            }
+        });
+
+        // Guardar permisos
+        var btnP = document.getElementById('btnGuardarPermisos');
+        if (btnP) btnP.addEventListener('click', guardarPermisos);
+
+        // Modal confirmar - botones
+        var btnCancelar = document.getElementById('btnConfirmCancelar');
+        if (btnCancelar) btnCancelar.addEventListener('click', cerrarModalConfirm);
+
+        var btnClose = document.getElementById('btnCloseConfirm');
+        if (btnClose) btnClose.addEventListener('click', cerrarModalConfirm);
+
+        var btnAceptar = document.getElementById('btnConfirmAceptar');
+        if (btnAceptar) btnAceptar.addEventListener('click', ejecutarToggleConsultor);
+
+        // Cerrar modal con clic en overlay
+        var overlay = document.getElementById('modalConfirmConsultor');
+        if (overlay) {
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) cerrarModalConfirm();
+            });
+        }
+    }
+
+    // =====================================================
+    // MODAL CONFIRMAR SUSPENDER/ACTIVAR
+    // =====================================================
+    function abrirModalConfirm(uid, estado, nombre) {
+        pendingConfirm.uid = uid;
+        pendingConfirm.estado = estado;
+
+        var header = document.getElementById('modalConfirmHeader');
+        var icon = document.getElementById('modalConfirmIcon');
+        var title = document.getElementById('modalConfirmTitle');
+        var msg = document.getElementById('modalConfirmMsg');
+        var btnAceptar = document.getElementById('btnConfirmAceptar');
+        var btnTexto = document.getElementById('btnConfirmTexto');
+        var btnIconAction = document.getElementById('btnConfirmIconAction');
+
+        if (estado === 'suspendido') {
+            header.style.background = 'linear-gradient(135deg, var(--rojo) 0%, #e63200 100%)';
+            icon.className = 'fas fa-user-slash';
+            title.textContent = 'Suspender Consultor';
+            msg.innerHTML = '¿Está seguro que desea <strong>suspender</strong> a<br><strong>' + esc(nombre) + '</strong>?<br><br><span style="font-size:11px;color:#92400e;">El consultor no podrá ingresar al sistema.</span>';
+            btnAceptar.style.background = 'var(--rojo)';
+            btnTexto.textContent = 'Suspender';
+            btnIconAction.className = 'fas fa-user-slash';
+        } else {
+            header.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+            icon.className = 'fas fa-user-check';
+            title.textContent = 'Activar Consultor';
+            msg.innerHTML = '¿Está seguro que desea <strong>activar</strong> a<br><strong>' + esc(nombre) + '</strong>?<br><br><span style="font-size:11px;color:#059669;">El consultor podrá ingresar al sistema nuevamente.</span>';
+            btnAceptar.style.background = '#059669';
+            btnTexto.textContent = 'Activar';
+            btnIconAction.className = 'fas fa-user-check';
+        }
+
+        document.getElementById('modalConfirmConsultor').classList.add('active');
+    }
+
+    function cerrarModalConfirm() {
+        document.getElementById('modalConfirmConsultor').classList.remove('active');
+        pendingConfirm.uid = 0;
+        pendingConfirm.estado = '';
+    }
+
+    function ejecutarToggleConsultor() {
+        if (pendingConfirm.uid <= 0) return;
+
+        var uid = pendingConfirm.uid;
+        var estado = pendingConfirm.estado;
+        cerrarModalConfirm();
+
+        var fd = new FormData();
+        fd.append('accion', 'toggle_consultor');
+        fd.append('usuario_id', uid);
+        fd.append('estado', estado);
+        fd.append('csrf_token', CSRF);
+
+        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success');
+                cargarConsultoresOpc();
+                cargarUsuarios();
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
+            }
+        })
+        .catch(function () { if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error'); });
+    }
+
+    // =====================================================
+    // OPCIONES GLOBALES
+    // =====================================================
+    function cargarOpcionesGlobales() {
+        fetch('includes/ajax/opciones_sistema.php?accion=get_globales', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                var o = data.opciones;
+                document.getElementById('optSistemaNombre').value = o.sistema_nombre || '';
+                var loginHab = document.getElementById('optLoginHabilitado');
+                var isEnabled = (o.login_habilitado !== '0');
+                loginHab.checked = isEnabled;
+                var status = document.getElementById('optLoginStatus');
+                status.textContent = isEnabled ? 'Habilitado' : 'Deshabilitado';
+                status.className = 'toggle-status ' + (isEnabled ? 'on' : 'off');
+                document.getElementById('rowLoginMensaje').style.display = isEnabled ? 'none' : '';
+                document.getElementById('optLoginMensaje').value = o.login_mensaje || '';
+            }
+        })
+        .catch(function (err) { console.error('Error cargando opciones globales:', err); });
+    }
+
+    function guardarGlobales() {
+        var btn = document.getElementById('btnGuardarGlobales');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        var fd = new FormData();
+        fd.append('accion', 'save_globales');
+        fd.append('sistema_nombre', document.getElementById('optSistemaNombre').value.trim());
+        fd.append('login_habilitado', document.getElementById('optLoginHabilitado').checked ? 1 : 0);
+        fd.append('login_mensaje', document.getElementById('optLoginMensaje').value.trim());
+        fd.append('csrf_token', CSRF);
+
+        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Opciones Globales';
+            if (data.success) {
+                if (typeof mostrarToast === 'function') mostrarToast('Opciones globales guardadas', 'success');
+                var nuevoNombre = document.getElementById('optSistemaNombre').value.trim();
+                var headerH1 = document.querySelector('.header-title h1');
+                if (headerH1) headerH1.textContent = nuevoNombre;
+                document.title = nuevoNombre;
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
+            }
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Opciones Globales';
+            if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
+        });
+    }
+
+    // =====================================================
+    // API KEYS
+    // =====================================================
+    function cargarApiKeys() {
+        fetch('includes/ajax/opciones_sistema.php?accion=get_api_keys', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) renderApiKeys(data.api_keys);
+        })
+        .catch(function (err) { console.error('Error cargando API Keys:', err); });
+    }
+
+    function renderApiKeys(keys) {
+        var tbody = document.getElementById('apiKeysBody');
+        if (!keys || keys.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6"><div class="opc-empty"><i class="fas fa-key"></i><p>No hay API Keys registradas</p></div></td></tr>';
+            return;
+        }
+        var html = '';
+        keys.forEach(function (k) {
+            var isActive = k.activo == 1;
+            var statusClass = isActive ? 'api-status-active' : 'api-status-inactive';
+            var statusText = isActive ? 'Activa' : 'Inactiva';
+            var toggleIcon = isActive ? 'fa-pause' : 'fa-play';
+            var toggleClass = isActive ? 'opc-btn-danger' : 'opc-btn-success';
+            var ultimoUso = k.ultimo_uso || 'Nunca';
+            html += '<tr>';
+            html += '<td><strong>' + esc(k.dominio) + '</strong></td>';
+            html += '<td><span class="api-key-text" title="Clic para copiar" onclick="OPC.copiarTexto(\'' + esc(k.api_key) + '\')">' + esc(k.api_key.substring(0, 16)) + '...</span></td>';
+            html += '<td><span class="' + statusClass + '">' + statusText + '</span></td>';
+            html += '<td>' + esc(k.fecha_creacion) + '</td>';
+            html += '<td>' + esc(ultimoUso) + '</td>';
+            html += '<td>';
+            html += '<button class="opc-btn opc-btn-sm ' + toggleClass + '" onclick="OPC.toggleApiKey(' + k.id + ', ' + (isActive ? 0 : 1) + ')"><i class="fas ' + toggleIcon + '"></i></button> ';
+            html += '<button class="opc-btn opc-btn-sm opc-btn-danger" onclick="OPC.eliminarApiKey(' + k.id + ', \'' + esc(k.dominio) + '\')"><i class="fas fa-trash"></i></button>';
+            html += '</td>';
+            html += '</tr>';
+        });
+        tbody.innerHTML = html;
+    }
+
+    function crearApiKey() {
+        var dominio = document.getElementById('apiNewDominio').value.trim();
+        if (!dominio) {
+            if (typeof mostrarToast === 'function') mostrarToast('Ingrese un dominio', 'error');
+            return;
+        }
+        var fd = new FormData();
+        fd.append('accion', 'create_api_key');
+        fd.append('dominio', dominio);
+        fd.append('csrf_token', CSRF);
+
+        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                document.getElementById('apiNewDominio').value = '';
+                if (typeof mostrarToast === 'function') mostrarToast('API Key creada. Secret: ' + data.api_secret.substring(0, 20) + '... (copiado al portapapeles)', 'success', 8000);
+                try { navigator.clipboard.writeText(data.api_secret); } catch (e) {}
+                cargarApiKeys();
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
+            }
+        })
+        .catch(function () { if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error'); });
+    }
+
+    function toggleApiKey(id, activo) {
+        var fd = new FormData();
+        fd.append('accion', 'toggle_api_key');
+        fd.append('id', id);
+        fd.append('activo', activo);
+        fd.append('csrf_token', CSRF);
+        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success');
+                cargarApiKeys();
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
+            }
+        });
+    }
+
+    function eliminarApiKey(id, dominio) {
+        if (!confirm('¿Eliminar la API Key del dominio "' + dominio + '"?')) return;
+        var fd = new FormData();
+        fd.append('accion', 'delete_api_key');
+        fd.append('id', id);
+        fd.append('csrf_token', CSRF);
+        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success');
+                cargarApiKeys();
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
+            }
+        });
+    }
+
+    function copiarTexto(texto) {
+        try {
+            navigator.clipboard.writeText(texto);
+            if (typeof mostrarToast === 'function') mostrarToast('Copiado al portapapeles', 'success');
+        } catch (e) {
+            if (typeof mostrarToast === 'function') mostrarToast('No se pudo copiar', 'error');
+        }
+    }
+
+    // =====================================================
+    // PERMISOS POR USUARIO (DETALLADOS)
+    // =====================================================
+    function cargarUsuarios() {
+        fetch('includes/ajax/opciones_sistema.php?accion=get_usuarios', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                var sel = document.getElementById('permUserSelect');
+                sel.innerHTML = '<option value="">— Seleccione un usuario —</option>';
+                data.usuarios.forEach(function (u) {
+                    var badge = u.tipo === 'administrador' ? ' [Admin]' : ' [Consultor]';
+                    var estado = u.estado === 'suspendido' ? ' (Suspendido)' : '';
+                    sel.innerHTML += '<option value="' + u.id + '">' + esc(u.nombre + ' ' + u.apellidos) + badge + estado + '</option>';
+                });
+            }
+        })
+        .catch(function (err) { console.error('Error cargando usuarios:', err); });
+    }
+
+    function cargarPermisosUsuario(uid) {
+        fetch('includes/ajax/opciones_sistema.php?accion=get_permisos&usuario_id=' + uid, { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                var permisos = data.permisos || {};
+
+                // Resetear todos los toggles
+                document.querySelectorAll('[data-perm]').forEach(function (cb) {
+                    var key = cb.getAttribute('data-perm');
+                    var parts = key.split('.');
+                    var seccion = parts[0]; // dashboard, asesores_delegados, estadisticas
+                    var permiso = parts[1]; // col_nombre, filtro_asesor, descargar_excel, etc.
+
+                    // Buscar en la estructura: permisos.seccion.permiso
+                    var val = true; // Default: habilitado
+                    if (permisos[seccion] !== undefined && permisos[seccion][permiso] !== undefined) {
+                        val = permisos[seccion][permiso];
+                    }
+                    cb.checked = val;
+                });
+            }
+        })
+        .catch(function (err) { console.error('Error cargando permisos:', err); });
+    }
+
+    function guardarPermisos() {
+        if (selectedUserId <= 0) {
+            if (typeof mostrarToast === 'function') mostrarToast('Seleccione un usuario', 'error');
+            return;
+        }
+        var btn = document.getElementById('btnGuardarPermisos');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        // Construir estructura organizada por sección
+        var permisos = {};
+        document.querySelectorAll('[data-perm]').forEach(function (cb) {
+            var key = cb.getAttribute('data-perm');
+            var parts = key.split('.');
+            var seccion = parts[0];
+            var permiso = parts[1];
+            if (!permisos[seccion]) permisos[seccion] = {};
+            permisos[seccion][permiso] = cb.checked;
+        });
+
+        var fd = new FormData();
+        fd.append('accion', 'save_permisos');
+        fd.append('usuario_id', selectedUserId);
+        fd.append('permisos', JSON.stringify(permisos));
+        fd.append('csrf_token', CSRF);
+
+        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Permisos';
+            if (data.success) {
+                if (typeof mostrarToast === 'function') mostrarToast('Permisos guardados correctamente. Se aplican en tiempo real.', 'success');
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
+            }
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Permisos';
+            if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
+        });
+    }
+
+    // =====================================================
+    // SUSPENDER / ACTIVAR CONSULTORES
+    // =====================================================
+    function cargarConsultoresOpc() {
+        fetch('includes/ajax/consultores.php?action=listar', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) renderConsultoresOpc(data.consultores);
+        })
+        .catch(function (err) { console.error('Error cargando consultores:', err); });
+    }
+
+    function renderConsultoresOpc(consultores) {
+        var container = document.getElementById('consultoresListOpc');
+        if (!consultores || consultores.length === 0) {
+            container.innerHTML = '<div class="opc-empty"><i class="fas fa-users"></i><p>No hay consultores registrados</p></div>';
+            return;
+        }
+        var html = '<table class="opc-api-table"><thead><tr><th>Nombre</th><th>Usuario</th><th>País</th><th>Estado</th><th style="width:120px;">Acción</th></tr></thead><tbody>';
+        consultores.forEach(function (c) {
+            var isActive = c.estado === 'activo';
+            var estadoClass = isActive ? 'api-status-active' : 'api-status-inactive';
+            var estadoText = isActive ? 'Activo' : 'Suspendido';
+            var btnText = isActive ? 'Suspender' : 'Activar';
+            var btnClass = isActive ? 'opc-btn-danger' : 'opc-btn-success';
+            var btnIcon = isActive ? 'fa-user-slash' : 'fa-user-check';
+            var nuevoEstado = isActive ? 'suspendido' : 'activo';
+            var nombreCompleto = (c.nombre + ' ' + c.apellidos).replace(/'/g, "\\'");
+            html += '<tr>';
+            html += '<td><strong>' + esc(c.nombre + ' ' + c.apellidos) + '</strong></td>';
+            html += '<td>' + esc(c.usuario) + '</td>';
+            html += '<td>' + esc(c.pais) + '</td>';
+            html += '<td><span class="' + estadoClass + '">' + estadoText + '</span></td>';
+            html += '<td><button class="opc-btn opc-btn-sm ' + btnClass + '" onclick="OPC.toggleConsultor(' + c.id + ', \'' + nuevoEstado + '\', \'' + nombreCompleto + '\')"><i class="fas ' + btnIcon + '"></i> ' + btnText + '</button></td>';
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    function toggleConsultor(uid, estado, nombre) {
+        // Abrir modal en lugar de confirm() nativo
+        abrirModalConfirm(uid, estado, nombre || 'este consultor');
+    }
+
+    // Inicializar
+    init();
+
+    // API pública
+    return {
+        toggleSection: toggleSection,
+        toggleApiKey: toggleApiKey,
+        eliminarApiKey: eliminarApiKey,
+        copiarTexto: copiarTexto,
+        toggleConsultor: toggleConsultor
+    };
+
+})();
+</script>
