@@ -1,0 +1,896 @@
+Hola! quiero me ayudes con un Sistema de Control de Registros
+Copilot said: ¡Hola! 👋 Con gusto te ayudo con
+¡Hola! 👋 Con gusto te ayudo con un Sistema de Control de Registros.
+
+Para poder orientarte de la mejor manera, necesito entender un poco más sobre lo que necesitas. Aquí te dejo algunas preguntas:
+
+📋 Preguntas para definir el alcance:
+¿Qué tipo de registros quieres controlar?
+
+Registros de empleados/personal
+Registros de clientes
+Registros de inventario/productos
+Registros de documentos
+Registros académicos
+Otro: _________
+¿Qué funcionalidades necesitas?
+
+✅ Crear registros (altas)
+✅ Leer/consultar registros
+✅ Actualizar registros (modificaciones)
+✅ Eliminar registros (bajas)
+🔍 Búsqueda y filtros
+📊 Reportes y estadísticas
+🔐 Control de acceso / autenticación
+¿Qué tecnologías prefieres o ya manejas?
+
+Frontend: HTML/CSS/JS, React, Vue, Angular, etc.
+Backend: Python, Node.js, Java, PHP, C#, etc.
+Base de datos: MySQL, PostgreSQL, MongoDB, SQLite, etc.
+¿Es una aplicación web, de escritorio o móvil?
+
+¿Ya tienes un repositorio en GitHub donde quieras trabajar? Si es así, compárteme el enlace (owner/repo).
+
+¿Cómo puedo ayudarte?
+Puedo asistirte de varias formas:
+
+Acción	Descripción
+🔧 Crear un PR	Si ya tienes un repositorio, puedo crear un Pull Request con el código
+📝 Crear issues	Puedo crear issues en GitHub para planificar el desarrollo
+💡 Diseñar la arquitectura	Te ayudo a definir la estructura del proyecto
+🔍 Revisar código existente	Si ya tienes algo avanzado, puedo revisarlo
+¡Cuéntame más detalles y empezamos! 🚀
+
+You said: Te paso lo que deseo Sistema de Control
+Te paso lo que deseo
+
+Sistema de Control de Registros
+Quiero un Sistema en PHP que obtenga datos de un formulario ContactForm 7 de Wordpress y me los muestre en un Lista Tipo Tabla, El Sistema es un Sistema aparte del Wordpress, que estará en otro Servidor en otro CPanel con su propia BD MySQL.
+¿Cuál es la función principal de este trabajo?
+Se tiene una Página web en WordPress y se trabaja con el plugin Contact Form 7, El Usuario ingresa a la Pagina y envía datos en un Formulario el Formulario valida los datos, errores y cuando esta todo bien envía los datos al correo de la Institución, envía los datos a una hoja de Excel en Google Drive y además envía datos del formulario a una página de respuesta, hay que tener en cuenta también se envía un archivo adjunto y para esto se trabaja con un plugin que el adjunto lo sube a una capeta en /uploads de WordPress y al correo envía un link directo para ver el archivo dándole clic al link. Lo que deseo es que el “Sistema de Control de Registros” capture esos datos que envía el formulario y los ponga en una BD y que me la muestra en unas listas con sus filtros y estadísticas (Eso lo veremos después). Además, el Sistema no debe interferir en el actual funcionamiento del Wordpress y de los Formularios, no debe generar errores.
+El “Sistema de Control de Registros” debe ir de la mano un Plugin de WordPress “Captura de Sistema de Registros” y se debe conectar mediante una API segura, tener en cuenta que el “Sistema de Control de Registros” puede obtener datos de formularios de otros dominios diferentes, la API no debe fallar ya que son datos sensibles e importantes para la Institución
+=============================
+Debe tener 2 Tipos de Usuarios: Administrador y Consultor
+Debe ingresar al sistema con las credenciales
+a.	Usuario: admin
+b.	Pass: 123456
+INDEX
+a.	Debe tener un Favicon (favicon.webp – Yo lo subiré al hosting del Sistema) 
+b.	Debe tener un formulario de ingreso
+i.	Debe tener el logo de la Institución (logo.webp – Yo lo subiré al hosting del Sistema)
+ii.	Debe ser profesional, buen diseño y seguro
+iii.	Solo debe tener Usuario y Contraseña, no hay forma de recuperar contraseña ni nada de esas opciones
+c.	Si no puede ingresar debe indicar en un modal que no son las credenciales de ingreso, el modal solo debe cerrarse con un botón de cerrar
+d.	Al ingresar con las credenciales correctas debe enviar un mensaje de bienvenida e ingresar al Sistema (Dashboard)
+
+1.	ADMINISTRADOR
+c.	DASHBOARD
+i.	Debe tener un Favicon (favicon.webp – Yo lo subiré al hosting del Sistema)
+ii.	Al ingresar debe mostrar 4 partes
+iii.	Un Header (es fijo y ocupa todo al ancho, desde el borde del sidebar hasta el final), un Sidebar (es fijo y ocupa todo el alto), un Footer (es fijo y ocupa todo al ancho, desde el borde del sidebar hasta el final) y un Panel donde se cargará toda la información 
+
+
+
+
+
+
+1.	HEADER
+a.	Debe tener el Titulo del Sistema “Escuela Internacional de Psicología | Sistema de Registros”, el nombre del Usuario logeado, el tipo de Usuario logeado y al final una lista que tiene “Editar Usuario” y “Salir del sistema”
+b.	Cuando se dé clic en Editar Usuario debe abrir modal de edición de Usuario debe ser:
+i.	Debe tener los campos: Nombre - Apellidos - País - Teléfono - Usuario – Contraseña y se deben cargar con la información actual, incluido el Usuario y Contraseña
+ii.	Cada campo debe tener las siguientes validaciones:
+1.	Nombre:
+a.	Validar en tiempo real con letra capital, menos las palabras enlace, ejemplo: si escribe JUAN DE DIOS, debe validar como Juan de Dios y no como Juan De Dios
+b.	No debe permitir espacios adelante y atrás de las palabras
+c.	Debe permitir escribir con un solo espacio entre palabras
+d.	El mensaje de error debe ser “El campo Nombre no debe de estar vacío”
+2.	Apellidos:
+a.	Validar en tiempo real con letra capital, menos las palabras enlace, ejemplo: si escribe JUAN DE DIOS, debe validar como Juan de Dios y no como Juan De Dios
+b.	No debe permitir espacios adelante y atrás de las palabras
+c.	Debe permitir escribir con un solo espacio entre palabras
+d.	El mensaje de error debe ser “El campo Apellido no debe de estar vacío”
+3.	País:
+a.	Debe haber una listad de los siguientes países: "Argentina" "Bolivia" "Brasil" "Chile" "Colombia" "Costa Rica" "Cuba" "Ecuador" "El Salvador" "España" "Estados Unidos" "Guatemala" "Honduras" "México" "Nicaragua" "Panamá" "Paraguay" "Perú" "Puerto Rico" "República Dominicana" "Uruguay" "Venezuela".
+b.	El mensaje de error debe ser “Debes seleccionar un País para continuar”
+4.	Teléfono / Whatsapp:
+a.	Aquí debe ingresar el número del celular sin espacios, ni letras, ni símbolos, solo números
+b.	Debe cargar automáticamente el prefijo del país, según el país que escoja en el campo PAIS
+c.	Este campo es UNICO en la BD por tanto no debe repetirse en ningún tipo de Usuario
+d.	El mensaje de error debe ser “El campo Teléfono no debe de estar vacío”
+e.	El mensaje de error debe ser “El número +## ########## ya está registrado”
+5.	Usuario:
+a.	Aquí no valida nada, debe aceptar tal como lo escribe el usuario
+b.	Debe tener como mínimo 4 caracteres
+c.	El mensaje de error debe ser “El campo Usuario no debe de estar vacío”
+d.	El mensaje de error debe ser “El campo Centro de Estudios debe tener al menos 4 caracteres”
+6.	Contraseña:
+a.	Aquí no valida nada, debe aceptar tal como lo escribe el usuario
+b.	El mensaje de error debe ser “El campo Contraseña no debe de estar vacío”
+c.	El mensaje de error debe ser “El campo Contraseña debe tener al menos 6 caracteres”
+2.	SIDEBAR
+a.	Debe ser fijo y ocupa todo el alto de la pantalla
+b.	En la parte de arriba debe tener el Logo de la Institución
+c.	Debe tener un menú
+i.	Dashboard
+1.	Debe mostrar una Lista tipo Tabla de todos los datos que están en la BD que pertenecen a los Formularios:
+NOMBRE / APELLIDOS / TELEFONO / CORREO / ASESOR / DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / IP / FECHA / HORA / CATEGORIA / FILE / ID / WEB (este dato debe obtenerse de la web de donde llega el formulario, eso no llega como dato)
+2.	La columna TELEFONO debe tener un botón para al darle clic me abra el whatsapp del Teléfono, algo como https://wa.me/+########## en una ventana nueva
+3.	La lista debe mostrar en tiempo real, en cuanto llegue un dato a la BD debe mostrarlo en la lista, sin actualizar la página, sin saltos, de forma automática y en tiempo real, cuando llegue un nuevo registro debe aparecer un anuncio en la parte inferior izquierda de la llegada del nuevo registro, que sea sutil y que dure unos segundos)
+4.	La lista debe ser infinita hacia abajo, no debe tener paginación (Tener en cuenta que llegan aproximadamente 400 registros al mes, de aquí a 10 meses habrá 4000 registros, tener en cuenta que el Sistema debe ser rápido, sin saltos, ni lento, ni que se cuelgue)
+5.	La lista debe tener encabezados tipo tabla y que al darle clic ordene los datos de la columna de arriba abajo y de abajo arriba
+6.	Debe tener un Filtro principal, que sea una lista que se cargue automáticamente con el listado de ID, ya que el ID es el nombre del Formulario que llegara como dato
+7.	Debe tener un buscador general, donde el Usuario escribe y mientras escribe la tabla va filtrando el contenido
+8.	Debe tener un filtro por rango de Fecha, que sea por fecha y hora, el Usuario debe poner la fecha de inicio y de fin y la tabla debe mostrar los datos entre esas fechas y también debe tener para filtra por hora sin dejar el filtro por fecha
+9.	Debe tener filtros tipo lista y esta lista deben llenarse automáticamente con los datos de su tabla, debe mostrar las listas de:
+ASESOR / DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / WEB
+10.	La lista que esta filtrada debe exportarse a un Excel, en formato excel con encabezados, tal como se ve en la lista se exporta, y si no se hace ningún filtro igual debe exportarse lo que se ve en pantalla
+11.	Debe haber una opción para editar los datos dentro de la Lista (este con filtros o sin filtros), debe haber un icono de lápiz pequeño que al darle clic me permita editar el campo. Debe dejarme editar cualquier dato
+12.	Dentro de los datos que llegaran a la BD llega un campo donde llega un link hacia el archivo adjunto (ID), dentro de la lista no debes poner toda la url completa que llega, solo crear un pequeño botón que vaya al link de la url en una ventana nueva
+13.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+14.	Los filtros deben trabajar juntos, es decir si aplico un filtro y luego aplico otro deben trabajar juntos, no por separado
+ii.	Crear Consultor
+1.	Cuando se dé clic en Crear Consultor debe abrir modal de edición de Crear Consultor
+2.	El modal no debe cerrarse, solo con el botón CANCELAR
+3.	El modal al cerrarse debe vaciar los datos del Formulario, si vuelve abrir debe abrirse con el formulario vacío
+4.	Debe tener los campos: Nombre - Apellidos - País - Teléfono - Usuario – Contraseña
+5.	Cada campo debe tener las siguientes validaciones:
+a.	Nombre:
+i.	Validar en tiempo real con letra capital, menos las palabras enlace, ejemplo: si escribe JUAN DE DIOS, debe validar como Juan de Dios y no como Juan De Dios
+ii.	No debe permitir espacios adelante y atrás de las palabras
+iii.	Debe permitir escribir con un solo espacio entre palabras
+iv.	El mensaje de error debe ser “El campo Nombre no debe de estar vacío”
+b.	Apellidos:
+i.	Validar en tiempo real con letra capital, menos las palabras enlace, ejemplo: si escribe JUAN DE DIOS, debe validar como Juan de Dios y no como Juan De Dios
+ii.	No debe permitir espacios adelante y atrás de las palabras
+iii.	Debe permitir escribir con un solo espacio entre palabras
+iv.	El mensaje de error debe ser “El campo Apellido no debe de estar vacío”
+c.	País:
+i.	Debe haber una listad de los siguientes países: "Argentina" "Bolivia" "Brasil" "Chile" "Colombia" "Costa Rica" "Cuba" "Ecuador" "El Salvador" "España" "Estados Unidos" "Guatemala" "Honduras" "México" "Nicaragua" "Panamá" "Paraguay" "Perú" "Puerto Rico" "República Dominicana" "Uruguay" "Venezuela".
+ii.	El mensaje de error debe ser “Debes seleccionar un País para continuar”
+d.	Teléfono / Whatsapp:
+i.	Aquí debe ingresar el número del celular sin espacios, ni letras, ni símbolos, solo números
+ii.	Debe cargar automáticamente el prefijo del país, según el país que escoja en el campo PAIS. Debe cargarse al costado izquierdo del numero y no debe dejar que lo borren o editen
+iii.	Este campo es UNICO en la BD por tanto no debe repetirse en ningún tipo de Consultor
+iv.	El mensaje de error debe ser “El campo Teléfono no debe de estar vacío”
+v.	El mensaje de error debe ser “El número +## ########## ya está registrado”
+e.	Usuario:
+i.	Aquí no valida nada, debe aceptar tal como lo escribe el usuario
+ii.	Debe tener como mínimo 4 caracteres
+iii.	El mensaje de error debe ser “El campo Usuario no debe de estar vacío”
+iv.	El mensaje de error debe ser “El campo Centro de Estudios debe tener al menos 4 caracteres”
+f.	Contraseña:
+i.	Aquí no valida nada, debe aceptar tal como lo escribe el usuario
+ii.	El mensaje de error debe ser “El campo Contraseña no debe de estar vacío”
+iii.	El mensaje de error debe ser “El campo Contraseña debe tener al menos 6 caracteres”
+iii.	Consultores
+1.	Debe mostrar una Lista tipo Tabla de todos los datos que están en la BD que pertenecen a los Consultores
+NOMBRE / APELLIDO / PAIS / TELEFONO
+2.	La columna TELEFONO debe tener un botón para al darle clic me abra el whatsapp del Teléfono, algo como https://wa.me/+########## en una ventana nueva
+3.	La lista debe mostrar en tiempo real, en cuanto llegue un dato a la BD debe mostrarlo en la lista, sin actualizar la página, sin saltos, de forma automática y en tiempo real, cuando llegue un nuevo registro debe aparecer un anuncio en la parte inferior izquierda de la llegada del nuevo registro, que sea sutil y que dure unos segundos)
+4.	La lista debe ser infinita hacia abajo, no debe tener paginación
+5.	La lista debe tener encabezados tipo tabla y que al darle clic ordene los datos de la columna de arriba abajo y de abajo arriba
+6.	Debe tener un buscador general, donde el Usuario escribe y mientras escribe la tabla va filtrando el contenido
+7.	La lista que esta filtrada debe exportarse a un Excel, en formato excel con encabezados, tal como se ve en la lista se exporta, y si no se hace ningún filtro igual debe exportarse lo que se ve en pantalla
+8.	Debe haber una opción para editar los datos dentro de la Lista (este con filtros o sin filtros), debe haber un icono de lápiz pequeño que al darle clic me permita editar el campo. Debe dejarme editar cualquier dato
+9.	Debe haber una opción donde me abra un modal para Modificar Datos de Consultor.
+Debe tener los campos: Nombre - Apellidos - País - Teléfono - Usuario – Contraseña y se deben cargar con la información actual, incluido el Usuario y Contraseña.
+Cada campo debe tener las siguientes validaciones:
+a.	Nombre:
+i.	Validar en tiempo real con letra capital, menos las palabras enlace, ejemplo: si escribe JUAN DE DIOS, debe validar como Juan de Dios y no como Juan De Dios
+ii.	No debe permitir espacios adelante y atrás de las palabras
+iii.	Debe permitir escribir con un solo espacio entre palabras
+iv.	El mensaje de error debe ser “El campo Nombre no debe de estar vacío”
+b.	Apellidos:
+i.	Validar en tiempo real con letra capital, menos las palabras enlace, ejemplo: si escribe JUAN DE DIOS, debe validar como Juan de Dios y no como Juan De Dios
+ii.	No debe permitir espacios adelante y atrás de las palabras
+iii.	Debe permitir escribir con un solo espacio entre palabras
+iv.	El mensaje de error debe ser “El campo Apellido no debe de estar vacío”
+c.	País:
+i.	Debe haber una listad de los siguientes países: "Argentina" "Bolivia" "Brasil" "Chile" "Colombia" "Costa Rica" "Cuba" "Ecuador" "El Salvador" "España" "Estados Unidos" "Guatemala" "Honduras" "México" "Nicaragua" "Panamá" "Paraguay" "Perú" "Puerto Rico" "República Dominicana" "Uruguay" "Venezuela".
+ii.	El mensaje de error debe ser “Debes seleccionar un País para continuar”
+d.	Teléfono / Whatsapp:
+i.	Aquí debe ingresar el número del celular sin espacios, ni letras, ni símbolos, solo números
+ii.	Debe cargar automáticamente el prefijo del país, según el país que escoja en el campo PAIS
+iii.	Este campo es UNICO en la BD por tanto no debe repetirse en ningún tipo de Usuario
+iv.	El mensaje de error debe ser “El campo Teléfono no debe de estar vacío”
+v.	El mensaje de error debe ser “El número +## ########## ya está registrado”
+e.	Usuario:
+i.	Aquí no valida nada, debe aceptar tal como lo escribe el usuario
+ii.	Debe tener como mínimo 4 caracteres
+iii.	El mensaje de error debe ser “El campo Usuario no debe de estar vacío”
+iv.	El mensaje de error debe ser “El campo Centro de Estudios debe tener al menos 4 caracteres”
+f.	Contraseña:
+i.	Aquí no valida nada, debe aceptar tal como lo escribe el usuario
+ii.	El mensaje de error debe ser “El campo Contraseña no debe de estar vacío”
+iii.	El mensaje de error debe ser “El campo Contraseña debe tener al menos 6 caracteres”
+10.	Debe haber una opción para Eliminar un Consultor, cuando lo elimine debe eliminarse su acceso y todos sus datos
+iv.	Asesores
+1.	Debe mostrar una Lista tipo Tabla de todos los datos que están en la BD que pertenecen a los Formularios:
+2.	NOMBRE / APELLIDOS / TELEFONO / CORREO / ASESOR / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / IP / FECHA / HORA / CATEGORIA / FILE / ID / WEB (este dato debe obtenerse de la web de donde llega el formulario, eso no llega como dato)
+3.	La columna TELEFONO debe tener un botón para al darle clic me abra el whatsapp del Teléfono, algo como https://wa.me/+########## en una ventana nueva
+4.	La lista debe mostrar en tiempo real, en cuanto llegue un dato a la BD debe mostrarlo en la lista, sin actualizar la página, sin saltos, de forma automática y en tiempo real, cuando llegue un nuevo registro debe aparecer un anuncio en la parte inferior izquierda de la llegada del nuevo registro, que sea sutil y que dure unos segundos)
+5.	La lista debe ser infinita hacia abajo, no debe tener paginación (Tener en cuenta que llegan aproximadamente 400 registros al mes, de aquí a 10 meses habrá 4000 registros, tener en cuenta que el Sistema debe ser rápido, sin saltos, ni lento, ni que se cuelgue)
+6.	La lista debe tener encabezados tipo tabla y que al darle clic ordene los datos de la columna de arriba abajo y de abajo arriba
+7.	Debe tener un Filtro principal, que sea una lista que se cargue automáticamente con el listado de ASESOR
+8.	Debe tener un buscador general, donde el Usuario escribe y mientras escribe la tabla va filtrando el contenido
+9.	Debe tener un filtro por rango de Fecha, que sea por fecha y hora, el Usuario debe poner la fecha de inicio y de fin y la tabla debe mostrar los datos entre esas fechas y también debe tener para filtra por hora sin dejar el filtro por fecha
+10.	Debe tener filtros tipo lista y esta lista deben llenarse automáticamente con los datos de su tabla, debe mostrar las listas de:
+11.	ASESOR / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO
+12.	La lista que esta filtrada debe exportarse a un Excel, en formato excel con encabezados, tal como se ve en la lista se exporta, y si no se hace ningún filtro igual debe exportarse lo que se ve en pantalla
+13.	Debe haber una opción para editar los datos dentro de la Lista (este con filtros o sin filtros), debe haber un icono de lápiz pequeño que al darle clic me permita editar el campo. Debe dejarme editar cualquier dato
+14.	Dentro de los datos que llegaran a la BD llega un campo donde llega un link hacia el archivo adjunto (ID), dentro de la lista no debes poner toda la url completa que llega, solo crear un pequeño botón que vaya al link de la url en una ventana nueva
+15.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+16.	Los filtros deben trabajar juntos, es decir si aplico un filtro y luego aplico otro deben trabajar juntos, no por separado
+17.	Debe tener un Dashboard (en la parte superior) donde me muestra estadísticas completas, mientras aplico los filtros en la lista debe mostrarme las estadísticas en tiempo real. Deben ser compactas, profesionales
+v.	Delegados
+1.	Debe mostrar una Lista tipo Tabla de todos los datos que están en la BD que pertenecen a los Formularios:
+2.	NOMBRE / APELLIDOS / TELEFONO / CORREO / DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / IP / FECHA / HORA / CATEGORIA / FILE / ID / WEB (este dato debe obtenerse de la web de donde llega el formulario, eso no llega como dato)
+3.	La columna TELEFONO debe tener un botón para al darle clic me abra el whatsapp del Teléfono, algo como https://wa.me/+########## en una ventana nueva
+4.	La lista debe mostrar en tiempo real, en cuanto llegue un dato a la BD debe mostrarlo en la lista, sin actualizar la página, sin saltos, de forma automática y en tiempo real, cuando llegue un nuevo registro debe aparecer un anuncio en la parte inferior izquierda de la llegada del nuevo registro, que sea sutil y que dure unos segundos)
+5.	La lista debe ser infinita hacia abajo, no debe tener paginación (Tener en cuenta que llegan aproximadamente 400 registros al mes, de aquí a 10 meses habrá 4000 registros, tener en cuenta que el Sistema debe ser rápido, sin saltos, ni lento, ni que se cuelgue)
+6.	La lista debe tener encabezados tipo tabla y que al darle clic ordene los datos de la columna de arriba abajo y de abajo arriba
+7.	Debe tener un Filtro principal, que sea una lista que se cargue automáticamente con el listado de DELEGADO
+8.	Debe tener un buscador general, donde el Usuario escribe y mientras escribe la tabla va filtrando el contenido
+9.	Debe tener un filtro por rango de Fecha, que sea por fecha y hora, el Usuario debe poner la fecha de inicio y de fin y la tabla debe mostrar los datos entre esas fechas y también debe tener para filtra por hora sin dejar el filtro por fecha
+10.	Debe tener filtros tipo lista y esta lista deben llenarse automáticamente con los datos de su tabla, debe mostrar las listas de:
+11.	DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO
+12.	La lista que esta filtrada debe exportarse a un Excel, en formato excel con encabezados, tal como se ve en la lista se exporta, y si no se hace ningún filtro igual debe exportarse lo que se ve en pantalla
+13.	Debe haber una opción para editar los datos dentro de la Lista (este con filtros o sin filtros), debe haber un icono de lápiz pequeño que al darle clic me permita editar el campo. Debe dejarme editar cualquier dato
+14.	Dentro de los datos que llegaran a la BD llega un campo donde llega un link hacia el archivo adjunto (ID), dentro de la lista no debes poner toda la url completa que llega, solo crear un pequeño botón que vaya al link de la url en una ventana nueva
+15.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+16.	Los filtros deben trabajar juntos, es decir si aplico un filtro y luego aplico otro deben trabajar juntos, no por separado
+17.	Debe tener un Dashboard (en la parte superior) donde me muestra estadísticas completas, mientras aplico los filtros en la lista debe mostrarme las estadísticas en tiempo real. Deben ser compactas, profesionales
+vi.	Logs
+1.	Lista de Logs
+2.	Debe mostrar una Lista tipo Tabla de todos los datos que están en la tabla de logs
+3.	Debe Capturar todos los movimientos de los Usuarios dentro del Sistema incluyendo el Administrador
+4.	La lista debe mostrar en tiempo real, en cuanto capture un log
+5.	Opción para exportar a un Excel, en formato excel con encabezados, tal como se ve en la lista se exporta
+6.	Debe darme la opción de poder eliminar los Logs, poner en cero la tabla y que empiecen desde el ID1 a volverse a llenar
+vii.	Estadísticas
+1.	Debe ser un Dashboard que tenga todo tipo de estadísticas
+2.	Debe haber unos filtros para cuando los apliquemos se muestre en las estadísticas en tiempo real. Deben ser compactas, profesionales
+3.	Filtros y Dashboard existentes
+a.	Por rango de FECHA y rango de HORA
+b.	Por ASESOR
+c.	Por DELEGADO
+d.	Por CURSO
+e.	Por PAIS
+f.	Por CIUDAD
+g.	Por MONEDA
+h.	Por METODO DE PAGO
+i.	Por CATEGORIA
+j.	Por ID
+4.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+viii.	Resetear BD
+1.	Poner la BD en cero, para ponerla en Producción, elimina todo, pone la base de datos para que todas las tablas borradas se pongan con el ID1 y volverse a llenar
+ix.	Opciones de Sistema
+1.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+2.	Debe darme la opción de habilitar o deshabilitar estas opciones por Usuario, no por tipo de Usuario, si no por Usuario (Incluido el Administrador)
+a.	EN INDEX
+i.	La posibilidad de deshabilitar el formulario de ingreso y que me dé la posibilidad de escribir un mensaje que salga en ves del formulario de ingreso
+b.	EN DASHBOARD
+i.	En la Lista me debe dar la opción de mostrar/ocultar columnas de la Lista. Por ejemplo, si quiero que el Usuario "Miriam" no vea la columna MONEDA, debe permitir esconderla y la Columna tiene un filtro enlazado que no esté activo ese filtro
+ii.	En la Lista me debe dar la opción de ordenar las columnas. Poner el orden las columnas Si el orden es por ejemplo NOMBRE / APELLIDOS debe darme la opción de poner APELLIDOS / NOMBRES
+iii.	Debe darme una opción para mostrar/ocultar los Filtros (ASESOR / DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / WEB)
+iv.	Debe darme la opción de mostrar/ocultar el botón para Exportar a Excel
+v.	En la lista me debe dar la opción de mostrar/ocultar la edición de datos dentro de la misma lista
+vi.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+c.	EN CONSULTORES
+i.	Opción de poder suspender un Consultor, es decir no permitirle el acceso a la plataforma (Es diferente a eliminarlo, ya que al Suspender luego puede volver a ingresar a la plataforma)
+ii.	En la Lista me debe dar la opción de ordenar las columnas. Poner el orden las columnas Si el orden es por ejemplo NOMBRE / APELLIDOS debe darme la opción de poner APELLIDOS / NOMBRES
+d.	EN ASESORES / DELEGADOS
+i.	En la Lista me debe dar la opción de mostrar/ocultar columnas de la Lista. Por ejemplo, si quiero que el Usuario "Miriam" no vea la columna MONEDA, debe permitir esconderla y la Columna tiene un filtro enlazado que no esté activo ese filtro
+ii.	En la Lista me debe dar la opción de ordenar las columnas. Poner el orden las columnas Si el orden es por ejemplo NOMBRE / APELLIDOS debe darme la opción de poner APELLIDOS / NOMBRES
+iii.	Debe darme una opción para mostrar/ocultar los Filtros (CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / WEB)
+iv.	Debe darme la opción de mostrar/ocultar el botón para Exportar a Excel
+v.	En la lista me debe dar la opción de mostrar/ocultar la edición de datos dentro de la misma lista
+vi.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+e.	EN ESTADISTICAS
+i.	Debe darme la opción de elegir que filtros/estadística debe mostrar
+x.	Importar desde Excel
+1.	Debe abrir un modal para Importar desde Excel
+FOOTER
+d.	Debe ser fijo
+e.	El ancho debe ser completo, desde el filo del Sidebar hasta el final
+f.	Para todo tipo de Usuario debe tener el texto “© Escuela Internacional de Psicología año actual” a la izquierda y a la derecha “🟢 Sistema en línea”
+2.	CONSULTOR
+a.	DASHBOARD
+i.	Debe tener un Favicon (favicon.webp – Yo lo subiré al hosting del Sistema)
+ii.	Al ingresar debe mostrar 4 partes
+iii.	Un Header (es fijo y ocupa todo al ancho, desde el borde del sidebar hasta el final), un Sidebar (es fijo y ocupa todo el alto), un Footer (es fijo y ocupa todo al ancho, desde el borde del sidebar hasta el final) y un Panel donde se cargará toda la información 
+
+
+
+
+
+
+1.	HEADER
+a.	Debe tener el Titulo del Sistema “Escuela Internacional de Psicología | Sistema de Registros”, el nombre del Usuario logeado, el tipo de Usuario logeado y al final una lista que tiene “Editar Usuario” y “Salir del sistema”
+b.	Cuando se dé clic en Editar Usuario debe abrir modal de edición de Usuario debe ser:
+i.	Debe tener los campos: Nombre - Apellidos - País - Teléfono - Usuario – Contraseña y se deben cargar con la información actual, incluido el Usuario y Contraseña
+ii.	Cada campo debe tener las siguientes validaciones:
+1.	Nombre:
+a.	Validar en tiempo real con letra capital, menos las palabras enlace, ejemplo: si escribe JUAN DE DIOS, debe validar como Juan de Dios y no como Juan De Dios
+b.	No debe permitir espacios adelante y atrás de las palabras
+c.	Debe permitir escribir con un solo espacio entre palabras
+d.	El mensaje de error debe ser “El campo Nombre no debe de estar vacío”
+2.	Apellidos:
+a.	Validar en tiempo real con letra capital, menos las palabras enlace, ejemplo: si escribe JUAN DE DIOS, debe validar como Juan de Dios y no como Juan De Dios
+b.	No debe permitir espacios adelante y atrás de las palabras
+c.	Debe permitir escribir con un solo espacio entre palabras
+d.	El mensaje de error debe ser “El campo Apellido no debe de estar vacío”
+3.	País:
+a.	Debe haber una listad de los siguientes países: "Argentina" "Bolivia" "Brasil" "Chile" "Colombia" "Costa Rica" "Cuba" "Ecuador" "El Salvador" "España" "Estados Unidos" "Guatemala" "Honduras" "México" "Nicaragua" "Panamá" "Paraguay" "Perú" "Puerto Rico" "República Dominicana" "Uruguay" "Venezuela".
+b.	El mensaje de error debe ser “Debes seleccionar un País para continuar”
+4.	Teléfono / Whatsapp:
+a.	Aquí debe ingresar el número del celular sin espacios, ni letras, ni símbolos, solo números
+b.	Debe cargar automáticamente el prefijo del país, según el país que escoja en el campo PAIS
+c.	Este campo es UNICO en la BD por tanto no debe repetirse en ningún tipo de Usuario
+d.	El mensaje de error debe ser “El campo Teléfono no debe de estar vacío”
+e.	El mensaje de error debe ser “El número +## ########## ya está registrado”
+5.	Usuario:
+a.	Aquí no valida nada, debe aceptar tal como lo escribe el usuario
+b.	Debe tener como mínimo 4 caracteres
+c.	El mensaje de error debe ser “El campo Usuario no debe de estar vacío”
+d.	El mensaje de error debe ser “El campo Centro de Estudios debe tener al menos 4 caracteres”
+6.	Contraseña:
+a.	Aquí no valida nada, debe aceptar tal como lo escribe el usuario
+b.	El mensaje de error debe ser “El campo Contraseña no debe de estar vacío”
+c.	El mensaje de error debe ser “El campo Contraseña debe tener al menos 6 caracteres”
+2.	SIDEBAR
+a.	Debe ser fijo y ocupa todo el alto de la pantalla
+b.	En la parte de arriba debe tener el Logo de la Institución
+c.	Debe tener un menú
+i.	Dashboard (El mismo que el Administrador)
+1.	Debe mostrar una Lista tipo Tabla de todos los datos que están en la BD que pertenecen a los Formularios:
+NOMBRE / APELLIDOS / TELEFONO / CORREO / ASESOR / DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / IP / FECHA / HORA / CATEGORIA / FILE / ID / WEB (este dato debe obtenerse de la web de donde llega el formulario, eso no llega como dato)
+2.	La columna TELEFONO debe tener un botón para al darle clic me abra el whatsapp del Teléfono, algo como https://wa.me/+########## en una ventana nueva
+3.	La lista debe mostrar en tiempo real, en cuanto llegue un dato a la BD debe mostrarlo en la lista, sin actualizar la página, sin saltos, de forma automática y en tiempo real, cuando llegue un nuevo registro debe aparecer un anuncio en la parte inferior izquierda de la llegada del nuevo registro, que sea sutil y que dure unos segundos)
+4.	La lista debe ser infinita hacia abajo, no debe tener paginación (Tener en cuenta que llegan aproximadamente 400 registros al mes, de aquí a 10 meses habrá 4000 registros, tener en cuenta que el Sistema debe ser rápido, sin saltos, ni lento, ni que se cuelgue)
+5.	La lista debe tener encabezados tipo tabla y que al darle clic ordene los datos de la columna de arriba abajo y de abajo arriba
+6.	Debe tener un Filtro principal, que sea una lista que se cargue automáticamente con el listado de ID, ya que el ID es el nombre del Formulario que llegara como dato
+7.	Debe tener un buscador general, donde el Usuario escribe y mientras escribe la tabla va filtrando el contenido
+8.	Debe tener un filtro por rango de Fecha, que sea por fecha y hora, el Usuario debe poner la fecha de inicio y de fin y la tabla debe mostrar los datos entre esas fechas y también debe tener para filtra por hora sin dejar el filtro por fecha
+9.	Debe tener filtros tipo lista y esta lista deben llenarse automáticamente con los datos de su tabla, debe mostrar las listas de:
+ASESOR / DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / WEB
+10.	La lista que esta filtrada debe exportarse a un Excel, en formato excel con encabezados, tal como se ve en la lista se exporta, y si no se hace ningún filtro igual debe exportarse lo que se ve en pantalla
+11.	Debe haber una opción para editar los datos dentro de la Lista (este con filtros o sin filtros), debe haber un icono de lápiz pequeño que al darle clic me permita editar el campo. Debe dejarme editar cualquier dato
+12.	Dentro de los datos que llegaran a la BD llega un campo donde llega un link hacia el archivo adjunto (ID), dentro de la lista no debes poner toda la url completa que llega, solo crear un pequeño botón que vaya al link de la url en una ventana nueva
+13.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+14.	Los filtros deben trabajar juntos, es decir si aplico un filtro y luego aplico otro deben trabajar juntos, no por separado
+ii.	Asesores (El mismo que el Administrador)
+1.	Debe mostrar una Lista tipo Tabla de todos los datos que están en la BD que pertenecen a los Formularios:
+2.	NOMBRE / APELLIDOS / TELEFONO / CORREO / ASESOR / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / IP / FECHA / HORA / CATEGORIA / FILE / ID / WEB (este dato debe obtenerse de la web de donde llega el formulario, eso no llega como dato)
+3.	La columna TELEFONO debe tener un botón para al darle clic me abra el whatsapp del Teléfono, algo como https://wa.me/+########## en una ventana nueva
+4.	La lista debe mostrar en tiempo real, en cuanto llegue un dato a la BD debe mostrarlo en la lista, sin actualizar la página, sin saltos, de forma automática y en tiempo real, cuando llegue un nuevo registro debe aparecer un anuncio en la parte inferior izquierda de la llegada del nuevo registro, que sea sutil y que dure unos segundos)
+5.	La lista debe ser infinita hacia abajo, no debe tener paginación (Tener en cuenta que llegan aproximadamente 400 registros al mes, de aquí a 10 meses habrá 4000 registros, tener en cuenta que el Sistema debe ser rápido, sin saltos, ni lento, ni que se cuelgue)
+6.	La lista debe tener encabezados tipo tabla y que al darle clic ordene los datos de la columna de arriba abajo y de abajo arriba
+7.	Debe tener un Filtro principal, que sea una lista que se cargue automáticamente con el listado de ASESOR
+8.	Debe tener un buscador general, donde el Usuario escribe y mientras escribe la tabla va filtrando el contenido
+9.	Debe tener un filtro por rango de Fecha, que sea por fecha y hora, el Usuario debe poner la fecha de inicio y de fin y la tabla debe mostrar los datos entre esas fechas y también debe tener para filtra por hora sin dejar el filtro por fecha
+10.	Debe tener filtros tipo lista y esta lista deben llenarse automáticamente con los datos de su tabla, debe mostrar las listas de:
+11.	ASESOR / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO
+12.	La lista que esta filtrada debe exportarse a un Excel, en formato excel con encabezados, tal como se ve en la lista se exporta, y si no se hace ningún filtro igual debe exportarse lo que se ve en pantalla
+13.	Debe haber una opción para editar los datos dentro de la Lista (este con filtros o sin filtros), debe haber un icono de lápiz pequeño que al darle clic me permita editar el campo. Debe dejarme editar cualquier dato
+14.	Dentro de los datos que llegaran a la BD llega un campo donde llega un link hacia el archivo adjunto (ID), dentro de la lista no debes poner toda la url completa que llega, solo crear un pequeño botón que vaya al link de la url en una ventana nueva
+15.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+16.	Los filtros deben trabajar juntos, es decir si aplico un filtro y luego aplico otro deben trabajar juntos, no por separado
+17.	Debe tener un Dashboard (en la parte superior) donde me muestra estadísticas completas, mientras aplico los filtros en la lista debe mostrarme las estadísticas en tiempo real. Deben ser compactas, profesionales
+iii.	Delegados (El mismo que el Administrador)
+1.	Debe mostrar una Lista tipo Tabla de todos los datos que están en la BD que pertenecen a los Formularios:
+2.	NOMBRE / APELLIDOS / TELEFONO / CORREO / DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / IP / FECHA / HORA / CATEGORIA / FILE / ID / WEB (este dato debe obtenerse de la web de donde llega el formulario, eso no llega como dato)
+3.	La columna TELEFONO debe tener un botón para al darle clic me abra el whatsapp del Teléfono, algo como https://wa.me/+########## en una ventana nueva
+4.	La lista debe mostrar en tiempo real, en cuanto llegue un dato a la BD debe mostrarlo en la lista, sin actualizar la página, sin saltos, de forma automática y en tiempo real, cuando llegue un nuevo registro debe aparecer un anuncio en la parte inferior izquierda de la llegada del nuevo registro, que sea sutil y que dure unos segundos)
+5.	La lista debe ser infinita hacia abajo, no debe tener paginación (Tener en cuenta que llegan aproximadamente 400 registros al mes, de aquí a 10 meses habrá 4000 registros, tener en cuenta que el Sistema debe ser rápido, sin saltos, ni lento, ni que se cuelgue)
+6.	La lista debe tener encabezados tipo tabla y que al darle clic ordene los datos de la columna de arriba abajo y de abajo arriba
+7.	Debe tener un Filtro principal, que sea una lista que se cargue automáticamente con el listado de DELEGADO
+8.	Debe tener un buscador general, donde el Usuario escribe y mientras escribe la tabla va filtrando el contenido
+9.	Debe tener un filtro por rango de Fecha, que sea por fecha y hora, el Usuario debe poner la fecha de inicio y de fin y la tabla debe mostrar los datos entre esas fechas y también debe tener para filtra por hora sin dejar el filtro por fecha
+10.	Debe tener filtros tipo lista y esta lista deben llenarse automáticamente con los datos de su tabla, debe mostrar las listas de:
+11.	DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO
+12.	La lista que esta filtrada debe exportarse a un Excel, en formato excel con encabezados, tal como se ve en la lista se exporta, y si no se hace ningún filtro igual debe exportarse lo que se ve en pantalla
+13.	Debe haber una opción para editar los datos dentro de la Lista (este con filtros o sin filtros), debe haber un icono de lápiz pequeño que al darle clic me permita editar el campo. Debe dejarme editar cualquier dato
+14.	Dentro de los datos que llegaran a la BD llega un campo donde llega un link hacia el archivo adjunto (ID), dentro de la lista no debes poner toda la url completa que llega, solo crear un pequeño botón que vaya al link de la url en una ventana nueva
+15.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+16.	Los filtros deben trabajar juntos, es decir si aplico un filtro y luego aplico otro deben trabajar juntos, no por separado
+17.	Debe tener un Dashboard (en la parte superior) donde me muestra estadísticas completas, mientras aplico los filtros en la lista debe mostrarme las estadísticas en tiempo real. Deben ser compactas, profesionales
+iv.	Estadísticas (El mismo que el Administrador)
+1.	Debe ser un Dashboard que tenga todo tipo de estadísticas
+2.	Debe haber unos filtros para cuando los apliquemos se muestre en las estadísticas en tiempo real. Deben ser compactas, profesionales
+3.	Filtros y Dashboard existentes
+a.	Por rango de FECHA y rango de HORA
+b.	Por ASESOR
+c.	Por DELEGADO
+d.	Por CURSO
+e.	Por PAIS
+f.	Por CIUDAD
+g.	Por MONEDA
+h.	Por METODO DE PAGO
+i.	Por CATEGORIA
+j.	Por ID
+4.	En alguna oportunidad llegara un nuevo dato dentro del Formulario, ¿Cómo por ejemplo PRODUCTO, como se puede trabajar esa nueva tabla? Ya que necesito que aparezca automáticamente en LISTA y si es necesario en FILTRO. ¿Me darás una opción dentro de OPCIONES DE SISTEMA para agregar una tabla en la BD y un filtro?
+3.	FOOTER
+a.	Debe ser fijo
+b.	El ancho debe ser completo, desde el filo del Sidebar hasta el final
+c.	Para todo tipo de Usuario debe tener el texto “© Escuela Internacional de Psicología año actual” a la izquierda y a la derecha “🟢 Sistema en línea”
+
+
+
+1.	REGLAS:
+a.	Vamos a trabajar con scripts, css, modales independientes, cada uno en sus carpetas respectivas, ordenado y fácil de editar, ya que el sistema será escalable y actualizable
+b.	Todo debe de estar bien estructura y listo para que el Sistema pueda crecer con nuevas opciones
+c.	Vamos a trabajar con los colores de la Escuela Azul1:#050018 Azul2:#020B31 Azul3:#07325A Rojo: #FF3600 Celeste: #00BCFF Amarillo: #FFC700 Blanco:#FFFFFF Negro:#000000 y hay que combinarlo seriamente, profesionalmente. El logo debe de estar sobre un fondo Azul, puedes trabajar con degradados
+d.	Los bordes radius no deben ser tan redondos, aproximado unos 5px, eso manéjalo Tu
+e.	El diseño debe ser compacto, los formulario también bien compactos y serios, con sus iconos
+f.	Todas la Validaciones deben ser en Tiempo real
+g.	Todos los filtros de las listas deben ser en Tiempo real
+h.	Como ves, no hay correo electrónico para los Usuarios que pueden registrarse, No quiero que intervenga el correo, es por ello que los usuarios los ingresan y las contraseñas también, no hay forma de recuperar contraseñas, solo lo podría hacer el Admisnitrador
+PLUGIN
+Se debe llamar “Conector Sistema de Registros”
+Autor: InforCom Soluciones Web
+
+
+Mis datos de la BD son:
+•	Trabajamos con el subdominio: https://administracion.psicologiaenvivo.com/
+•	BD: zqgikadc_administracionphp
+•	Usuario: zqgikadc_admin
+•	Contraseña:  aBjar1BKI4sW
+
+REGLAS DE TRABAJO
+•	Siempre que se haga un cambio, debes entregarme el archivo completo, para copiar y pegar, trabajar solo los archivos necesarios y darme como respuesta algo exacto
+•	Cada que se haga un cambio, no debes cambiar lo avanzando, no tocar la estructura ni el diseño
+
+¡Aun no avances nada! Revisa bien todo y dime si tienes alguna consulta o hago que agregarLogo y Favicon:
+Yo tengo el logo y el favicon en webp. Solo debes indicarme a que carpeta subir, son con fondo transparente
+
+Dominios WordPress:
+De varios dominios, por eso la API debe funcionar en varios dominios, ya que los formularios son con las misma información
+
+Estructura de Datos Inicial:
+Hay que agregar dentro del menú de Sidebar del Administrador un menú que sea Importar de Excel, para importar datos de una hoja Excel, ya que años atrás la información de los formularios llega a Google Drive
+
+Asesores y Delegados:
+Son nombre de Personas, que llegaran junto con los datos del Formulario, es importante ya que estos son Asesores y Delegados y se saca estadísticas de sus ventas y registros, pero no forman parte de los Usuarios del Sistema
+
+Url de Adjuntos:
+La url es publica y llega como url a Google Drive y al Correo
+
+Ten en cuenta que no debe interferir con el Actual comportamiento del ContactForm7 ni mucho menos generar errores
+
+
+Antes de todo, dime si tienes sugerencias o alguna duda
+Copilot said: # 🔍 Análisis Completo del Proyecto: Sistema
+🔍 Análisis Completo del Proyecto: Sistema de Control de Registros
+¡Excelente! He revisado todo el documento detalladamente. Es un proyecto muy bien definido y completo. Antes de comenzar, tengo algunas consultas, observaciones y sugerencias importantes:
+
+✅ Lo que tengo claro:
+Componente	Entendimiento
+Sistema PHP	Independiente de WordPress, en servidor propio con cPanel
+Plugin WP	"Conector Sistema de Registros" - captura datos de CF7 y los envía via API
+BD MySQL	zqgikadc_administracionphp en el subdominio administracion.psicologiaenvivo.com
+2 Roles	Administrador (acceso total) y Consultor (acceso limitado)
+API segura	Multi-dominio, no debe interferir con CF7
+Tiempo real	Listas con actualización automática sin recargar página
+Escalable	Posibilidad de agregar nuevos campos dinámicamente
+🔶 CONSULTAS (Necesito tu respuesta):
+1. Sobre la Seguridad de la API
+La API recibirá datos de múltiples dominios WordPress. ¿Cómo prefieres autenticar?
+
+Mi sugerencia: Usar un sistema de API Key + Secret por cada dominio registrado. Así cada WordPress tiene su propia clave y si un dominio se compromete, solo se revoca esa clave sin afectar los demás.
+
+¿Te parece bien este enfoque?
+¿O prefieres un token único para todos los dominios?
+2. Sobre el campo WEB (origen del formulario)
+Dices que el dato WEB "debe obtenerse de la web de donde llega el formulario, eso no llega como dato".
+
+Mi sugerencia: El plugin de WordPress enviará automáticamente la URL del dominio donde está instalado como parte del payload de la API. Así el sistema lo captura automáticamente.
+
+¿Quieres que se guarde el dominio completo (ej: www.psicologiaenvivo.com) o solo el nombre del sitio?
+3. Sobre los campos del Formulario CF7
+Necesito confirmar los nombres exactos de los campos que envía tu formulario CF7. Los que entiendo son:
+
+NOMBRE / APELLIDOS / TELEFONO / CORREO / ASESOR / DELEGADO / CURSO / PAIS / CIUDAD / MONEDA / METODO DE PAGO / IP / CATEGORIA / FILE (URL adjunto) / ID (nombre del formulario)
+
+¿La FECHA y HORA se capturan del momento en que llega el registro al sistema, o vienen como dato del formulario?
+¿El campo IP lo captura el plugin automáticamente del visitante, o viene en el formulario?
+¿El campo ID es el nombre/identificador del formulario CF7 (ej: "Formulario Inscripción 2026")?
+4. Sobre la Importación desde Excel
+¿La hoja de Excel de Google Drive tiene las mismas columnas que los datos del formulario?
+¿Hay algún formato específico (fecha, teléfono con prefijo, etc.) que deba considerar al importar?
+¿Quieres que detecte duplicados al importar o que inserte todo tal cual?
+5. Sobre las Estadísticas
+Mencionas "todo tipo de estadísticas". Para diseñarlas correctamente, ¿cuáles son las más importantes para ti?
+
+Mi sugerencia de estadísticas:
+
+📊 Total de registros (con comparativa por período)
+📈 Registros por día/semana/mes (gráfico de líneas)
+🥧 Distribución por País (gráfico de pastel)
+📊 Registros por Asesor (gráfico de barras)
+📊 Registros por Delegado (gráfico de barras)
+📊 Registros por Curso (gráfico de barras)
+💰 Distribución por Moneda y Método de Pago
+🌐 Registros por Web de origen
+📊 Registros por Categoría
+🕐 Horas pico de registro
+¿Agregarías o quitarías alguna?
+
+6. Sobre el Consultor
+El Consultor tiene casi las mismas vistas que el Administrador, pero NO tiene acceso a:
+
+Crear Consultor
+Lista de Consultores
+Logs
+Resetear BD
+Opciones de Sistema
+Importar desde Excel
+¿Es correcto? ¿El Administrador puede configurar qué ve cada Consultor desde Opciones de Sistema (columnas, filtros, etc.)?
+
+7. Sobre las Contraseñas
+Credenciales iniciales: admin / 123456
+¿Quieres que las contraseñas se almacenen encriptadas en la BD (con password_hash de PHP)? Lo recomiendo fuertemente.
+¿La contraseña visible en el modal de edición se muestra en texto plano o con asteriscos y un botón para mostrar/ocultar?
+💡 SUGERENCIAS ADICIONALES:
+A. Estructura de Carpetas Propuesta
+Code
+📁 sistema-registros/
+├── 📁 api/              → Endpoints de la API (recibir datos, autenticación)
+├── 📁 assets/
+│   ├── 📁 css/          → Estilos (por módulo)
+│   ├── 📁 js/           → Scripts (por módulo)
+│   ├── 📁 img/          → Logo, favicon, iconos
+│   └── 📁 libs/         → Librerías externas (Chart.js, SheetJS, etc.)
+├── 📁 config/           → Configuración BD, constantes
+├── 📁 includes/         → Funciones PHP reutilizables
+├── 📁 modals/           → Modales independientes (HTML)
+├── 📁 pages/            → Páginas del sistema (dashboard, asesores, etc.)
+├── 📁 plugins/          → Plugin WordPress (para entregar aparte)
+│   └── 📁 conector-sistema-registros/
+├── index.php            → Login
+└── dashboard.php        → Panel principal
+Las imágenes (logo.webp y favicon.webp) irían en assets/img/
+
+B. Tecnologías Sugeridas
+Uso	Tecnología	Razón
+Tiempo real	AJAX Polling cada 5-10 seg	Compatible con hosting compartido cPanel
+Gráficos	Chart.js	Ligero, responsivo, profesional
+Exportar Excel	SheetJS (xlsx)	Exporta desde el frontend respetando filtros
+Iconos	Font Awesome	Profesional, lápiz de edición, WhatsApp, etc.
+Scroll infinito	Intersection Observer + paginación lazy	Carga datos por bloques para rendimiento
+Diseño	CSS Grid + Flexbox	Sin frameworks pesados, diseño compacto
+C. Seguridad
+✅ Contraseñas encriptadas con password_hash()
+✅ Tokens de sesión con expiración
+✅ API con HTTPS obligatorio + API Key
+✅ Protección CSRF en formularios
+✅ Prepared statements (sin SQL injection)
+✅ Rate limiting en la API
+✅ Sanitización de todos los inputs
+D. Sobre "Nuevo campo dinámico" (ej: PRODUCTO)
+Mi sugerencia: En Opciones de Sistema, crear una sección "Campos Dinámicos" donde el admin pueda:
+
+Agregar un nuevo campo (nombre, tipo)
+El campo se agrega como columna a la tabla de registros en la BD
+Automáticamente aparece en las listas y como filtro disponible
+Se puede activar/desactivar por usuario
+Esto no requiere tocar código, todo desde la interfaz.
+
+⚠️ OBSERVACIÓN IMPORTANTE SOBRE CREDENCIALES
+⚠️ Has compartido credenciales reales de tu base de datos en este chat. Te recomiendo cambiar la contraseña de la BD después de que terminemos la configuración. Nunca dejes credenciales expuestas en conversaciones.
+
+📋 RESUMEN - Necesito tus respuestas:
+#	Pregunta	Tu respuesta
+1	¿API Key + Secret por dominio o token único?	
+2	¿Campo WEB: dominio completo o nombre del sitio?	
+3	¿FECHA/HORA se captura al llegar? ¿IP la captura el plugin? ¿ID es nombre del formulario?	
+4	¿Excel tiene mismas columnas? ¿Detectar duplicados?	
+5	¿Las estadísticas sugeridas están bien?	
+6	¿Es correcto lo que NO ve el Consultor?	
+7	¿Contraseñas encriptadas? ¿Mostrar/ocultar en edición?	
+¡Respóndeme estas preguntas y arrancamos con el desarrollo! 🚀 Trabajaremos módulo por módulo, de forma ordenada.
+
+You said: 1. Sobre la Seguridad de la API Usar
+1. Sobre la Seguridad de la API
+Usar un sistema de API Key + Secret por cada dominio registrado
+
+2. Sobre el campo WEB (origen del formulario)
+Que se guarde el dominio completo
+
+3. Sobre los campos del Formulario CF7
+Campos confirmados
+¿La FECHA y HORA se capturan del momento en que llega el registro al sistema, o vienen como dato del formulario? Viene como dato, pero debes tomarlo como fecha y hora
+¿El campo IP lo captura el plugin automáticamente del visitante, o viene en el formulario? Viene en el formulario como dato, tomarlo como IP
+¿El campo ID es el nombre/identificador del formulario CF7 (ej: "Formulario Inscripción 2026")? Si
+
+4. Sobre la Importación desde Excel
+¿La hoja de Excel de Google Drive tiene las mismas columnas que los datos del formulario? Si
+¿Hay algún formato específico (fecha, teléfono con prefijo, etc.) que deba considerar al importar? No, que se importe tal como esta
+¿Quieres que detecte duplicados al importar o que inserte todo tal cual? No, ya que puede existir duplicados
+
+5. Sobre las Estadísticas
+Las que me indicas, pero hay forma de agregar nuevas?
+
+6. Sobre el Consultor
+¿Es correcto? ¿El Administrador puede configurar qué ve cada Consultor desde Opciones de Sistema (columnas, filtros, etc.)? Correcto
+
+7. Sobre las Contraseñas
+¿Quieres que las contraseñas se almacenen encriptadas en la BD (con password_hash de PHP)? Lo recomiendo fuertemente. SI
+¿La contraseña visible en el modal de edición se muestra en texto plano o con asteriscos y un botón para mostrar/ocultar? SI en texto planoi con boton para mostrar/ocultar
+
+
+AJAX Polling cada 5-10 seg puede ser cada 3 segundos?
+
+
+D. Sobre "Nuevo campo dinámico" (ej: PRODUCTO)
+Aqui quiero que me sugieras como hacer para agregar ese campo nuevo (que puede ser mas de un campo), ya que debe agregarse a la BD, a la lista, filtros y estadisticas si es que es necesario
+Copilot said: # ✅ Todas las respuestas confirmadas -
+✅ Todas las respuestas confirmadas - ¡Perfecto!
+Tengo todo claro. Ahora te presento el plan de trabajo definitivo antes de comenzar:
+
+📋 RESUMEN DE DECISIONES CONFIRMADAS
+#	Decisión	Confirmado
+1	API Key + Secret por dominio	✅
+2	Campo WEB = dominio completo	✅
+3	FECHA/HORA/IP vienen como dato del formulario	✅
+4	ID = nombre del formulario CF7	✅
+5	Excel se importa tal cual, sin detectar duplicados	✅
+6	Estadísticas sugeridas + posibilidad de agregar nuevas	✅
+7	Consultor: sin acceso a Crear Consultor, Consultores, Logs, Resetear BD, Opciones, Importar	✅
+8	Contraseñas encriptadas con password_hash()	✅
+9	Contraseña visible en texto plano + botón mostrar/ocultar	✅
+10	AJAX Polling cada 3 segundos	✅
+💡 PROPUESTA: Campos Dinámicos (Tu pregunta sobre PRODUCTO y nuevos campos)
+Esta es mi sugerencia detallada para manejar campos dinámicos de forma profesional y escalable:
+
+Arquitectura de Campos Dinámicos
+En lugar de modificar la tabla principal cada vez que llega un campo nuevo, vamos a usar un sistema híbrido:
+
+Code
+📊 ENFOQUE: Tabla de campos dinámicos + columnas JSON
+¿Cómo funciona?
+1. En la Base de Datos:
+
+Tabla	Función
+registros	Tiene las columnas fijas (nombre, apellidos, telefono, etc.) + una columna campos_extra tipo JSON
+campos_dinamicos	Define los campos nuevos (nombre, tipo, si es filtro, si aparece en estadísticas)
+2. En Opciones de Sistema → "Campos Dinámicos":
+
+El Administrador verá una interfaz así:
+
+Code
+┌─────────────────────────────────────────────────────────┐
+│  CAMPOS DINÁMICOS                              [+ Nuevo] │
+├───────────┬──────────┬─────────┬──────────┬─────────────┤
+│  Campo    │  Tipo    │ Filtro  │ Estadíst.│  Acciones   │
+├───────────┼──────────┼─────────┼──────────┼─────────────┤
+│ PRODUCTO  │ Texto    │   ✅    │    ✅    │  ✏️  🗑️    │
+│ TURNO     │ Lista    │   ✅    │    ❌    │  ✏️  🗑️    │
+│ DESCUENTO │ Número   │   ❌    │    ✅    │  ✏️  🗑️    │
+└───────────┴──────────┴─────────┴──────────┴─────────────┘
+3. Al crear un campo nuevo, el Admin define:
+
+Opción	Descripción
+Nombre del campo	Ej: PRODUCTO
+Tipo de dato	Texto, Número, Lista, Fecha
+¿Mostrar en Lista?	Sí/No → aparece como columna en las tablas
+¿Crear Filtro?	Sí/No → aparece como filtro tipo lista
+¿Incluir en Estadísticas?	Sí/No → aparece en el dashboard de estadísticas
+¿Exportar en Excel?	Sí/No
+Orden en la tabla	Posición de la columna
+4. Flujo completo cuando se agrega "PRODUCTO":
+
+Code
+Admin crea campo "PRODUCTO" en Opciones de Sistema
+         │
+         ▼
+Se registra en tabla `campos_dinamicos`
+         │
+         ▼
+El Plugin de WordPress se actualiza automáticamente
+(la API le dice qué campos esperar)
+         │
+         ▼
+Los nuevos datos de CF7 que incluyan PRODUCTO
+se guardan en la columna JSON `campos_extra`
+         │
+         ▼
+Automáticamente aparece:
+  ✅ Como columna en las Listas (Dashboard, Asesores, Delegados)
+  ✅ Como filtro (si se activó)
+  ✅ En Estadísticas (si se activó)
+  ✅ En la exportación Excel (si se activó)
+  ✅ Configurable por usuario en Opciones de Sistema
+5. En el Plugin WordPress:
+
+Cuando el plugin envía datos a la API, envía todos los campos del formulario CF7. Si el sistema reconoce un campo dinámico, lo guarda en campos_extra. Si no lo reconoce, lo ignora (no genera error).
+
+¿Por qué este enfoque?
+Ventaja	Detalle
+🚀 No toca la estructura de BD	No hay ALTER TABLE cada vez que se agrega un campo
+🔄 Automático	Una vez creado, aparece en todo el sistema
+🔐 Seguro	No hay riesgo de romper la BD
+📊 Configurable	El admin decide dónde aparece y quién lo ve
+⚡ Rendimiento	MySQL 5.7+ maneja JSON eficientemente con índices
+¿Te parece bien este enfoque? ¿Lo apruebas?
+📦 PLAN DE TRABAJO POR FASES
+Propongo trabajar en este orden, entregando archivos completos en cada fase:
+
+🔷 FASE 1: Base del Sistema
+Paso	Entregable
+1.1	Estructura de carpetas + configuración BD
+1.2	Script SQL completo (todas las tablas)
+1.3	Archivo config.php (conexión BD)
+1.4	Sistema de autenticación (login/sesiones)
+1.5	INDEX - Página de login con diseño completo
+🔷 FASE 2: Layout del Dashboard
+Paso	Entregable
+2.1	Layout principal (Header, Sidebar, Footer, Panel)
+2.2	CSS con los colores de la institución
+2.3	Navegación del Sidebar (Admin y Consultor)
+2.4	Modal de Editar Usuario con validaciones
+🔷 FASE 3: Dashboard Principal (Lista de Registros)
+Paso	Entregable
+3.1	Lista tipo tabla con todos los campos
+3.2	Scroll infinito + polling cada 3 seg
+3.3	Filtros combinados (todos trabajan juntos)
+3.4	Buscador general en tiempo real
+3.5	Ordenamiento por columnas
+3.6	Edición inline (ícono lápiz)
+3.7	Exportar a Excel
+3.8	Botón WhatsApp + botón archivo adjunto
+3.9	Notificación sutil de nuevo registro
+🔷 FASE 4: Gestión de Consultores
+Paso	Entregable
+4.1	Modal Crear Consultor con validaciones
+4.2	Lista de Consultores
+4.3	Modal Editar Consultor
+4.4	Eliminar / Suspender Consultor
+🔷 FASE 5: Asesores y Delegados
+Paso	Entregable
+5.1	Vista Asesores (lista + filtros + estadísticas mini)
+5.2	Vista Delegados (lista + filtros + estadísticas mini)
+🔷 FASE 6: Estadísticas
+Paso	Entregable
+6.1	Dashboard completo con Chart.js
+6.2	Filtros que actualizan gráficos en tiempo real
+🔷 FASE 7: Sistema Avanzado
+Paso	Entregable
+7.1	Logs del sistema
+7.2	Opciones de Sistema (columnas, filtros, permisos por usuario)
+7.3	Campos Dinámicos
+7.4	Importar desde Excel
+7.5	Resetear BD
+🔷 FASE 8: API + Plugin WordPress
+Paso	Entregable
+8.1	API REST segura (endpoints)
+8.2	Gestión de API Keys por dominio
+8.3	Plugin WordPress "Conector Sistema de Registros"
+8.4	Pruebas de integración
+🔷 FASE 9: Ajustes Finales
+Paso	Entregable
+9.1	Vista Consultor (permisos aplicados)
+9.2	Pruebas de rendimiento (4000+ registros)
+9.3	Seguridad final (CSRF, XSS, SQL Injection)
+⏳ Antes de empezar necesito que confirmes:
+#	Confirmación necesaria
+1	¿Apruebas el enfoque de Campos Dinámicos con JSON?
+2	¿Apruebas el Plan de Trabajo por Fases?
+3	¿Empezamos con la FASE 1 (BD + Login)?
+4	¿Tienes un repositorio en GitHub donde quieras que trabaje, o prefieres que te entregue los archivos directamente aquí?
+¡Dime y arrancamos! 🚀
+
+You said: ¿Apruebas el enfoque de Campos Dinámicos con
+¿Apruebas el enfoque de Campos Dinámicos con JSON? Esta bien asi como propones
+¿Apruebas el Plan de Trabajo por Fases? SI
+
+Recuerda que los formularios no tienen siempre los mismo campos, por ejemplo en algun formulario puede llegar el DELEGADO y no llegara ASESOR y en otro formulario puede llegar ASESOR y no DELEGADO, tambien puede que no llegue ninguno de los 2
+
+Alguna duda o sugerencia ?
+Copilot said: # ✅ Confirmado todo - ¡Excelente observación! Esa
+✅ Confirmado todo - ¡Excelente observación!
+Esa aclaración sobre los campos variables es muy importante. Déjame ajustar el diseño para contemplar esto:
+
+🔄 AJUSTE: Campos Variables por Formulario
+Entendido perfectamente. Los formularios de CF7 NO son uniformes:
+
+Formulario A	Formulario B	Formulario C
+NOMBRE ✅	NOMBRE ✅	NOMBRE ✅
+APELLIDOS ✅	APELLIDOS ✅	APELLIDOS ✅
+TELEFONO ✅	TELEFONO ✅	TELEFONO ✅
+CORREO ✅	CORREO ✅	CORREO ✅
+ASESOR ✅	ASESOR ❌	ASESOR ✅
+DELEGADO ❌	DELEGADO ✅	DELEGADO ❌
+CURSO ✅	CURSO ✅	CURSO ✅
+PAIS ✅	PAIS ✅	PAIS ✅
+...	...	...
+¿Cómo lo manejo?
+En la Base de Datos:
+
+Todos los campos (ASESOR, DELEGADO, etc.) existen como columnas en la tabla registros
+Cuando un formulario NO envía un campo, se guarda como NULL o vacío
+En la lista se muestra vacío (celda en blanco), no muestra error
+En las Listas:
+
+Si ASESOR viene vacío, la celda aparece vacía en esa fila
+Los filtros solo muestran valores que existen en la BD (si no hay ningún DELEGADO, el filtro de DELEGADO aparece vacío o no muestra opciones)
+En la API:
+
+La API acepta todos los campos posibles pero ninguno es obligatorio excepto el que identifica el formulario (ID)
+Si un campo no viene en el payload, simplemente se guarda como NULL
+Ejemplo visual en la Lista:
+
+Code
+┌─────────┬───────────┬──────────┬───────────┬──────────┬─────────┐
+│ NOMBRE  │ APELLIDOS │ TELEFONO │  ASESOR   │ DELEGADO │  CURSO  │
+├─────────┼───────────┼──────────┼───────────┼──────────┼─────────┤
+│ Juan    │ Pérez     │ +51 999  │ María L.  │          │ Básico  │
+│ Ana     │ López     │ +52 888  │           │ Pedro R. │ Avanzado│
+│ Carlos  │ Ruiz      │ +54 777  │ María L.  │          │ Básico  │
+│ Lucía   │ Gómez     │ +593 666 │           │          │ Premium │
+└─────────┴───────────┴──────────┴───────────┴──────────┴─────────┘
+Lucía no tiene ni ASESOR ni DELEGADO → ambas celdas vacías, sin error.
+
+💡 SUGERENCIA ADICIONAL
+Dado que los formularios son variables, te sugiero agregar en Opciones de Sistema una opción:
+
+"Mapeo de Campos por Formulario"
+Donde el Admin pueda ver qué campos envía cada formulario:
+
+Code
+┌──────────────────────────────────────────────────────────┐
+│  MAPEO DE CAMPOS POR FORMULARIO                          │
+├─────────────────────┬────────────────────────────────────┤
+│  Formulario (ID)    │  Campos que envía                  │
+├─────────────────────┼────────────────────────────────────┤
+│ Inscripción Básica  │ NOMBRE, APELLIDOS, ASESOR, CURSO  │
+│ Registro Delegado   │ NOMBRE, APELLIDOS, DELEGADO, CURSO│
+│ Consulta General    │ NOMBRE, APELLIDOS, CORREO         │
+└─────────────────────┴────────────────────────────────────┘
+Esto se llena automáticamente según van llegando datos. El Admin puede ver de un vistazo qué envía cada formulario. No requiere configuración manual.
+
+¿Te parece bien agregar esto?
+📌 ÚLTIMA PREGUNTA ANTES DE EMPEZAR
+¿Tienes un repositorio en GitHub donde quieras que trabaje?
+
+Puedo:
+
+Opción A: Crear un PR en tu repositorio de GitHub (necesito el owner/repo)
+Opción B: Entregarte los archivos completos aquí en el chat, listos para copiar y pegar en tu hosting
+¿Cuál prefieres?
+
+Si no hay más dudas, confirmame la opción (A o B) y arrancamos con la FASE 1 🚀:
+
+FASE 1: Base del Sistema
+
+Estructura de carpetas
+Script SQL completo
+Archivo config.php
+Sistema de autenticación
+Página de LOGIN (index.php)
+You said: "Mapeo de Campos por Formulario" Agregalo como
+"Mapeo de Campos por Formulario" Agregalo como indicas
+¿Tienes un repositorio en GitHub donde quieras que trabaje? Opcion B
+Copilot said: # 🚀 FASE 1: Base del Sistema ¡Arrancamos!
+🚀 FASE 1: Base del Sistema
+¡Arrancamos! Te entrego todos los archivos completos de la FASE 1. Copia y pega cada uno en tu hosting siguiendo la estructura de carpetas.
+
+📁 Estructura de Carpetas a Crear
+Code
+📁 public_html/  (o la raíz de tu subdominio administracion.psicologiaenvivo.com)
+├── 📁 api/
+│   └── 📁 v1/
+├── 📁 assets/
+│   ├── 📁 css/
+│   ├── 📁 js/
+│   ├── 📁 img/          ← Aquí sube logo.webp y favicon.webp
+│   └── 📁 libs/
+├── 📁 config/
+├── 📁 includes/
+├── 📁 modals/
+├── 📁 pages/
+├── index.php
+├── dashboard.php
+├── logout.php
+└── .htaccess
+📸 Sube logo.webp y favicon.webp a la carpeta assets/img/
