@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$accion = isset($_POST['accion']) ? trim($_POST['accion']) : '';
+$accion       = isset($_POST['accion'])       ? trim($_POST['accion'])       : '';
 $confirmacion = isset($_POST['confirmacion']) ? trim($_POST['confirmacion']) : '';
 
 if ($accion !== 'resetear_todo' || $confirmacion !== 'RESETEAR') {
@@ -62,11 +62,14 @@ if (!validarTokenCSRF($csrfToken)) {
 }
 
 try {
-    $db = Database::getInstance()->getConnection();
+    $db      = Database::getInstance()->getConnection();
     $adminId = $_SESSION['user_id'];
 
     // Guardar datos del admin ANTES de tocar nada
-    $stmtAdmin = $db->prepare("SELECT nombre, apellidos, usuario, password, telefono, pais, fecha_creacion FROM usuarios WHERE id = :aid AND tipo = 'administrador' LIMIT 1");
+    $stmtAdmin = $db->prepare(
+        "SELECT nombre, apellidos, usuario, password, telefono, pais, fecha_creacion
+         FROM usuarios WHERE id = :aid AND tipo = 'administrador' LIMIT 1"
+    );
     $stmtAdmin->execute([':aid' => $adminId]);
     $adminData = $stmtAdmin->fetch();
 
@@ -80,21 +83,31 @@ try {
 
     // =====================================================
     // 1. VACIAR TABLAS una por una (con try/catch individual)
+    //    INCLUYE mapeo_campos_formulario para que empiece en id=1
     // =====================================================
-    $tablasVaciar = ['registros', 'logs', 'api_keys', 'campos_dinamicos', 'opciones_sistema'];
+    $tablasVaciar = [
+        'registros',
+        'logs',
+        'api_keys',
+        'campos_dinamicos',
+        'opciones_sistema',
+        'mapeo_campos_formulario'   // ← AÑADIDO: limpiar y reiniciar AUTO_INCREMENT
+    ];
     $tablasLimpiadas = [];
-    $tablasError = [];
+    $tablasError     = [];
 
     foreach ($tablasVaciar as $tabla) {
         try {
             $db->exec("TRUNCATE TABLE `$tabla`");
             $tablasLimpiadas[] = $tabla;
         } catch (PDOException $e) {
-            // Si no existe la tabla, intentar con DELETE
+            // Si TRUNCATE falla, intentar con DELETE + reset manual
             try {
                 $db->exec("DELETE FROM `$tabla`");
+                try { $db->exec("ALTER TABLE `$tabla` AUTO_INCREMENT = 1"); } catch (Exception $ex) {}
                 $tablasLimpiadas[] = $tabla;
             } catch (PDOException $e2) {
+                // Tabla no existe: no es error crítico, simplemente omitir
                 $tablasError[] = $tabla . ': ' . $e2->getMessage();
             }
         }
@@ -116,20 +129,40 @@ try {
         ':usuario'   => $adminData['usuario'],
         ':password'  => $adminData['password'],
         ':telefono'  => isset($adminData['telefono']) ? $adminData['telefono'] : '',
-        ':pais'      => isset($adminData['pais']) ? $adminData['pais'] : '',
+        ':pais'      => isset($adminData['pais'])     ? $adminData['pais']     : '',
         ':fecha'     => $adminData['fecha_creacion']
     ]);
 
     $nuevoAdminId = (int)$db->lastInsertId();
 
-    // Actualizar sesión
+    // Actualizar sesión con el nuevo ID del admin
     $_SESSION['user_id'] = $nuevoAdminId;
 
     // Reactivar FK
     $db->exec("SET FOREIGN_KEY_CHECKS = 1");
 
     // =====================================================
-    // 3. LOG del reset
+    // 3. SEÑAL DE BROADCAST en opciones_globales
+    //    (tabla sin FK de usuario y sin CHECK json_valid)
+    //    Usamos ON DUPLICATE KEY UPDATE porque opciones_globales
+    //    tiene UNIQUE KEY uk_opcion(opcion).
+    //    El timestamp avisa a otros usuarios conectados que
+    //    la BD fue reseteada y deben recargar.
+    // =====================================================
+    try {
+        $tsNow = date('Y-m-d H:i:s');
+        $stmtBroadcast = $db->prepare(
+            "INSERT INTO opciones_globales (opcion, valor)
+             VALUES ('bd_reseteada_at', :ts)
+             ON DUPLICATE KEY UPDATE valor = :ts2"
+        );
+        $stmtBroadcast->execute([':ts' => $tsNow, ':ts2' => $tsNow]);
+    } catch (Exception $broadcastErr) {
+        // No crítico: si falla el broadcast el reset igual fue exitoso
+    }
+
+    // =====================================================
+    // 4. LOG del reset
     // =====================================================
     try {
         registrarLog(
@@ -144,10 +177,10 @@ try {
     }
 
     echo json_encode([
-        'success' => true,
-        'message' => 'Base de datos reseteada exitosamente',
+        'success'          => true,
+        'message'          => 'Base de datos reseteada exitosamente',
         'tablas_limpiadas' => $tablasLimpiadas,
-        'tablas_error' => $tablasError
+        'tablas_error'     => $tablasError
     ]);
 
 } catch (PDOException $e) {
