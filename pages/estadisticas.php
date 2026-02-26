@@ -73,18 +73,16 @@ if (!defined('SISTEMA_REGISTROS')) {
 
 <!-- TABS -->
 <div class="est-tabs-container">
-    <div class="est-tabs-nav">
-        <button class="est-tab-item active" data-tab="general">
-            <i class="fas fa-globe"></i>
-            <span>GENERAL</span>
+    <div class="est-tabs-nav" id="estTabsNav">
+        <!-- ── IDs individuales para control por permiso ── -->
+        <button class="est-tab-item active" data-tab="general" id="estTabGeneral">
+            <i class="fas fa-globe"></i><span>GENERAL</span>
         </button>
-        <button class="est-tab-item" data-tab="asesor">
-            <i class="fas fa-headset"></i>
-            <span>ASESOR</span>
+        <button class="est-tab-item" data-tab="asesor" id="estTabAsesor">
+            <i class="fas fa-headset"></i><span>ASESOR</span>
         </button>
-        <button class="est-tab-item" data-tab="delegado">
-            <i class="fas fa-user-shield"></i>
-            <span>DELEGADO</span>
+        <button class="est-tab-item" data-tab="delegado" id="estTabDelegado">
+            <i class="fas fa-user-shield"></i><span>DELEGADO</span>
         </button>
     </div>
 
@@ -791,7 +789,6 @@ if (!defined('SISTEMA_REGISTROS')) {
             var tieneAcceso = (es.acceso_estadisticas !== false);
             var chartsContainer = document.getElementById('chartsContainer');
             var tabsContainer   = document.querySelector('.est-tabs-container');
-
             if (!tieneAcceso) {
                 [chartsContainer, tabsContainer].forEach(function(el){
                     if (el) { el.style.pointerEvents='none'; el.style.opacity='0.3'; el.style.filter='blur(2px)'; }
@@ -814,41 +811,53 @@ if (!defined('SISTEMA_REGISTROS')) {
                 if (blk2) blk2.remove();
             }
 
-            // ── 2. PESTAÑAS (GENERAL / ASESOR / DELEGADO) ──
-            // Se controlan como grupo con permiso "filtro_tabs"
-            var mostrarTabs = (es.filtro_tabs !== false);
-            setVisible('estTabsNav', mostrarTabs);
+            // ── 2. PESTAÑAS INDIVIDUALES ──
+            // Cada pestaña se controla por separado con su propio permiso
+            var tabPermisos = {
+                'tab_general':  'estTabGeneral',
+                'tab_asesor':   'estTabAsesor',
+                'tab_delegado': 'estTabDelegado'
+            };
+            Object.keys(tabPermisos).forEach(function(permKey){
+                var visible = (es[permKey] !== false);
+                setVisible(tabPermisos[permKey], visible);
+                // Si la pestaña activa se oculta, redirigir a la primera visible
+                if (!visible && STATE.currentTab === permKey.replace('tab_','')) {
+                    // Buscar la primera tab visible y activarla
+                    var tabs = ['general','asesor','delegado'];
+                    for (var i=0; i<tabs.length; i++) {
+                        var tpk = 'tab_' + tabs[i];
+                        if (es[tpk] !== false) { cambiarTab(tabs[i]); break; }
+                    }
+                }
+            });
 
             // ── 3. FILTRO FORMULARIO / SELECTOR PRINCIPAL ──
             var mostrarFormulario = (es.filtro_formulario !== false);
-            setVisible('estLabelFormulario', mostrarFormulario);
+            setVisible('estLabelFormulario',  mostrarFormulario);
             setVisibleEl(DOM.estFormularioGeneral, mostrarFormulario);
-            setVisible('estLabelAsesor',  mostrarFormulario);
-            setVisibleEl(DOM.estAsesor,   mostrarFormulario);
-            setVisible('estLabelDelegado', mostrarFormulario);
-            setVisibleEl(DOM.estDelegado,  mostrarFormulario);
+            setVisible('estLabelAsesor',      mostrarFormulario);
+            setVisibleEl(DOM.estAsesor,       mostrarFormulario);
+            setVisible('estLabelDelegado',    mostrarFormulario);
+            setVisibleEl(DOM.estDelegado,     mostrarFormulario);
 
             // ── 4. FILTRO FECHA (incluye separadores "a") ──
             var mostrarFecha = (es.filtro_fecha_hora !== false);
-            // General
-            setVisible('estLabelFechaGeneral',  mostrarFecha);
+            setVisible('estLabelFechaGeneral',     mostrarFecha);
             setVisibleEl(DOM.estFechaDesdeGeneral, mostrarFecha);
-            setVisible('estFechaSepGeneral',    mostrarFecha);
+            setVisible('estFechaSepGeneral',       mostrarFecha);
             setVisibleEl(DOM.estFechaHastaGeneral, mostrarFecha);
-            // Asesor
-            setVisible('estLabelFechaAsesor',   mostrarFecha);
+            setVisible('estLabelFechaAsesor',      mostrarFecha);
             setVisibleEl(DOM.estFechaDesdeAsesor,  mostrarFecha);
-            setVisible('estFechaSepAsesor',     mostrarFecha);
+            setVisible('estFechaSepAsesor',        mostrarFecha);
             setVisibleEl(DOM.estFechaHastaAsesor,  mostrarFecha);
-            // Delegado
-            setVisible('estLabelFechaDelegado', mostrarFecha);
-            setVisibleEl(DOM.estFechaDescuDelegado, mostrarFecha);
-            setVisible('estFechaSepDelegado',   mostrarFecha);
-            setVisibleEl(DOM.estFechaHastaDelegado, mostrarFecha);
+            setVisible('estLabelFechaDelegado',    mostrarFecha);
+            setVisibleEl(DOM.estFechaDescuDelegado,mostrarFecha);
+            setVisible('estFechaSepDelegado',      mostrarFecha);
+            setVisibleEl(DOM.estFechaHastaDelegado,mostrarFecha);
 
-            // ── 5. FILTRO TENDENCIA ──
+            // ── 5. FILTRO TENDENCIA ── (usa clases .est-tendencia-label / .est-tendencia-select)
             var mostrarTendencia = (es.filtro_tendencia !== false);
-            // Usamos clases para afectar todos a la vez
             document.querySelectorAll('.est-tendencia-label').forEach(function(el){ el.style.display = mostrarTendencia ? '' : 'none'; });
             document.querySelectorAll('.est-tendencia-select').forEach(function(el){ el.style.display = mostrarTendencia ? '' : 'none'; });
 
@@ -873,9 +882,8 @@ if (!defined('SISTEMA_REGISTROS')) {
                 setVisible(elId, visible);
                 if (visible) hayAlgunSubFiltro = true;
             });
-            // Ocultar fila completa + label si no hay ninguno visible
-            setVisible('estSubFiltrosRow',    hayAlgunSubFiltro);
-            setVisible('estSubFiltrosLabel',  hayAlgunSubFiltro);
+            setVisible('estSubFiltrosRow',   hayAlgunSubFiltro);
+            setVisible('estSubFiltrosLabel', hayAlgunSubFiltro);
 
             // ── 8. GRÁFICOS VISIBLES ──
             var graficosMap = {
