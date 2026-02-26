@@ -42,19 +42,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function navegarAPagina(page, title) {
-        // Actualizar menú activo
         menuItems.forEach(function (mi) { mi.classList.remove('active'); });
         var menuActivo = document.querySelector('.menu-item[data-page="' + page + '"]');
         if (menuActivo) menuActivo.classList.add('active');
-
-        // Actualizar título
         if (!title && menuActivo) title = menuActivo.getAttribute('data-title');
         if (pageName) pageName.textContent = title || 'Dashboard';
-
-        // Guardar en hash (sin disparar hashchange)
         history.replaceState(null, '', '#' + page);
-
-        // Cargar contenido
         cargarPagina(page);
     }
 
@@ -93,7 +86,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var paginaValida = null;
 
         if (hash) {
-            // Verificar que el hash corresponda a un menú existente
             var menuTarget = document.querySelector('.menu-item[data-page="' + hash + '"]');
             if (menuTarget) paginaValida = hash;
         }
@@ -103,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function () {
             var title = menuTarget ? menuTarget.getAttribute('data-title') : 'Dashboard';
             navegarAPagina(paginaValida, title);
         } else {
-            // Default: Dashboard
             var defaultItem = document.querySelector('.menu-item[data-page="dashboard-main"]');
             if (defaultItem) {
                 navegarAPagina('dashboard-main', defaultItem.getAttribute('data-title'));
@@ -111,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Escuchar cambio de hash (botón atrás/adelante del navegador)
     window.addEventListener('hashchange', function () {
         var hash = window.location.hash.replace('#', '');
         if (hash) {
@@ -164,7 +154,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnCancelEdit) btnCancelEdit.addEventListener('click', cerrarModalEditarUsuario);
     if (btnCloseEditUser) btnCloseEditUser.addEventListener('click', cerrarModalEditarUsuario);
 
-    // Cerrar modal con clic fuera
     if (modalEditUser) {
         modalEditUser.addEventListener('click', function (e) {
             if (e.target === modalEditUser) cerrarModalEditarUsuario();
@@ -349,8 +338,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(function (data) {
                 btnGuardar.classList.remove('loading'); btnGuardar.disabled = false;
                 if (data.success) {
-                    var headerName = document.querySelector('.user-name');
-                    if (headerName) headerName.textContent = data.nombre_completo;
+                    // Actualizar header inmediatamente al guardar
+                    aplicarDatosSidebar(data.nombre_completo, null);
                     cerrarModalEditarUsuario();
                     mostrarToast('Datos actualizados correctamente', 'success');
                 } else {
@@ -404,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Actualiza HEADER y TITLE de la página
     // =====================================================
     var ultimasOpciones = {};
-    
+
     function verificarOpcionesGlobales() {
         fetch('includes/ajax/opciones_sistema.php?accion=get_opciones_globales_realtime', {
             credentials: 'same-origin'
@@ -414,14 +403,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.success && data.opciones) {
                 if (data.opciones['sistema_nombre'] !== ultimasOpciones['sistema_nombre']) {
                     ultimasOpciones['sistema_nombre'] = data.opciones['sistema_nombre'];
-                    
-                    // Actualizar en el HEADER
-                    var headerTitle = document.querySelector('.header-title, .navbar-brand, h1, .system-name, [data-system-name]');
-                    if (headerTitle) {
-                        headerTitle.textContent = data.opciones['sistema_nombre'];
-                    }
-                    
-                    // Actualizar en el TITLE de la página
+                    var headerTitle = document.querySelector('.header-title h1');
+                    if (headerTitle) headerTitle.textContent = data.opciones['sistema_nombre'];
                     document.title = 'Dashboard | ' + data.opciones['sistema_nombre'];
                 }
             }
@@ -431,5 +414,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setInterval(verificarOpcionesGlobales, 3000);
     verificarOpcionesGlobales();
+
+    // =====================================================
+    // POLLING: DATOS DEL SIDEBAR EN TIEMPO REAL
+    // ── FIX: actualiza nombre e iniciales del sidebar ──
+    // cuando el admin edita los datos del consultor.
+    // Reutiliza get_user_data.php que ya existe.
+    // Corre cada 15 segundos (no hace falta más frecuente).
+    // =====================================================
+    function aplicarDatosSidebar(nombreCompleto, iniciales) {
+        if (nombreCompleto) {
+            var elNombre = document.querySelector('.user-name');
+            if (elNombre) elNombre.textContent = nombreCompleto;
+        }
+        if (iniciales) {
+            var elAvatar = document.querySelector('.header-user-avatar');
+            if (elAvatar) elAvatar.textContent = iniciales;
+        }
+    }
+
+    function actualizarDatosSidebar() {
+        fetch('includes/ajax/get_user_data.php', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (!data.success) return;
+            var u = data.user;
+            var nombreCompleto = (u.nombre || '') + ' ' + (u.apellidos || '');
+            var iniciales = '';
+            if (u.nombre && u.apellidos) {
+                iniciales = (u.nombre.charAt(0) + u.apellidos.charAt(0)).toUpperCase();
+            }
+            aplicarDatosSidebar(nombreCompleto.trim(), iniciales);
+        })
+        .catch(function () { /* silencioso */ });
+    }
+
+    setInterval(actualizarDatosSidebar, 15000);
 
 });
