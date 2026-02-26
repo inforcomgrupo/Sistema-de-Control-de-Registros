@@ -31,8 +31,8 @@ if (!isset($_POST['csrf_token']) || !validarTokenCSRF($_POST['csrf_token'])) {
 }
 
 $registroId = isset($_POST['registro_id']) ? (int)$_POST['registro_id'] : 0;
-$campo      = isset($_POST['campo']) ? trim($_POST['campo']) : '';
-$valor      = isset($_POST['valor']) ? trim($_POST['valor']) : '';
+$campo      = isset($_POST['campo'])       ? trim($_POST['campo'])       : '';
+$valor      = isset($_POST['valor'])       ? trim($_POST['valor'])       : '';
 
 if ($registroId <= 0 || $campo === '') {
     echo json_encode(['success' => false, 'message' => 'Datos incompletos']);
@@ -76,11 +76,13 @@ try {
         $extra = !empty($row['campos_extra']) ? json_decode($row['campos_extra'], true) : [];
         $extra[$campo] = $valor;
 
-        $stmtUp = $db->prepare("UPDATE registros SET campos_extra = :extra WHERE id = :id");
+        // ── FIX: actualizar fecha_actualizacion para que el polling lo detecte ──
+        $stmtUp = $db->prepare("UPDATE registros SET campos_extra = :extra, fecha_actualizacion = NOW() WHERE id = :id");
         $stmtUp->execute([':extra' => json_encode($extra), ':id' => $registroId]);
+
     } else {
-        // Actualizar columna directa
-        $stmt = $db->prepare("UPDATE registros SET `$campo` = :valor WHERE id = :id");
+        // ── FIX: actualizar fecha_actualizacion para que el polling lo detecte ──
+        $stmt = $db->prepare("UPDATE registros SET `$campo` = :valor, fecha_actualizacion = NOW() WHERE id = :id");
         $stmt->execute([':valor' => $valor, ':id' => $registroId]);
     }
 
@@ -93,7 +95,12 @@ try {
         'Registro #' . $registroId . ' | Campo: ' . $campo . ' → ' . mb_substr($valor, 0, 200)
     );
 
-    echo json_encode(['success' => true, 'message' => 'Actualizado correctamente']);
+    // ── FIX: devolver server_ts para que el JS actualice STATE.lastTs ──
+    echo json_encode([
+        'success'   => true,
+        'message'   => 'Actualizado correctamente',
+        'server_ts' => date('Y-m-d H:i:s')
+    ]);
 
 } catch (PDOException $e) {
     error_log("Error update_registro: " . $e->getMessage());
