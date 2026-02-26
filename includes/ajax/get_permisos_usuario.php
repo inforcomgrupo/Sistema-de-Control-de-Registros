@@ -44,6 +44,9 @@ function getPermisosDefault() {
             'filtro_asesor' => true, 'filtro_delegado' => true, 'filtro_curso' => true,
             'filtro_pais' => true, 'filtro_ciudad' => true, 'filtro_moneda' => true,
             'filtro_metodo_pago' => true, 'filtro_web' => true,
+            // ── NUEVOS FILTROS ──
+            'filtro_formulario' => true, 'filtro_busqueda' => true,
+            'filtro_mostrando' => true, 'filtro_limpiar' => true, 'filtro_fecha_hora' => true,
             'reordenar_columnas' => true, 'descargar_excel' => true, 'edicion_inline' => true
         ],
         'asesores_delegados' => [
@@ -55,6 +58,9 @@ function getPermisosDefault() {
             'col_file_url' => true, 'col_formulario_id' => true, 'col_web' => true,
             'filtro_curso' => true, 'filtro_pais' => true, 'filtro_ciudad' => true,
             'filtro_moneda' => true, 'filtro_metodo_pago' => true, 'filtro_web' => true,
+            // ── NUEVOS FILTROS ──
+            'filtro_formulario' => true, 'filtro_busqueda' => true,
+            'filtro_mostrando' => true, 'filtro_limpiar' => true, 'filtro_fecha_hora' => true,
             'reordenar_columnas' => true, 'descargar_excel' => true, 'edicion_inline' => true
         ],
         'estadisticas' => [
@@ -62,7 +68,10 @@ function getPermisosDefault() {
             'filtro_fecha' => true, 'filtro_asesor' => true, 'filtro_delegado' => true,
             'filtro_curso' => true, 'filtro_pais' => true, 'filtro_ciudad' => true,
             'filtro_moneda' => true, 'filtro_metodo_pago' => true,
-            'filtro_categoria' => true, 'filtro_id' => true
+            'filtro_categoria' => true, 'filtro_id' => true,
+            // ── NUEVOS FILTROS ──
+            'filtro_formulario' => true, 'filtro_busqueda' => true,
+            'filtro_mostrando' => true, 'filtro_limpiar' => true, 'filtro_fecha_hora_est' => true
         ]
     ];
 }
