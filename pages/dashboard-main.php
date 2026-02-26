@@ -72,16 +72,16 @@ if (!defined('SISTEMA_REGISTROS')) {
 
 <!-- Barra de filtros -->
 <div class="filters-bar" id="filtersBar" style="flex-shrink:0;">
-    <div class="filters-row">
-        <span class="filters-row-label"><i class="fas fa-file-alt"></i> Formularios:</span>
+    <div class="filters-row" id="filtersRow1">
+        <span class="filters-row-label" id="filtroFormularioWrapper"><i class="fas fa-file-alt"></i> Formularios:</span>
         <select class="filter-select" id="filterFormulario" title="Formulario">
             <option value="">Todos los Formularios</option>
         </select>
-        <div class="filter-search-wrapper">
+        <div class="filter-search-wrapper" id="filtroBusquedaWrapper">
             <i class="fas fa-search"></i>
             <input type="text" class="filter-search" id="filterSearch" placeholder="Buscar en todos los campos...">
         </div>
-        <div class="records-counter">
+        <div class="records-counter" id="filtroMostrandoWrapper">
             <i class="fas fa-database"></i>
             Mostrando <strong id="countFiltered">0</strong> de
             <strong id="countTotal">0</strong>
@@ -101,21 +101,21 @@ if (!defined('SISTEMA_REGISTROS')) {
             <i class="fas fa-file-excel"></i> Excel
         </button>
     </div>
-    <div class="filters-row">
-        <span class="filters-row-label"><i class="fas fa-calendar"></i> Fecha:</span>
+    <div class="filters-row" id="filtersRow2">
+        <span class="filters-row-label" id="filtroFechaHoraWrapper"><i class="fas fa-calendar"></i> Fecha:</span>
         <input type="date" class="filter-date-input" id="filterFechaDesde" title="Fecha desde">
         <span class="filter-separator">a</span>
         <input type="date" class="filter-date-input" id="filterFechaHasta" title="Fecha hasta">
-        <span class="filters-row-label" style="margin-left: 8px;">
+        <span class="filters-row-label" style="margin-left: 8px;" id="filtroHoraLabel">
             <i class="fas fa-clock"></i> Hora:
         </span>
-        <div class="time-picker-wrapper">
+        <div class="time-picker-wrapper" id="filtroHoraDesdeWrapper">
             <select class="filter-time-select" id="filterHoraDesdeH" title="Hora desde"><option value="">hh</option></select>
             <span class="time-sep">:</span>
             <select class="filter-time-select" id="filterHoraDesdeM" title="Minutos desde"><option value="">mm</option></select>
         </div>
         <span class="filter-separator">a</span>
-        <div class="time-picker-wrapper">
+        <div class="time-picker-wrapper" id="filtroHoraHastaWrapper">
             <select class="filter-time-select" id="filterHoraHastaH" title="Hora hasta"><option value="">hh</option></select>
             <span class="time-sep">:</span>
             <select class="filter-time-select" id="filterHoraHastaM" title="Minutos hasta"><option value="">mm</option></select>
@@ -160,7 +160,8 @@ if (!defined('SISTEMA_REGISTROS')) {
         sortColumn: 'fecha_registro', sortDir: 'DESC', searchTimer: null,
         pollTimer: null, camposDinamicos: [], editingCell: null,
         requestId: 0, permisosTimer: null,
-        sesionInvalidada: false  // ← flag para evitar múltiples redirects
+        sesionInvalidada: false,  // ← flag para evitar múltiples redirects
+        reordenarPermitido: true  // ← FIX: control de reordenamiento
     };
 
     var COLUMNAS_BASE = [
@@ -283,12 +284,15 @@ if (!defined('SISTEMA_REGISTROS')) {
     function renderHeaders() {
         var html = '';
         COLUMNAS_BASE.forEach(function (col) {
+            // ── FIX reordenar: si no está permitido, tratar todas como no-sort ──
+            var esSortable = col.sortable && STATE.reordenarPermitido;
             var sc = '', si = '<i class="fas fa-sort sort-icon"></i>';
-            if (col.sortable && col.key === STATE.sortColumn) {
+            if (esSortable && col.key === STATE.sortColumn) {
                 sc = STATE.sortDir === 'ASC' ? 'sort-asc' : 'sort-desc';
                 si = STATE.sortDir === 'ASC' ? '<i class="fas fa-sort-up sort-icon"></i>' : '<i class="fas fa-sort-down sort-icon"></i>';
             }
-            html += '<th class="' + sc + (col.sortable ? '' : ' no-sort') + '" data-column="' + col.key + '" data-sortable="' + col.sortable + '">' + col.label + (col.sortable ? ' ' + si : '') + '</th>';
+            var noSortClass = esSortable ? '' : ' no-sort';
+            html += '<th class="' + sc + noSortClass + '" data-column="' + col.key + '" data-sortable="' + (esSortable ? 'true' : 'false') + '">' + col.label + (esSortable ? ' ' + si : '') + '</th>';
         });
         STATE.camposDinamicos.forEach(function (cd) {
             if (cd.mostrar_lista == 1) html += '<th data-column="dyn_' + cd.nombre_campo + '" data-sortable="false" class="no-sort">' + cd.nombre_mostrar + '</th>';
@@ -627,6 +631,8 @@ if (!defined('SISTEMA_REGISTROS')) {
 
         if (DOM.tableHeaders) {
             DOM.tableHeaders.addEventListener('click', function (e) {
+                // ── FIX: si reordenar no está permitido, ignorar todos los clicks ──
+                if (!STATE.reordenarPermitido) return;
                 var th = e.target.closest('th');
                 if (!th || th.getAttribute('data-sortable') === 'false') return;
                 var col = th.getAttribute('data-column');
@@ -751,28 +757,19 @@ if (!defined('SISTEMA_REGISTROS')) {
 
     // =====================================================
     // PERMISOS EN TIEMPO REAL + WATCHDOG DE SESIÓN
-    //
-    // Consulta get_permisos_usuario.php cada 5 segundos.
-    // Si el servidor responde session_invalida:true
-    // (usuario eliminado de la BD, p.ej. tras Reset),
-    // detiene todos los timers, muestra un aviso y
-    // redirige al login tras 3 segundos.
     // =====================================================
     function expulsarSesion(mensaje) {
-        if (STATE.sesionInvalidada) return; // ejecutar solo una vez
+        if (STATE.sesionInvalidada) return;
         STATE.sesionInvalidada = true;
 
-        // Detener todos los timers para no seguir haciendo peticiones
-        if (STATE.pollTimer)    clearInterval(STATE.pollTimer);
+        if (STATE.pollTimer)     clearInterval(STATE.pollTimer);
         if (STATE.permisosTimer) clearInterval(STATE.permisosTimer);
         STATE.isPollActive = false;
 
-        // Mostrar aviso
         if (typeof mostrarToast === 'function') {
             mostrarToast(mensaje || 'Tu sesión ha sido cerrada. Redirigiendo...', 'error', 4000);
         }
 
-        // Oscurecer la pantalla y mostrar mensaje central
         var overlay = document.createElement('div');
         overlay.style.cssText = [
             'position:fixed', 'inset:0', 'background:rgba(0,0,0,0.75)',
@@ -787,20 +784,19 @@ if (!defined('SISTEMA_REGISTROS')) {
             '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;">Redirigiendo al inicio de sesión...</p>';
         document.body.appendChild(overlay);
 
-        // Redirigir al login tras 3 segundos
         setTimeout(function () {
             window.location.href = 'index.php?session=expired';
         }, 3000);
     }
 
     function cargarYAplicarPermisos() {
-        if (STATE.sesionInvalidada) return; // ya expulsado, no seguir
+        if (STATE.sesionInvalidada) return;
 
         fetch('includes/ajax/get_permisos_usuario.php', { credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
         .then(function (data) {
 
-            // ─── WATCHDOG: sesión inválida (usuario eliminado/suspendido) ───
+            // ─── WATCHDOG: sesión inválida ───
             if (data.session_invalida === true) {
                 expulsarSesion(data.message || 'Tu cuenta ya no existe en el sistema.');
                 return;
@@ -838,7 +834,7 @@ if (!defined('SISTEMA_REGISTROS')) {
                 }
             });
 
-            // === FILTROS ===
+            // === FILTROS SELECTORES (fila 3) ===
             var filtroMap = {
                 'filtro_asesor':      'filterAsesor',
                 'filtro_delegado':    'filterDelegado',
@@ -856,6 +852,46 @@ if (!defined('SISTEMA_REGISTROS')) {
                     el.style.display = visible ? '' : 'none';
                 }
             });
+
+            // === FILTROS FILA 1: Formulario, Búsqueda, Mostrando, Limpiar ===
+            // filtro_formulario → label + select juntos (wrapper)
+            var wFormulario = document.getElementById('filtroFormularioWrapper');
+            var selectFormulario = document.getElementById('filterFormulario');
+            var visFormulario = (dash.filtro_formulario !== false);
+            if (wFormulario) wFormulario.style.display = visFormulario ? '' : 'none';
+            if (selectFormulario) selectFormulario.style.display = visFormulario ? '' : 'none';
+
+            // filtro_busqueda → input de búsqueda
+            var wBusqueda = document.getElementById('filtroBusquedaWrapper');
+            if (wBusqueda) wBusqueda.style.display = (dash.filtro_busqueda !== false) ? '' : 'none';
+
+            // filtro_mostrando → contador "Mostrando X de Y"
+            var wMostrando = document.getElementById('filtroMostrandoWrapper');
+            if (wMostrando) wMostrando.style.display = (dash.filtro_mostrando !== false) ? '' : 'none';
+
+            // filtro_limpiar → botón Limpiar
+            if (DOM.btnClearFilters) {
+                DOM.btnClearFilters.style.display = (dash.filtro_limpiar !== false) ? '' : 'none';
+            }
+
+            // === FILTROS FILA 2: Fecha y Hora ===
+            var wFechaHora = document.getElementById('filtersRow2');
+            if (wFechaHora) wFechaHora.style.display = (dash.filtro_fecha_hora !== false) ? '' : 'none';
+
+            // === REORDENAR COLUMNAS ===
+            var nuevoReordenar = (dash.reordenar_columnas !== false);
+            if (nuevoReordenar !== STATE.reordenarPermitido) {
+                STATE.reordenarPermitido = nuevoReordenar;
+                // Re-renderizar headers para aplicar/quitar clase no-sort y data-sortable
+                renderHeaders();
+            }
+            // Cursor visual en thead: si no puede reordenar, deshabilitar pointer
+            if (DOM.tableHeaders) {
+                DOM.tableHeaders.style.cursor = nuevoReordenar ? '' : 'default';
+                DOM.tableHeaders.querySelectorAll('th').forEach(function (th) {
+                    th.style.pointerEvents = nuevoReordenar ? '' : 'none';
+                });
+            }
 
             // === BOTÓN EXCEL ===
             if (DOM.btnExportExcel) {
@@ -879,7 +915,6 @@ if (!defined('SISTEMA_REGISTROS')) {
 
     // =====================================================
     // POLLING: OPCIONES GLOBALES EN TIEMPO REAL
-    // Verifica cambios cada 3 segundos
     // =====================================================
     var ultimasOpciones = {};
 
