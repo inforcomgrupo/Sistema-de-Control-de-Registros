@@ -167,7 +167,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                 <div class="opc-perm-group">
                     <div class="opc-perm-group-title"><i class="fas fa-th-large"></i> Dashboard</div>
 
-                    <!-- Columnas individuales -->
                     <div class="opc-perm-subgroup">
                         <div class="opc-perm-subgroup-title"><i class="fas fa-columns"></i> Columnas visibles</div>
                         <div class="opc-perm-grid">
@@ -192,7 +191,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                         </div>
                     </div>
 
-                    <!-- Filtros individuales -->
                     <div class="opc-perm-subgroup">
                         <div class="opc-perm-subgroup-title"><i class="fas fa-filter"></i> Filtros visibles</div>
                         <div class="opc-perm-grid">
@@ -207,7 +205,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                         </div>
                     </div>
 
-                    <!-- Opciones generales -->
                     <div class="opc-perm-item">
                         <span class="opc-perm-item-label"><i class="fas fa-sort"></i> Reordenar Columnas</span>
                         <label class="toggle-switch"><input type="checkbox" data-perm="dashboard.reordenar_columnas" checked><span class="toggle-slider"></span></label>
@@ -226,7 +223,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                 <div class="opc-perm-group">
                     <div class="opc-perm-group-title"><i class="fas fa-headset"></i> Asesores / Delegados</div>
 
-                    <!-- Columnas individuales -->
                     <div class="opc-perm-subgroup">
                         <div class="opc-perm-subgroup-title"><i class="fas fa-columns"></i> Columnas visibles</div>
                         <div class="opc-perm-grid">
@@ -251,7 +247,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                         </div>
                     </div>
 
-                    <!-- Filtros individuales -->
                     <div class="opc-perm-subgroup">
                         <div class="opc-perm-subgroup-title"><i class="fas fa-filter"></i> Filtros visibles</div>
                         <div class="opc-perm-grid">
@@ -264,7 +259,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                         </div>
                     </div>
 
-                    <!-- Opciones generales -->
                     <div class="opc-perm-item">
                         <span class="opc-perm-item-label"><i class="fas fa-sort"></i> Reordenar Columnas</span>
                         <label class="toggle-switch"><input type="checkbox" data-perm="asesores_delegados.reordenar_columnas" checked><span class="toggle-slider"></span></label>
@@ -376,6 +370,10 @@ var OPC = (function () {
         cargarUsuarios();
         cargarConsultoresOpc();
         bindEvents();
+
+        // ── FIX: refresca la lista de consultores cada 8s ──
+        // Permite ver cambios de nombre/estado sin recargar
+        setInterval(cargarConsultoresOpc, 8000);
     }
 
     function bindEvents() {
@@ -704,16 +702,12 @@ var OPC = (function () {
         .then(function (data) {
             if (data.success) {
                 var permisos = data.permisos || {};
-
-                // Resetear todos los toggles
                 document.querySelectorAll('[data-perm]').forEach(function (cb) {
                     var key = cb.getAttribute('data-perm');
                     var parts = key.split('.');
-                    var seccion = parts[0]; // dashboard, asesores_delegados, estadisticas
-                    var permiso = parts[1]; // col_nombre, filtro_asesor, descargar_excel, etc.
-
-                    // Buscar en la estructura: permisos.seccion.permiso
-                    var val = true; // Default: habilitado
+                    var seccion = parts[0];
+                    var permiso = parts[1];
+                    var val = true;
                     if (permisos[seccion] !== undefined && permisos[seccion][permiso] !== undefined) {
                         val = permisos[seccion][permiso];
                     }
@@ -733,7 +727,6 @@ var OPC = (function () {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-        // Construir estructura organizada por sección
         var permisos = {};
         document.querySelectorAll('[data-perm]').forEach(function (cb) {
             var key = cb.getAttribute('data-perm');
@@ -776,8 +769,12 @@ var OPC = (function () {
         .then(function (r) { return r.json(); })
         .then(function (data) {
             if (data.success) renderConsultoresOpc(data.consultores);
+            // Si success:false, simplemente no actualiza — sin toast de error
         })
-        .catch(function (err) { console.error('Error cargando consultores:', err); });
+        .catch(function (err) {
+            // ── FIX: solo log silencioso, sin mostrarToast ──
+            console.error('cargarConsultoresOpc:', err);
+        });
     }
 
     function renderConsultoresOpc(consultores) {
@@ -809,7 +806,6 @@ var OPC = (function () {
     }
 
     function toggleConsultor(uid, estado, nombre) {
-        // Abrir modal en lugar de confirm() nativo
         abrirModalConfirm(uid, estado, nombre || 'este consultor');
     }
 
