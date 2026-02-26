@@ -178,6 +178,12 @@ if (!estaAutenticado() || !esAdministrador()) {
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_moneda" checked> Moneda</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_metodo_pago" checked> Método de Pago</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_web" checked> Web</label></div>
+                            <!-- ── NUEVOS FILTROS DASHBOARD ── -->
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_formulario" checked> Formulario</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_busqueda" checked> Búsqueda</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_mostrando" checked> Mostrando</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_limpiar" checked> Limpiar</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_fecha_hora" checked> Fecha y Hora</label></div>
                         </div>
                     </div>
                     <div class="opc-perm-item">
@@ -229,6 +235,12 @@ if (!estaAutenticado() || !esAdministrador()) {
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_moneda" checked> Moneda</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_metodo_pago" checked> Método de Pago</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_web" checked> Web</label></div>
+                            <!-- ── NUEVOS FILTROS ASESORES/DELEGADOS ── -->
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_formulario" checked> Formulario</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_busqueda" checked> Búsqueda</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_mostrando" checked> Mostrando</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_limpiar" checked> Limpiar</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_fecha_hora" checked> Fecha y Hora</label></div>
                         </div>
                     </div>
                     <div class="opc-perm-item">
@@ -265,6 +277,12 @@ if (!estaAutenticado() || !esAdministrador()) {
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_metodo_pago" checked> Método de Pago</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_categoria" checked> Categoría</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_id" checked> ID</label></div>
+                            <!-- ── NUEVOS FILTROS ESTADÍSTICAS ── -->
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_formulario" checked> Formulario</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_busqueda" checked> Búsqueda</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_mostrando" checked> Mostrando</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_limpiar" checked> Limpiar</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_fecha_hora_est" checked> Fecha y Hora</label></div>
                         </div>
                     </div>
                 </div>
@@ -331,9 +349,6 @@ var OPC = (function () {
         _consultoresTimer = setInterval(cargarConsultoresOpc, 8000);
 
         // ── FIX: limpiar el timer cuando se navegue a otra página ──
-        // El contenido se reemplaza en #contentArea, así que usamos
-        // MutationObserver sobre el container para detectar cuando
-        // este elemento es removido del DOM.
         var _self = document.getElementById('opcionesContainer');
         if (_self) {
             var observer = new MutationObserver(function () {
