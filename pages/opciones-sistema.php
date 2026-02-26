@@ -260,29 +260,49 @@ if (!estaAutenticado() || !esAdministrador()) {
                 <!-- ========== ESTADÍSTICAS ========== -->
                 <div class="opc-perm-group">
                     <div class="opc-perm-group-title"><i class="fas fa-chart-bar"></i> Estadísticas</div>
+
+                    <!-- Acceso general -->
                     <div class="opc-perm-item">
                         <span class="opc-perm-item-label"><i class="fas fa-chart-pie"></i> Acceso a Estadísticas</span>
                         <label class="toggle-switch"><input type="checkbox" data-perm="estadisticas.acceso_estadisticas" checked><span class="toggle-slider"></span></label>
                     </div>
+
+                    <!-- Pestañas (una por una) -->
                     <div class="opc-perm-subgroup">
-                        <div class="opc-perm-subgroup-title"><i class="fas fa-sliders-h"></i> Filtros/Gráficos visibles</div>
+                        <div class="opc-perm-subgroup-title"><i class="fas fa-folder"></i> Pestañas</div>
                         <div class="opc-perm-grid">
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_fecha" checked> Fecha/Hora</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_asesor" checked> Asesor</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_delegado" checked> Delegado</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_curso" checked> Curso</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_pais" checked> País</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_ciudad" checked> Ciudad</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_moneda" checked> Moneda</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_metodo_pago" checked> Método de Pago</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_categoria" checked> Categoría</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_id" checked> ID</label></div>
-                            <!-- ── NUEVOS FILTROS ESTADÍSTICAS ── -->
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_formulario" checked> Formulario</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_busqueda" checked> Búsqueda</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_mostrando" checked> Mostrando</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.tab_general" checked> General</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.tab_asesor" checked> Asesor</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.tab_delegado" checked> Delegado</label></div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros visibles -->
+                    <div class="opc-perm-subgroup">
+                        <div class="opc-perm-subgroup-title"><i class="fas fa-filter"></i> Filtros visibles</div>
+                        <div class="opc-perm-grid">
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_formulario" checked> Formulario / Selector</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_fecha_hora" checked> Fecha y Hora</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_limpiar" checked> Limpiar</label></div>
-                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_fecha_hora_est" checked> Fecha y Hora</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_curso" checked> Sub-filtro Curso</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_pais" checked> Sub-filtro País</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_ciudad" checked> Sub-filtro Ciudad</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_metodo_pago" checked> Sub-filtro Método de Pago</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_web" checked> Sub-filtro Web</label></div>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos visibles -->
+                    <div class="opc-perm-subgroup">
+                        <div class="opc-perm-subgroup-title"><i class="fas fa-chart-line"></i> Gráficos visibles</div>
+                        <div class="opc-perm-grid">
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.grafico_tendencia" checked> Tendencia</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.grafico_asesores" checked> Asesores</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.grafico_delegados" checked> Delegados</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.grafico_cursos" checked> Cursos</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.grafico_paises" checked> Países</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.grafico_metodo_pago" checked> Métodos de Pago</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.grafico_horas" checked> Horas del Día</label></div>
                         </div>
                     </div>
                 </div>
