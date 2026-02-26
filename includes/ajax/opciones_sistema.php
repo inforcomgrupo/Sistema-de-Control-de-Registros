@@ -94,14 +94,14 @@ try {
                 exit;
             }
 
-            $sistemaNombre  = isset($_POST['sistema_nombre']) ? trim($_POST['sistema_nombre']) : '';
+            $sistemaNombre   = isset($_POST['sistema_nombre'])   ? trim($_POST['sistema_nombre'])   : '';
             $loginHabilitado = isset($_POST['login_habilitado']) ? trim($_POST['login_habilitado']) : '1';
-            $loginMensaje   = isset($_POST['login_mensaje']) ? trim($_POST['login_mensaje']) : '';
+            $loginMensaje    = isset($_POST['login_mensaje'])    ? trim($_POST['login_mensaje'])    : '';
 
             $opciones = [
-                'sistema_nombre'  => $sistemaNombre,
+                'sistema_nombre'   => $sistemaNombre,
                 'login_habilitado' => $loginHabilitado,
-                'login_mensaje'   => $loginMensaje
+                'login_mensaje'    => $loginMensaje
             ];
 
             foreach ($opciones as $key => $val) {
@@ -177,7 +177,7 @@ try {
             }
 
             // Generar API Key y Secret
-            $apiKey = bin2hex(random_bytes(32)); // 64 caracteres
+            $apiKey    = bin2hex(random_bytes(32)); // 64 caracteres
             $apiSecret = bin2hex(random_bytes(64)); // 128 caracteres
 
             $stmtIns = $db->prepare(
@@ -185,8 +185,8 @@ try {
                  VALUES (:dominio, :api_key, :api_secret, 1, NOW())"
             );
             $stmtIns->execute([
-                ':dominio' => $dominio,
-                ':api_key' => $apiKey,
+                ':dominio'    => $dominio,
+                ':api_key'    => $apiKey,
                 ':api_secret' => $apiSecret
             ]);
 
@@ -199,9 +199,9 @@ try {
             );
 
             echo json_encode([
-                'success' => true,
-                'message' => 'API Key creada correctamente',
-                'api_key' => $apiKey,
+                'success'    => true,
+                'message'    => 'API Key creada correctamente',
+                'api_key'    => $apiKey,
                 'api_secret' => $apiSecret
             ]);
             break;
@@ -232,7 +232,6 @@ try {
                 exit;
             }
 
-            // Obtener estado actual
             $stmtGet = $db->prepare("SELECT dominio, activo FROM api_keys WHERE id = :id");
             $stmtGet->execute([':id' => $id]);
             $key = $stmtGet->fetch();
@@ -367,8 +366,8 @@ try {
                 exit;
             }
 
-            $usuarioId = isset($_POST['usuario_id']) ? (int)$_POST['usuario_id'] : 0;
-            $permisosJson = isset($_POST['permisos']) ? trim($_POST['permisos']) : '';
+            $usuarioId    = isset($_POST['usuario_id']) ? (int)$_POST['usuario_id'] : 0;
+            $permisosJson = isset($_POST['permisos'])   ? trim($_POST['permisos'])   : '';
 
             if ($usuarioId <= 0) {
                 echo json_encode(['success' => false, 'message' => 'Seleccione un usuario']);
@@ -399,7 +398,7 @@ try {
 
             $stmtUser = $db->prepare("SELECT nombre, apellidos FROM usuarios WHERE id = :id");
             $stmtUser->execute([':id' => $usuarioId]);
-            $userData = $stmtUser->fetch();
+            $userData      = $stmtUser->fetch();
             $nombreUsuario = $userData ? $userData['nombre'] . ' ' . $userData['apellidos'] : 'ID ' . $usuarioId;
 
             registrarLog(
@@ -415,6 +414,10 @@ try {
 
         // =====================================================
         // SUSPENDER / ACTIVAR CONSULTOR (ADMIN SOLAMENTE)
+        // ─────────────────────────────────────────────────────
+        // El JS de opciones-sistema.php envía: usuario_id
+        // El JS de consultores.php envía:      consultor_id
+        // Ambos son aceptados para máxima compatibilidad.
         // =====================================================
         case 'toggle_consultor':
             if (!esAdministrador()) {
@@ -432,14 +435,19 @@ try {
                 exit;
             }
 
-            $consultorId = isset($_POST['consultor_id']) ? (int)$_POST['consultor_id'] : 0;
+            // ← FIX: acepta 'usuario_id' (opciones-sistema) O 'consultor_id' (compatibilidad)
+            $consultorId = 0;
+            if (!empty($_POST['usuario_id'])) {
+                $consultorId = (int)$_POST['usuario_id'];
+            } elseif (!empty($_POST['consultor_id'])) {
+                $consultorId = (int)$_POST['consultor_id'];
+            }
 
             if ($consultorId <= 0) {
                 echo json_encode(['success' => false, 'message' => 'ID de consultor inválido']);
                 exit;
             }
 
-            // Obtener datos actuales
             $stmtGet = $db->prepare("SELECT nombre, apellidos, estado FROM usuarios WHERE id = :id AND tipo = 'consultor'");
             $stmtGet->execute([':id' => $consultorId]);
             $consultor = $stmtGet->fetch();
@@ -464,8 +472,8 @@ try {
             );
 
             echo json_encode([
-                'success' => true,
-                'message' => $accionLog . ' correctamente',
+                'success'     => true,
+                'message'     => $accionLog . ' correctamente',
                 'nuevoEstado' => $nuevoEstado
             ]);
             break;
