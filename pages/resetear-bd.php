@@ -141,9 +141,32 @@ if (!estaAutenticado() || !esAdministrador()) {
 .reset-result-icon { font-size: 50px; color: #059669; display: block; margin-bottom: 12px; }
 .reset-result-title { font-size: 16px; font-weight: 700; color: #059669; margin-bottom: 8px; }
 .reset-result-text { font-size: 12px; color: var(--gris-oscuro); line-height: 1.6; }
+
+/* BANNER BROADCAST: avisa a otros usuarios que el admin reseteó */
+.reset-broadcast-banner {
+    display: none;
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    color: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    text-align: center;
+    margin-bottom: 12px;
+    animation: pulseIcon 1.5s infinite;
+}
+.reset-broadcast-banner.active { display: block; }
+.reset-broadcast-banner i { font-size: 28px; display: block; margin-bottom: 8px; }
+.reset-broadcast-banner strong { font-size: 14px; display: block; }
+.reset-broadcast-banner span { font-size: 12px; opacity: 0.9; }
 </style>
 
 <div class="reset-container" id="resetContainer">
+
+    <!-- Banner de aviso a otros usuarios (broadcast) -->
+    <div class="reset-broadcast-banner" id="resetBroadcastBanner">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>La Base de Datos ha sido reseteada por el Administrador.</strong>
+        <span>Los datos que veías han sido eliminados. Recargando...</span>
+    </div>
 
     <div class="opc-section">
         <div class="opc-section-header" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); cursor: default;">
@@ -168,6 +191,7 @@ if (!estaAutenticado() || !esAdministrador()) {
                     <li><i class="fas fa-trash-alt"></i> Todos los permisos de usuarios</li>
                     <li><i class="fas fa-trash-alt"></i> Todos los campos dinámicos</li>
                     <li><i class="fas fa-trash-alt"></i> Opciones globales (se restauran por defecto)</li>
+                    <li><i class="fas fa-trash-alt"></i> Tabla de mapeo de campos de formulario</li>
                     <li class="safe"><i class="fas fa-shield-alt"></i> <strong>Se conserva ÚNICAMENTE el usuario Administrador</strong></li>
                     <li class="safe"><i class="fas fa-shield-alt"></i> <strong>Todos los IDs inician desde 1</strong></li>
                 </ul>
@@ -185,7 +209,7 @@ if (!estaAutenticado() || !esAdministrador()) {
                 </button>
             </div>
 
-            <!-- Resultado -->
+            <!-- Resultado (solo el admin que ejecutó el reset lo ve) -->
             <div class="reset-result" id="resetResult">
                 <i class="fas fa-check-circle reset-result-icon"></i>
                 <div class="reset-result-title">Base de Datos Reseteada Exitosamente</div>
@@ -225,15 +249,25 @@ if (!estaAutenticado() || !esAdministrador()) {
 /**
  * Resetear BD - Script
  * Namespace RST
+ *
+ * NUEVO: polling de broadcast para detectar en tiempo real
+ * si el admin ejecutó el reset mientras otro usuario tenía
+ * esta página abierta.
  */
 var RST = (function () {
     'use strict';
 
     var CSRF = document.getElementById('csrfTokenDash') ? document.getElementById('csrfTokenDash').value : '';
 
+    // Timestamp del último reset que YA conocíamos al cargar la página
+    // Se compara en el polling para detectar un reset NUEVO
+    var ultimoBdReseteadaAt = null;
+    var yaReseteadoPorMi    = false;  // true si fui yo quien ejecutó el reset
+    var broadcastPollTimer  = null;
+
     function init() {
         var input = document.getElementById('resetConfirmInput');
-        var btn = document.getElementById('btnResetear');
+        var btn   = document.getElementById('btnResetear');
 
         if (input && btn) {
             input.addEventListener('input', function () {
@@ -249,7 +283,6 @@ var RST = (function () {
 
             btn.addEventListener('click', function () {
                 if (this.disabled) return;
-                // Mostrar modal de confirmación final
                 document.getElementById('resetModalOverlay').classList.add('active');
             });
         }
@@ -272,6 +305,9 @@ var RST = (function () {
         if (btnConfirmar) {
             btnConfirmar.addEventListener('click', ejecutarReset);
         }
+
+        // Iniciar polling de broadcast (detecta reset hecho por otro)
+        iniciarBroadcastPoll();
     }
 
     function ejecutarReset() {
@@ -280,9 +316,9 @@ var RST = (function () {
         btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reseteando...';
 
         var fd = new FormData();
-        fd.append('accion', 'resetear_todo');
+        fd.append('accion',       'resetear_todo');
         fd.append('confirmacion', 'RESETEAR');
-        fd.append('csrf_token', CSRF);
+        fd.append('csrf_token',   CSRF);
 
         fetch('includes/ajax/resetear_bd.php', { method: 'POST', body: fd, credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
@@ -290,6 +326,7 @@ var RST = (function () {
             document.getElementById('resetModalOverlay').classList.remove('active');
 
             if (data.success) {
+                yaReseteadoPorMi = true;
                 document.getElementById('dangerZone').style.display = 'none';
                 document.getElementById('resetResult').classList.add('active');
                 if (typeof mostrarToast === 'function') mostrarToast('Base de datos reseteada exitosamente', 'success', 6000);
@@ -306,6 +343,69 @@ var RST = (function () {
             if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
         });
     }
+
+    // =====================================================
+    // BROADCAST POLL
+    // Consulta cada 3 seg si la BD fue reseteada por otro
+    // usuario administrador. Si detecta un timestamp nuevo,
+    // muestra el banner de aviso y recarga la página.
+    // =====================================================
+    function iniciarBroadcastPoll() {
+        // Primera consulta inmediata para capturar el estado actual
+        // (sin reaccionar, solo guardando el baseline)
+        consultarBroadcast(true);
+
+        broadcastPollTimer = setInterval(function () {
+            if (yaReseteadoPorMi) return; // yo lo hice, no reaccionar
+            consultarBroadcast(false);
+        }, 3000);
+    }
+
+    function consultarBroadcast(esBaseline) {
+        fetch(
+            "includes/ajax/opciones_sistema.php?accion=get_bd_reseteada_at",
+            { credentials: 'same-origin' }
+        )
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (!data.success) return;
+
+            var ts = data.bd_reseteada_at || null;
+
+            if (esBaseline) {
+                // Solo guardamos el valor inicial, no reaccionamos
+                ultimoBdReseteadaAt = ts;
+                return;
+            }
+
+            // Si el timestamp cambió respecto al que teníamos → hubo un reset nuevo
+            if (ts && ts !== ultimoBdReseteadaAt) {
+                ultimoBdReseteadaAt = ts;
+
+                // Mostrar banner de aviso
+                var banner = document.getElementById('resetBroadcastBanner');
+                if (banner) banner.classList.add('active');
+
+                // Ocultar la zona de peligro para evitar confusión
+                var dz = document.getElementById('dangerZone');
+                if (dz) dz.style.display = 'none';
+
+                // Detener el polling
+                if (broadcastPollTimer) clearInterval(broadcastPollTimer);
+
+                // Recargar tras 3 segundos para que el usuario vea el banner
+                if (typeof mostrarToast === 'function') {
+                    mostrarToast('La BD fue reseteada. Recargando página...', 'error', 4000);
+                }
+                setTimeout(function () { window.location.reload(); }, 4000);
+            }
+        })
+        .catch(function () {});
+    }
+
+    window.addEventListener('beforeunload', function () {
+        if (broadcastPollTimer) clearInterval(broadcastPollTimer);
+    });
 
     init();
     return {};
