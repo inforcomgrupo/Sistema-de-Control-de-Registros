@@ -21,7 +21,6 @@ if (!defined('SISTEMA_REGISTROS')) {
             <span class="stat-label">Total</span>
         </div>
     </div>
-
     <div class="stat-card stat-today">
         <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
         <div class="stat-info">
@@ -29,7 +28,6 @@ if (!defined('SISTEMA_REGISTROS')) {
             <span class="stat-label">Hoy</span>
         </div>
     </div>
-
     <div class="stat-card stat-week">
         <div class="stat-icon"><i class="fas fa-calendar-week"></i></div>
         <div class="stat-info">
@@ -37,7 +35,6 @@ if (!defined('SISTEMA_REGISTROS')) {
             <span class="stat-label">Semana</span>
         </div>
     </div>
-
     <div class="stat-card stat-month">
         <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
         <div class="stat-info">
@@ -45,7 +42,6 @@ if (!defined('SISTEMA_REGISTROS')) {
             <span class="stat-label">Mes</span>
         </div>
     </div>
-
     <div class="stat-card stat-asesores">
         <div class="stat-icon"><i class="fas fa-headset"></i></div>
         <div class="stat-info">
@@ -53,7 +49,6 @@ if (!defined('SISTEMA_REGISTROS')) {
             <span class="stat-label">Asesores</span>
         </div>
     </div>
-
     <div class="stat-card stat-cursos">
         <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
         <div class="stat-info">
@@ -61,7 +56,6 @@ if (!defined('SISTEMA_REGISTROS')) {
             <span class="stat-label">Cursos</span>
         </div>
     </div>
-
     <div class="stat-card stat-paises">
         <div class="stat-icon"><i class="fas fa-globe-americas"></i></div>
         <div class="stat-info">
@@ -73,18 +67,18 @@ if (!defined('SISTEMA_REGISTROS')) {
 
 <!-- Barra de filtros -->
 <div class="filters-bar" id="filtersBarAsesor" style="flex-shrink:0;">
-    <div class="filters-row">
-        <span class="filters-row-label"><i class="fas fa-headset"></i> Asesores:</span>
+    <div class="filters-row" id="asesorFiltersRow1">
+        <span class="filters-row-label" id="asesorFiltroAsesorLabel"><i class="fas fa-headset"></i> Asesores:</span>
         <select class="filter-select" id="asesorFilterAsesor" title="Asesor">
             <option value="">Todos los Asesores</option>
         </select>
 
-        <div class="filter-search-wrapper">
+        <div class="filter-search-wrapper" id="asesorFiltroBusquedaWrapper">
             <i class="fas fa-search"></i>
             <input type="text" class="filter-search" id="asesorFilterSearch" placeholder="Buscar en todos los campos...">
         </div>
 
-        <div class="records-counter">
+        <div class="records-counter" id="asesorFiltroMostrandoWrapper">
             <i class="fas fa-database"></i>
             <strong id="asesorCountFiltered">0</strong> de
             <strong id="asesorCountTotal">0</strong>
@@ -107,56 +101,32 @@ if (!defined('SISTEMA_REGISTROS')) {
         </button>
     </div>
 
-    <div class="filters-row">
+    <div class="filters-row" id="asesorFiltersRow2">
         <span class="filters-row-label"><i class="fas fa-calendar"></i> Fecha:</span>
         <input type="date" class="filter-date-input" id="asesorFilterFechaDesde">
         <span class="filter-separator">a</span>
         <input type="date" class="filter-date-input" id="asesorFilterFechaHasta">
-
         <span class="filters-row-label" style="margin-left:8px;"><i class="fas fa-clock"></i> Hora:</span>
-
         <div class="time-picker-wrapper">
-            <select class="filter-time-select" id="asesorFilterHoraDesdeH">
-                <option value="">hh</option>
-            </select>
+            <select class="filter-time-select" id="asesorFilterHoraDesdeH"><option value="">hh</option></select>
             <span class="time-sep">:</span>
-            <select class="filter-time-select" id="asesorFilterHoraDesdeM">
-                <option value="">mm</option>
-            </select>
+            <select class="filter-time-select" id="asesorFilterHoraDesdeM"><option value="">mm</option></select>
         </div>
-
         <span class="filter-separator">a</span>
-
         <div class="time-picker-wrapper">
-            <select class="filter-time-select" id="asesorFilterHoraHastaH">
-                <option value="">hh</option>
-            </select>
+            <select class="filter-time-select" id="asesorFilterHoraHastaH"><option value="">hh</option></select>
             <span class="time-sep">:</span>
-            <select class="filter-time-select" id="asesorFilterHoraHastaM">
-                <option value="">mm</option>
-            </select>
+            <select class="filter-time-select" id="asesorFilterHoraHastaM"><option value="">mm</option></select>
         </div>
     </div>
 
     <div class="filters-row">
-        <select class="filter-select" id="asesorFilterCurso">
-            <option value="">Curso</option>
-        </select>
-        <select class="filter-select" id="asesorFilterPais">
-            <option value="">País</option>
-        </select>
-        <select class="filter-select" id="asesorFilterCiudad">
-            <option value="">Ciudad</option>
-        </select>
-        <select class="filter-select" id="asesorFilterMoneda">
-            <option value="">Moneda</option>
-        </select>
-        <select class="filter-select" id="asesorFilterMetodoPago">
-            <option value="">Método de Pago</option>
-        </select>
-        <select class="filter-select" id="asesorFilterWeb">
-            <option value="">Web</option>
-        </select>
+        <select class="filter-select" id="asesorFilterCurso"><option value="">Curso</option></select>
+        <select class="filter-select" id="asesorFilterPais"><option value="">País</option></select>
+        <select class="filter-select" id="asesorFilterCiudad"><option value="">Ciudad</option></select>
+        <select class="filter-select" id="asesorFilterMoneda"><option value="">Moneda</option></select>
+        <select class="filter-select" id="asesorFilterMetodoPago"><option value="">Método de Pago</option></select>
+        <select class="filter-select" id="asesorFilterWeb"><option value="">Web</option></select>
     </div>
 </div>
 
@@ -169,11 +139,7 @@ if (!defined('SISTEMA_REGISTROS')) {
             </thead>
             <tbody id="asesorTableBody"></tbody>
         </table>
-
-        <div class="table-loader" id="asesorTableLoader">
-            <div class="mini-spinner"></div>
-        </div>
-
+        <div class="table-loader" id="asesorTableLoader"><div class="mini-spinner"></div></div>
         <div class="no-results" id="asesorNoResults" style="display:none;">
             <i class="fas fa-inbox"></i>
             <p>No se encontraron registros</p>
@@ -194,13 +160,14 @@ if (!defined('SISTEMA_REGISTROS')) {
         registros: [], offset: 0, hasMore: true, isLoading: false,
         isPollActive: true, lastId: 0, totalFiltered: 0, totalGeneral: 0,
         sortColumn: 'fecha_registro', sortDir: 'DESC', searchTimer: null,
-        pollTimer: null, camposDinamicos: [], editingCell: null, requestId: 0
+        pollTimer: null, camposDinamicos: [], editingCell: null, requestId: 0,
+        permisosTimer: null, sesionInvalidada: false, reordenarPermitido: true
     };
 
     var COLUMNAS = [
         { key: 'nombre',        label: 'Nombre',         sortable: true },
         { key: 'apellidos',     label: 'Apellidos',      sortable: true },
-        { key: 'telefono',      label: 'Teléfono',       sortable: true,  type: 'whatsapp' },
+        { key: 'telefono',      label: 'Teléfono',       sortable: true, type: 'whatsapp' },
         { key: 'correo',        label: 'Correo',         sortable: true },
         { key: 'asesor',        label: 'Asesor',         sortable: true },
         { key: 'curso',         label: 'Curso',          sortable: true },
@@ -220,30 +187,30 @@ if (!defined('SISTEMA_REGISTROS')) {
     var DOM = {};
 
     function cacheDom() {
-        DOM.tableHeaders = document.getElementById(PREFIX + 'TableHeaders');
-        DOM.tableBody = document.getElementById(PREFIX + 'TableBody');
-        DOM.tableScroll = document.getElementById(PREFIX + 'TableScroll');
-        DOM.tableLoader = document.getElementById(PREFIX + 'TableLoader');
-        DOM.noResults = document.getElementById(PREFIX + 'NoResults');
-        DOM.countFiltered = document.getElementById(PREFIX + 'CountFiltered');
-        DOM.countTotal = document.getElementById(PREFIX + 'CountTotal');
-        DOM.filterSearch = document.getElementById(PREFIX + 'FilterSearch');
+        DOM.tableHeaders    = document.getElementById(PREFIX + 'TableHeaders');
+        DOM.tableBody       = document.getElementById(PREFIX + 'TableBody');
+        DOM.tableScroll     = document.getElementById(PREFIX + 'TableScroll');
+        DOM.tableLoader     = document.getElementById(PREFIX + 'TableLoader');
+        DOM.noResults       = document.getElementById(PREFIX + 'NoResults');
+        DOM.countFiltered   = document.getElementById(PREFIX + 'CountFiltered');
+        DOM.countTotal      = document.getElementById(PREFIX + 'CountTotal');
+        DOM.filterSearch    = document.getElementById(PREFIX + 'FilterSearch');
         DOM.filterPrincipal = document.getElementById(PREFIX + 'FilterAsesor');
-        DOM.filterCurso = document.getElementById(PREFIX + 'FilterCurso');
-        DOM.filterPais = document.getElementById(PREFIX + 'FilterPais');
-        DOM.filterCiudad = document.getElementById(PREFIX + 'FilterCiudad');
-        DOM.filterMoneda = document.getElementById(PREFIX + 'FilterMoneda');
-        DOM.filterMetodoPago = document.getElementById(PREFIX + 'FilterMetodoPago');
-        DOM.filterWeb = document.getElementById(PREFIX + 'FilterWeb');
-        DOM.filterFechaDesde = document.getElementById(PREFIX + 'FilterFechaDesde');
-        DOM.filterFechaHasta = document.getElementById(PREFIX + 'FilterFechaHasta');
-        DOM.filterHoraDesdeH = document.getElementById(PREFIX + 'FilterHoraDesdeH');
-        DOM.filterHoraDesdeM = document.getElementById(PREFIX + 'FilterHoraDesdeM');
-        DOM.filterHoraHastaH = document.getElementById(PREFIX + 'FilterHoraHastaH');
-        DOM.filterHoraHastaM = document.getElementById(PREFIX + 'FilterHoraHastaM');
-        DOM.filterPageSize = document.getElementById(PREFIX + 'FilterPageSize');
-        DOM.btnClear = document.getElementById(PREFIX + 'BtnClear');
-        DOM.btnExcel = document.getElementById(PREFIX + 'BtnExcel');
+        DOM.filterCurso     = document.getElementById(PREFIX + 'FilterCurso');
+        DOM.filterPais      = document.getElementById(PREFIX + 'FilterPais');
+        DOM.filterCiudad    = document.getElementById(PREFIX + 'FilterCiudad');
+        DOM.filterMoneda    = document.getElementById(PREFIX + 'FilterMoneda');
+        DOM.filterMetodoPago= document.getElementById(PREFIX + 'FilterMetodoPago');
+        DOM.filterWeb       = document.getElementById(PREFIX + 'FilterWeb');
+        DOM.filterFechaDesde= document.getElementById(PREFIX + 'FilterFechaDesde');
+        DOM.filterFechaHasta= document.getElementById(PREFIX + 'FilterFechaHasta');
+        DOM.filterHoraDesdeH= document.getElementById(PREFIX + 'FilterHoraDesdeH');
+        DOM.filterHoraDesdeM= document.getElementById(PREFIX + 'FilterHoraDesdeM');
+        DOM.filterHoraHastaH= document.getElementById(PREFIX + 'FilterHoraHastaH');
+        DOM.filterHoraHastaM= document.getElementById(PREFIX + 'FilterHoraHastaM');
+        DOM.filterPageSize  = document.getElementById(PREFIX + 'FilterPageSize');
+        DOM.btnClear        = document.getElementById(PREFIX + 'BtnClear');
+        DOM.btnExcel        = document.getElementById(PREFIX + 'BtnExcel');
     }
 
     function init() {
@@ -255,11 +222,11 @@ if (!defined('SISTEMA_REGISTROS')) {
         cargarRegistros(true);
         bindEvents();
         iniciarPolling();
+        // Permisos en tiempo real
+        cargarYAplicarPermisos();
+        STATE.permisosTimer = setInterval(cargarYAplicarPermisos, 5000);
     }
 
-    // =====================================================
-    // FORMATO FECHA: aaaa-mm-dd → dd/mm/aaaa
-    // =====================================================
     function formatearFecha(fecha) {
         if (!fecha) return '';
         var partes = fecha.split('-');
@@ -267,9 +234,6 @@ if (!defined('SISTEMA_REGISTROS')) {
         return partes[2] + '/' + partes[1] + '/' + partes[0];
     }
 
-    // =====================================================
-    // LLENAR SELECTS DE HORA Y MINUTOS
-    // =====================================================
     function llenarSelectsHora() {
         [DOM.filterHoraDesdeH, DOM.filterHoraHastaH].forEach(function (sel) {
             if (!sel) return;
@@ -294,43 +258,42 @@ if (!defined('SISTEMA_REGISTROS')) {
     function renderHeaders() {
         var html = '';
         COLUMNAS.forEach(function (col) {
+            var esSortable = col.sortable && STATE.reordenarPermitido;
             var sc = '', si = '<i class="fas fa-sort sort-icon"></i>';
-            if (col.sortable && col.key === STATE.sortColumn) { sc = STATE.sortDir === 'ASC' ? 'sort-asc' : 'sort-desc'; si = STATE.sortDir === 'ASC' ? '<i class="fas fa-sort-up sort-icon"></i>' : '<i class="fas fa-sort-down sort-icon"></i>'; }
-            html += '<th class="' + sc + (col.sortable ? '' : ' no-sort') + '" data-column="' + col.key + '" data-sortable="' + col.sortable + '">' + col.label + (col.sortable ? ' ' + si : '') + '</th>';
+            if (esSortable && col.key === STATE.sortColumn) {
+                sc = STATE.sortDir === 'ASC' ? 'sort-asc' : 'sort-desc';
+                si = STATE.sortDir === 'ASC' ? '<i class="fas fa-sort-up sort-icon"></i>' : '<i class="fas fa-sort-down sort-icon"></i>';
+            }
+            var noSortClass = esSortable ? '' : ' no-sort';
+            html += '<th class="' + sc + noSortClass + '" data-column="' + col.key + '" data-sortable="' + (esSortable ? 'true' : 'false') + '">' + col.label + (esSortable ? ' ' + si : '') + '</th>';
         });
         DOM.tableHeaders.innerHTML = html;
     }
 
     function getPageSize() { if (!DOM.filterPageSize) return CONFIG.PAGE_SIZE; var v = parseInt(DOM.filterPageSize.value); return v === 0 ? 99999 : v; }
 
-    // =====================================================
-    // ESTADÍSTICAS
-    // =====================================================
     function actualizarStats(stats) {
-        document.getElementById('statTotalAsesor').textContent = (stats.total || 0).toLocaleString();
-        document.getElementById('statHoyAsesor').textContent = (stats.hoy || 0).toLocaleString();
-        document.getElementById('statSemanaAsesor').textContent = (stats.semana || 0).toLocaleString();
-        document.getElementById('statMesAsesor').textContent = (stats.mes || 0).toLocaleString();
-        document.getElementById('statAsesoresCount').textContent = (stats.asesores || 0).toLocaleString();
-        document.getElementById('statCursosAsesor').textContent = (stats.cursos || 0).toLocaleString();
-        document.getElementById('statPaisesAsesor').textContent = (stats.paises || 0).toLocaleString();
+        document.getElementById('statTotalAsesor').textContent    = (stats.total    || 0).toLocaleString();
+        document.getElementById('statHoyAsesor').textContent      = (stats.hoy      || 0).toLocaleString();
+        document.getElementById('statSemanaAsesor').textContent   = (stats.semana   || 0).toLocaleString();
+        document.getElementById('statMesAsesor').textContent      = (stats.mes      || 0).toLocaleString();
+        document.getElementById('statAsesoresCount').textContent  = (stats.asesores || 0).toLocaleString();
+        document.getElementById('statCursosAsesor').textContent   = (stats.cursos   || 0).toLocaleString();
+        document.getElementById('statPaisesAsesor').textContent   = (stats.paises   || 0).toLocaleString();
     }
 
-    // =====================================================
-    // FILTROS
-    // =====================================================
     function buildFilterParams() {
         var p = { vista_tipo: VISTA_TIPO };
-        if (DOM.filterSearch && DOM.filterSearch.value.trim() !== '') p.search = DOM.filterSearch.value.trim();
-        if (DOM.filterPrincipal && DOM.filterPrincipal.value !== '') p.asesor = DOM.filterPrincipal.value;
-        if (DOM.filterCurso && DOM.filterCurso.value !== '') p.curso = DOM.filterCurso.value;
-        if (DOM.filterPais && DOM.filterPais.value !== '') p.pais = DOM.filterPais.value;
-        if (DOM.filterCiudad && DOM.filterCiudad.value !== '') p.ciudad = DOM.filterCiudad.value;
-        if (DOM.filterMoneda && DOM.filterMoneda.value !== '') p.moneda = DOM.filterMoneda.value;
-        if (DOM.filterMetodoPago && DOM.filterMetodoPago.value !== '') p.metodo_pago = DOM.filterMetodoPago.value;
-        if (DOM.filterWeb && DOM.filterWeb.value !== '') p.web = DOM.filterWeb.value;
-        if (DOM.filterFechaDesde && DOM.filterFechaDesde.value !== '') p.fecha_desde = DOM.filterFechaDesde.value;
-        if (DOM.filterFechaHasta && DOM.filterFechaHasta.value !== '') p.fecha_hasta = DOM.filterFechaHasta.value;
+        if (DOM.filterSearch     && DOM.filterSearch.value.trim() !== '')  p.search       = DOM.filterSearch.value.trim();
+        if (DOM.filterPrincipal  && DOM.filterPrincipal.value !== '')       p.asesor       = DOM.filterPrincipal.value;
+        if (DOM.filterCurso      && DOM.filterCurso.value !== '')           p.curso        = DOM.filterCurso.value;
+        if (DOM.filterPais       && DOM.filterPais.value !== '')            p.pais         = DOM.filterPais.value;
+        if (DOM.filterCiudad     && DOM.filterCiudad.value !== '')          p.ciudad       = DOM.filterCiudad.value;
+        if (DOM.filterMoneda     && DOM.filterMoneda.value !== '')          p.moneda       = DOM.filterMoneda.value;
+        if (DOM.filterMetodoPago && DOM.filterMetodoPago.value !== '')      p.metodo_pago  = DOM.filterMetodoPago.value;
+        if (DOM.filterWeb        && DOM.filterWeb.value !== '')             p.web          = DOM.filterWeb.value;
+        if (DOM.filterFechaDesde && DOM.filterFechaDesde.value !== '')      p.fecha_desde  = DOM.filterFechaDesde.value;
+        if (DOM.filterFechaHasta && DOM.filterFechaHasta.value !== '')      p.fecha_hasta  = DOM.filterFechaHasta.value;
         var hd = getHoraDesde(), hh = getHoraHasta();
         if (hd !== '') p.hora_desde = hd;
         if (hh !== '') p.hora_hasta = hh;
@@ -346,13 +309,13 @@ if (!defined('SISTEMA_REGISTROS')) {
         .then(function (r) { return r.json(); })
         .then(function (data) {
             if (data.success) {
-                llenarSelect(DOM.filterPrincipal, data.filtros.asesor, 'Todos los Asesores');
-                llenarSelect(DOM.filterCurso, data.filtros.curso, 'Curso');
-                llenarSelect(DOM.filterPais, data.filtros.pais, 'País');
-                llenarSelect(DOM.filterCiudad, data.filtros.ciudad, 'Ciudad');
-                llenarSelect(DOM.filterMoneda, data.filtros.moneda, 'Moneda');
-                llenarSelect(DOM.filterMetodoPago, data.filtros.metodo_pago, 'Método de Pago');
-                llenarSelect(DOM.filterWeb, data.filtros.web, 'Web');
+                llenarSelect(DOM.filterPrincipal,  data.filtros.asesor,       'Todos los Asesores');
+                llenarSelect(DOM.filterCurso,      data.filtros.curso,        'Curso');
+                llenarSelect(DOM.filterPais,       data.filtros.pais,         'País');
+                llenarSelect(DOM.filterCiudad,     data.filtros.ciudad,       'Ciudad');
+                llenarSelect(DOM.filterMoneda,     data.filtros.moneda,       'Moneda');
+                llenarSelect(DOM.filterMetodoPago, data.filtros.metodo_pago,  'Método de Pago');
+                llenarSelect(DOM.filterWeb,        data.filtros.web,          'Web');
                 if (data.stats) actualizarStats(data.stats);
             }
         }).catch(function (err) { console.error('Error filtros:', err); });
@@ -383,7 +346,8 @@ if (!defined('SISTEMA_REGISTROS')) {
             .then(function (data) {
                 if (cr !== STATE.requestId) return;
                 if (data.success) {
-                    STATE.totalFiltered = data.total_filtered; STATE.totalGeneral = data.total_general; STATE.hasMore = data.has_more; STATE.camposDinamicos = data.campos_dinamicos || []; STATE.registros = [];
+                    STATE.totalFiltered = data.total_filtered; STATE.totalGeneral = data.total_general;
+                    STATE.hasMore = data.has_more; STATE.camposDinamicos = data.campos_dinamicos || []; STATE.registros = [];
                     renderHeaders();
                     if (data.registros.length === 0) { DOM.tableBody.innerHTML = ''; DOM.tableBody.style.opacity = '1'; DOM.tableBody.style.pointerEvents = ''; DOM.noResults.style.display = 'block'; updateCounters(); return; }
                     DOM.noResults.style.display = 'none';
@@ -452,13 +416,9 @@ if (!defined('SISTEMA_REGISTROS')) {
         var id = parseInt(btn.getAttribute('data-id')), campo = btn.getAttribute('data-campo');
         var cc = btn.closest('.cell-content'), ct = cc.querySelector('.cell-text');
         var cv = ct ? (ct.textContent === '—' ? '' : ct.textContent) : '';
-
-        // Si es fecha mostrada como dd/mm/aaaa, convertir de vuelta a aaaa-mm-dd para editar
         if (campo === 'fecha' && cv && cv.indexOf('/') !== -1) {
-            var fp = cv.split('/');
-            if (fp.length === 3) cv = fp[2] + '-' + fp[1] + '-' + fp[0];
+            var fp = cv.split('/'); if (fp.length === 3) cv = fp[2] + '-' + fp[1] + '-' + fp[0];
         }
-
         STATE.editingCell = { element: cc, id: id, campo: campo, originalValue: cv, originalHtml: cc.innerHTML };
         cc.innerHTML = '<input type="text" class="inline-edit-input" value="' + escapeHtml(cv) + '"><div class="inline-edit-actions"><button class="inline-edit-save"><i class="fas fa-check"></i></button><button class="inline-edit-cancel"><i class="fas fa-times"></i></button></div>';
         var inp = cc.querySelector('.inline-edit-input'); inp.focus(); inp.select();
@@ -501,7 +461,9 @@ if (!defined('SISTEMA_REGISTROS')) {
     // EVENTOS
     // =====================================================
     function bindEvents() {
-        if (DOM.filterSearch) DOM.filterSearch.addEventListener('input', function () { clearTimeout(STATE.searchTimer); STATE.searchTimer = setTimeout(function () { cargarFiltros(); cargarRegistros(true); }, CONFIG.DEBOUNCE_DELAY); });
+        if (DOM.filterSearch) DOM.filterSearch.addEventListener('input', function () {
+            clearTimeout(STATE.searchTimer); STATE.searchTimer = setTimeout(function () { cargarFiltros(); cargarRegistros(true); }, CONFIG.DEBOUNCE_DELAY);
+        });
         [DOM.filterPrincipal, DOM.filterCurso, DOM.filterPais, DOM.filterCiudad, DOM.filterMoneda, DOM.filterMetodoPago, DOM.filterWeb].forEach(function (s) {
             if (s) s.addEventListener('change', function () { this.classList.toggle('active-filter', this.value !== ''); cargarFiltros(); cargarRegistros(true); });
         });
@@ -510,15 +472,22 @@ if (!defined('SISTEMA_REGISTROS')) {
         if (DOM.filterPageSize) DOM.filterPageSize.addEventListener('change', function () { cargarRegistros(true); });
         if (DOM.btnClear) DOM.btnClear.addEventListener('click', limpiarFiltros);
         if (DOM.btnExcel) DOM.btnExcel.addEventListener('click', exportarExcel);
+
         if (DOM.tableHeaders) DOM.tableHeaders.addEventListener('click', function (e) {
+            // ── FIX: si reordenar no está permitido, ignorar clicks ──
+            if (!STATE.reordenarPermitido) return;
             var th = e.target.closest('th'); if (!th || th.getAttribute('data-sortable') === 'false') return;
             var col = th.getAttribute('data-column');
             if (STATE.sortColumn === col) STATE.sortDir = STATE.sortDir === 'ASC' ? 'DESC' : 'ASC';
             else { STATE.sortColumn = col; STATE.sortDir = 'ASC'; }
             renderHeaders(); cargarRegistros(true);
         });
-        if (DOM.tableScroll) DOM.tableScroll.addEventListener('scroll', function () { if (this.scrollTop + this.clientHeight >= this.scrollHeight - 100 && !STATE.isLoading && STATE.hasMore) cargarRegistros(false); });
-        if (DOM.tableBody) DOM.tableBody.addEventListener('click', function (e) { var btn = e.target.closest('.edit-btn'); if (btn) { e.preventDefault(); iniciarEdicion(btn); } });
+        if (DOM.tableScroll) DOM.tableScroll.addEventListener('scroll', function () {
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 100 && !STATE.isLoading && STATE.hasMore) cargarRegistros(false);
+        });
+        if (DOM.tableBody) DOM.tableBody.addEventListener('click', function (e) {
+            var btn = e.target.closest('.edit-btn'); if (btn) { e.preventDefault(); iniciarEdicion(btn); }
+        });
     }
 
     function limpiarFiltros() {
@@ -554,7 +523,10 @@ if (!defined('SISTEMA_REGISTROS')) {
         }, CONFIG.POLL_INTERVAL);
     }
 
-    function updateCounters() { if (DOM.countFiltered) DOM.countFiltered.textContent = STATE.totalFiltered.toLocaleString(); if (DOM.countTotal) DOM.countTotal.textContent = STATE.totalGeneral.toLocaleString(); }
+    function updateCounters() {
+        if (DOM.countFiltered) DOM.countFiltered.textContent = STATE.totalFiltered.toLocaleString();
+        if (DOM.countTotal)    DOM.countTotal.textContent    = STATE.totalGeneral.toLocaleString();
+    }
 
     // =====================================================
     // EXPORTAR EXCEL
@@ -566,10 +538,7 @@ if (!defined('SISTEMA_REGISTROS')) {
             var row = [];
             COLUMNAS.forEach(function (c) {
                 var v = reg[c.key];
-                if (v !== null && v !== undefined) {
-                    if (c.key === 'fecha') v = formatearFecha(v);
-                    row.push(v);
-                } else { row.push(''); }
+                if (v !== null && v !== undefined) { if (c.key === 'fecha') v = formatearFecha(v); row.push(v); } else { row.push(''); }
             });
             rows.push(row);
         });
@@ -577,10 +546,134 @@ if (!defined('SISTEMA_REGISTROS')) {
         else generarExcel(headers, rows);
     }
 
-    function generarExcel(h, r) { var ws = XLSX.utils.aoa_to_sheet([h].concat(r)); var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Asesores'); ws['!cols'] = h.map(function (x) { return { wch: Math.max(x.length + 2, 12) }; }); XLSX.writeFile(wb, 'Asesores_' + new Date().toISOString().slice(0, 10) + '.xlsx'); if (typeof mostrarToast === 'function') mostrarToast('Excel exportado', 'success', 3000); }
+    function generarExcel(h, r) {
+        var ws = XLSX.utils.aoa_to_sheet([h].concat(r)); var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Asesores'); ws['!cols'] = h.map(function (x) { return { wch: Math.max(x.length + 2, 12) }; });
+        XLSX.writeFile(wb, 'Asesores_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+        if (typeof mostrarToast === 'function') mostrarToast('Excel exportado', 'success', 3000);
+    }
 
     function escapeHtml(t) { if (t === null || t === undefined) return ''; var d = document.createElement('div'); d.appendChild(document.createTextNode(t)); return d.innerHTML; }
-    window.addEventListener('beforeunload', function () { if (STATE.pollTimer) clearInterval(STATE.pollTimer); });
+
+    // =====================================================
+    // PERMISOS EN TIEMPO REAL (sección: asesores_delegados)
+    // =====================================================
+    function expulsarSesion(mensaje) {
+        if (STATE.sesionInvalidada) return;
+        STATE.sesionInvalidada = true;
+        if (STATE.pollTimer)     clearInterval(STATE.pollTimer);
+        if (STATE.permisosTimer) clearInterval(STATE.permisosTimer);
+        STATE.isPollActive = false;
+        if (typeof mostrarToast === 'function') mostrarToast(mensaje || 'Tu sesión ha sido cerrada. Redirigiendo...', 'error', 4000);
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px';
+        overlay.innerHTML = '<i class="fas fa-lock" style="font-size:48px;color:#fff;"></i>' +
+            '<p style="color:#fff;font-size:16px;font-weight:600;margin:0;text-align:center;">' + (mensaje || 'Tu sesión ha sido cerrada.') + '</p>' +
+            '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;">Redirigiendo al inicio de sesión...</p>';
+        document.body.appendChild(overlay);
+        setTimeout(function () { window.location.href = 'index.php?session=expired'; }, 3000);
+    }
+
+    function cargarYAplicarPermisos() {
+        if (STATE.sesionInvalidada) return;
+        fetch('includes/ajax/get_permisos_usuario.php', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.session_invalida === true) { expulsarSesion(data.message || 'Tu cuenta ya no existe en el sistema.'); return; }
+            if (!data.success) return;
+            if (data.es_admin) return; // Admin ve todo
+
+            var p  = data.permisos;
+            var ad = p.asesores_delegados || {};
+
+            // === COLUMNAS: ocultar/mostrar ===
+            var colMap = {
+                'nombre': 'col_nombre', 'apellidos': 'col_apellidos', 'telefono': 'col_telefono',
+                'correo': 'col_correo', 'asesor': 'col_asesor', 'curso': 'col_curso',
+                'pais': 'col_pais', 'ciudad': 'col_ciudad', 'moneda': 'col_moneda',
+                'metodo_pago': 'col_metodo_pago', 'ip': 'col_ip', 'fecha': 'col_fecha',
+                'hora': 'col_hora', 'categoria': 'col_categoria', 'file_url': 'col_file_url',
+                'formulario_id': 'col_formulario_id', 'web': 'col_web'
+            };
+            var allTh = DOM.tableHeaders.querySelectorAll('th');
+            allTh.forEach(function (th, idx) {
+                var colKey = th.getAttribute('data-column');
+                if (colKey && colMap[colKey] !== undefined) {
+                    var visible = (ad[colMap[colKey]] !== undefined) ? ad[colMap[colKey]] : true;
+                    var dv = visible ? '' : 'none';
+                    th.style.display = dv;
+                    DOM.tableBody.querySelectorAll('tr').forEach(function (row) {
+                        var tds = row.querySelectorAll('td'); if (tds[idx]) tds[idx].style.display = dv;
+                    });
+                }
+            });
+
+            // === FILTROS FILA 3 (selectores) ===
+            var filtroMap = {
+                'filtro_curso':       'asesorFilterCurso',
+                'filtro_pais':        'asesorFilterPais',
+                'filtro_ciudad':      'asesorFilterCiudad',
+                'filtro_moneda':      'asesorFilterMoneda',
+                'filtro_metodo_pago': 'asesorFilterMetodoPago',
+                'filtro_web':         'asesorFilterWeb'
+            };
+            Object.keys(filtroMap).forEach(function (permKey) {
+                var el = document.getElementById(filtroMap[permKey]);
+                if (el) el.style.display = (ad[permKey] !== false) ? '' : 'none';
+            });
+
+            // === FILTROS FILA 1 ===
+            // filtro_formulario → label Asesores + select principal
+            var labelAsesor = document.getElementById('asesorFiltroAsesorLabel');
+            if (labelAsesor) labelAsesor.style.display = (ad.filtro_formulario !== false) ? '' : 'none';
+            if (DOM.filterPrincipal) DOM.filterPrincipal.style.display = (ad.filtro_formulario !== false) ? '' : 'none';
+
+            // filtro_busqueda → input búsqueda
+            var wBusqueda = document.getElementById('asesorFiltroBusquedaWrapper');
+            if (wBusqueda) wBusqueda.style.display = (ad.filtro_busqueda !== false) ? '' : 'none';
+
+            // filtro_mostrando → contador
+            var wMostrando = document.getElementById('asesorFiltroMostrandoWrapper');
+            if (wMostrando) wMostrando.style.display = (ad.filtro_mostrando !== false) ? '' : 'none';
+
+            // filtro_limpiar → botón Limpiar
+            if (DOM.btnClear) DOM.btnClear.style.display = (ad.filtro_limpiar !== false) ? '' : 'none';
+
+            // === FILTROS FILA 2: Fecha y Hora ===
+            var row2 = document.getElementById('asesorFiltersRow2');
+            if (row2) row2.style.display = (ad.filtro_fecha_hora !== false) ? '' : 'none';
+
+            // === REORDENAR COLUMNAS ===
+            var nuevoReordenar = (ad.reordenar_columnas !== false);
+            if (nuevoReordenar !== STATE.reordenarPermitido) {
+                STATE.reordenarPermitido = nuevoReordenar;
+                renderHeaders();
+            }
+            if (DOM.tableHeaders) {
+                DOM.tableHeaders.style.cursor = nuevoReordenar ? '' : 'default';
+                DOM.tableHeaders.querySelectorAll('th').forEach(function (th) {
+                    th.style.pointerEvents = nuevoReordenar ? '' : 'none';
+                });
+            }
+
+            // === DESCARGAR EXCEL ===
+            if (DOM.btnExcel) DOM.btnExcel.style.display = (ad.descargar_excel !== false) ? '' : 'none';
+
+            // === EDICIÓN INLINE ===
+            if (ad.edicion_inline === false) {
+                document.querySelectorAll('#asesorTableBody .edit-btn').forEach(function(btn){ btn.style.visibility = 'hidden'; btn.style.pointerEvents = 'none'; });
+            } else {
+                document.querySelectorAll('#asesorTableBody .edit-btn').forEach(function(btn){ btn.style.visibility = ''; btn.style.pointerEvents = ''; });
+            }
+        })
+        .catch(function (err) { console.error('Error permisos asesores:', err); });
+    }
+
+    window.addEventListener('beforeunload', function () {
+        if (STATE.pollTimer)     clearInterval(STATE.pollTimer);
+        if (STATE.permisosTimer) clearInterval(STATE.permisosTimer);
+    });
+
     init();
 })();
 </script>
