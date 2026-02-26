@@ -159,7 +159,8 @@ if (!defined('SISTEMA_REGISTROS')) {
         isPollActive: true, lastId: 0, totalFiltered: 0, totalGeneral: 0,
         sortColumn: 'fecha_registro', sortDir: 'DESC', searchTimer: null,
         pollTimer: null, camposDinamicos: [], editingCell: null,
-        requestId: 0, permisosTimer: null
+        requestId: 0, permisosTimer: null,
+        sesionInvalidada: false  // ← flag para evitar múltiples redirects
     };
 
     var COLUMNAS_BASE = [
@@ -186,32 +187,32 @@ if (!defined('SISTEMA_REGISTROS')) {
     var DOM = {};
 
     function cacheDom() {
-        DOM.tableHeaders = document.getElementById('tableHeaders');
-        DOM.tableBody = document.getElementById('tableBody');
-        DOM.tableScroll = document.getElementById('tableScroll');
-        DOM.tableLoader = document.getElementById('tableLoader');
-        DOM.noResults = document.getElementById('noResults');
+        DOM.tableHeaders  = document.getElementById('tableHeaders');
+        DOM.tableBody     = document.getElementById('tableBody');
+        DOM.tableScroll   = document.getElementById('tableScroll');
+        DOM.tableLoader   = document.getElementById('tableLoader');
+        DOM.noResults     = document.getElementById('noResults');
         DOM.countFiltered = document.getElementById('countFiltered');
-        DOM.countTotal = document.getElementById('countTotal');
-        DOM.filterSearch = document.getElementById('filterSearch');
-        DOM.filterFormulario = document.getElementById('filterFormulario');
-        DOM.filterAsesor = document.getElementById('filterAsesor');
-        DOM.filterDelegado = document.getElementById('filterDelegado');
-        DOM.filterCurso = document.getElementById('filterCurso');
-        DOM.filterPais = document.getElementById('filterPais');
-        DOM.filterCiudad = document.getElementById('filterCiudad');
-        DOM.filterMoneda = document.getElementById('filterMoneda');
-        DOM.filterMetodoPago = document.getElementById('filterMetodoPago');
-        DOM.filterWeb = document.getElementById('filterWeb');
-        DOM.filterFechaDesde = document.getElementById('filterFechaDesde');
-        DOM.filterFechaHasta = document.getElementById('filterFechaHasta');
-        DOM.filterHoraDesdeH = document.getElementById('filterHoraDesdeH');
-        DOM.filterHoraDesdeM = document.getElementById('filterHoraDesdeM');
-        DOM.filterHoraHastaH = document.getElementById('filterHoraHastaH');
-        DOM.filterHoraHastaM = document.getElementById('filterHoraHastaM');
-        DOM.filterPageSize = document.getElementById('filterPageSize');
-        DOM.btnClearFilters = document.getElementById('btnClearFilters');
-        DOM.btnExportExcel = document.getElementById('btnExportExcel');
+        DOM.countTotal    = document.getElementById('countTotal');
+        DOM.filterSearch      = document.getElementById('filterSearch');
+        DOM.filterFormulario  = document.getElementById('filterFormulario');
+        DOM.filterAsesor      = document.getElementById('filterAsesor');
+        DOM.filterDelegado    = document.getElementById('filterDelegado');
+        DOM.filterCurso       = document.getElementById('filterCurso');
+        DOM.filterPais        = document.getElementById('filterPais');
+        DOM.filterCiudad      = document.getElementById('filterCiudad');
+        DOM.filterMoneda      = document.getElementById('filterMoneda');
+        DOM.filterMetodoPago  = document.getElementById('filterMetodoPago');
+        DOM.filterWeb         = document.getElementById('filterWeb');
+        DOM.filterFechaDesde  = document.getElementById('filterFechaDesde');
+        DOM.filterFechaHasta  = document.getElementById('filterFechaHasta');
+        DOM.filterHoraDesdeH  = document.getElementById('filterHoraDesdeH');
+        DOM.filterHoraDesdeM  = document.getElementById('filterHoraDesdeM');
+        DOM.filterHoraHastaH  = document.getElementById('filterHoraHastaH');
+        DOM.filterHoraHastaM  = document.getElementById('filterHoraHastaM');
+        DOM.filterPageSize    = document.getElementById('filterPageSize');
+        DOM.btnClearFilters   = document.getElementById('btnClearFilters');
+        DOM.btnExportExcel    = document.getElementById('btnExportExcel');
     }
 
     function init() {
@@ -306,14 +307,14 @@ if (!defined('SISTEMA_REGISTROS')) {
     // =====================================================
     function actualizarStats(stats) {
         if (!stats) return;
-        document.getElementById('statTotalDash').textContent = (stats.total || 0).toLocaleString();
-        document.getElementById('statHoyDash').textContent = (stats.hoy || 0).toLocaleString();
-        document.getElementById('statSemanaDash').textContent = (stats.semana || 0).toLocaleString();
-        document.getElementById('statMesDash').textContent = (stats.mes || 0).toLocaleString();
+        document.getElementById('statTotalDash').textContent    = (stats.total    || 0).toLocaleString();
+        document.getElementById('statHoyDash').textContent      = (stats.hoy      || 0).toLocaleString();
+        document.getElementById('statSemanaDash').textContent   = (stats.semana   || 0).toLocaleString();
+        document.getElementById('statMesDash').textContent      = (stats.mes      || 0).toLocaleString();
         document.getElementById('statAsesoresDash').textContent = (stats.asesores || 0).toLocaleString();
-        document.getElementById('statDelegadosDash').textContent = (stats.delegados || 0).toLocaleString();
-        document.getElementById('statCursosDash').textContent = (stats.cursos || 0).toLocaleString();
-        document.getElementById('statPaisesDash').textContent = (stats.paises || 0).toLocaleString();
+        document.getElementById('statDelegadosDash').textContent= (stats.delegados|| 0).toLocaleString();
+        document.getElementById('statCursosDash').textContent   = (stats.cursos   || 0).toLocaleString();
+        document.getElementById('statPaisesDash').textContent   = (stats.paises   || 0).toLocaleString();
     }
 
     // =====================================================
@@ -321,18 +322,18 @@ if (!defined('SISTEMA_REGISTROS')) {
     // =====================================================
     function buildFilterParams() {
         var p = {};
-        if (DOM.filterSearch && DOM.filterSearch.value.trim() !== '') p.search = DOM.filterSearch.value.trim();
-        if (DOM.filterFormulario && DOM.filterFormulario.value !== '') p.formulario_id = DOM.filterFormulario.value;
-        if (DOM.filterAsesor && DOM.filterAsesor.value !== '') p.asesor = DOM.filterAsesor.value;
-        if (DOM.filterDelegado && DOM.filterDelegado.value !== '') p.delegado = DOM.filterDelegado.value;
-        if (DOM.filterCurso && DOM.filterCurso.value !== '') p.curso = DOM.filterCurso.value;
-        if (DOM.filterPais && DOM.filterPais.value !== '') p.pais = DOM.filterPais.value;
-        if (DOM.filterCiudad && DOM.filterCiudad.value !== '') p.ciudad = DOM.filterCiudad.value;
-        if (DOM.filterMoneda && DOM.filterMoneda.value !== '') p.moneda = DOM.filterMoneda.value;
-        if (DOM.filterMetodoPago && DOM.filterMetodoPago.value !== '') p.metodo_pago = DOM.filterMetodoPago.value;
-        if (DOM.filterWeb && DOM.filterWeb.value !== '') p.web = DOM.filterWeb.value;
-        if (DOM.filterFechaDesde && DOM.filterFechaDesde.value !== '') p.fecha_desde = DOM.filterFechaDesde.value;
-        if (DOM.filterFechaHasta && DOM.filterFechaHasta.value !== '') p.fecha_hasta = DOM.filterFechaHasta.value;
+        if (DOM.filterSearch      && DOM.filterSearch.value.trim() !== '')  p.search       = DOM.filterSearch.value.trim();
+        if (DOM.filterFormulario  && DOM.filterFormulario.value !== '')      p.formulario_id= DOM.filterFormulario.value;
+        if (DOM.filterAsesor      && DOM.filterAsesor.value !== '')          p.asesor       = DOM.filterAsesor.value;
+        if (DOM.filterDelegado    && DOM.filterDelegado.value !== '')        p.delegado     = DOM.filterDelegado.value;
+        if (DOM.filterCurso       && DOM.filterCurso.value !== '')           p.curso        = DOM.filterCurso.value;
+        if (DOM.filterPais        && DOM.filterPais.value !== '')            p.pais         = DOM.filterPais.value;
+        if (DOM.filterCiudad      && DOM.filterCiudad.value !== '')          p.ciudad       = DOM.filterCiudad.value;
+        if (DOM.filterMoneda      && DOM.filterMoneda.value !== '')          p.moneda       = DOM.filterMoneda.value;
+        if (DOM.filterMetodoPago  && DOM.filterMetodoPago.value !== '')      p.metodo_pago  = DOM.filterMetodoPago.value;
+        if (DOM.filterWeb         && DOM.filterWeb.value !== '')             p.web          = DOM.filterWeb.value;
+        if (DOM.filterFechaDesde  && DOM.filterFechaDesde.value !== '')      p.fecha_desde  = DOM.filterFechaDesde.value;
+        if (DOM.filterFechaHasta  && DOM.filterFechaHasta.value !== '')      p.fecha_hasta  = DOM.filterFechaHasta.value;
         var hDesde = getHoraDesde();
         var hHasta = getHoraHasta();
         if (hDesde !== '') p.hora_desde = hDesde;
@@ -353,14 +354,14 @@ if (!defined('SISTEMA_REGISTROS')) {
         .then(function (data) {
             if (data.success) {
                 llenarSelect(DOM.filterFormulario, data.filtros.formulario_id, 'Todos los Formularios');
-                llenarSelect(DOM.filterAsesor, data.filtros.asesor, 'Asesor');
-                llenarSelect(DOM.filterDelegado, data.filtros.delegado, 'Delegado');
-                llenarSelect(DOM.filterCurso, data.filtros.curso, 'Curso');
-                llenarSelect(DOM.filterPais, data.filtros.pais, 'País');
-                llenarSelect(DOM.filterCiudad, data.filtros.ciudad, 'Ciudad');
-                llenarSelect(DOM.filterMoneda, data.filtros.moneda, 'Moneda');
-                llenarSelect(DOM.filterMetodoPago, data.filtros.metodo_pago, 'Método de Pago');
-                llenarSelect(DOM.filterWeb, data.filtros.web, 'Web');
+                llenarSelect(DOM.filterAsesor,     data.filtros.asesor,        'Asesor');
+                llenarSelect(DOM.filterDelegado,   data.filtros.delegado,      'Delegado');
+                llenarSelect(DOM.filterCurso,      data.filtros.curso,         'Curso');
+                llenarSelect(DOM.filterPais,       data.filtros.pais,          'País');
+                llenarSelect(DOM.filterCiudad,     data.filtros.ciudad,        'Ciudad');
+                llenarSelect(DOM.filterMoneda,     data.filtros.moneda,        'Moneda');
+                llenarSelect(DOM.filterMetodoPago, data.filtros.metodo_pago,   'Método de Pago');
+                llenarSelect(DOM.filterWeb,        data.filtros.web,           'Web');
                 if (data.stats) actualizarStats(data.stats);
             }
         })
@@ -540,7 +541,7 @@ if (!defined('SISTEMA_REGISTROS')) {
         var input = cellContent.querySelector('.inline-edit-input');
         input.focus(); input.select();
         input.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); guardarEdicion(); }
+            if (e.key === 'Enter')  { e.preventDefault(); guardarEdicion(); }
             else if (e.key === 'Escape') { e.preventDefault(); cancelarEdicion(); }
         });
         cellContent.querySelector('.inline-edit-save').addEventListener('click', guardarEdicion);
@@ -622,7 +623,7 @@ if (!defined('SISTEMA_REGISTROS')) {
 
         if (DOM.filterPageSize) DOM.filterPageSize.addEventListener('change', function () { cargarRegistros(true); });
         if (DOM.btnClearFilters) DOM.btnClearFilters.addEventListener('click', limpiarFiltros);
-        if (DOM.btnExportExcel) DOM.btnExportExcel.addEventListener('click', exportarExcel);
+        if (DOM.btnExportExcel)  DOM.btnExportExcel.addEventListener('click', exportarExcel);
 
         if (DOM.tableHeaders) {
             DOM.tableHeaders.addEventListener('click', function (e) {
@@ -669,7 +670,7 @@ if (!defined('SISTEMA_REGISTROS')) {
     }
 
     // =====================================================
-    // POLLING
+    // POLLING DE REGISTROS
     // =====================================================
     function iniciarPolling() {
         STATE.pollTimer = setInterval(function () {
@@ -702,7 +703,7 @@ if (!defined('SISTEMA_REGISTROS')) {
 
     function updateCounters() {
         if (DOM.countFiltered) DOM.countFiltered.textContent = STATE.totalFiltered.toLocaleString();
-        if (DOM.countTotal) DOM.countTotal.textContent = STATE.totalGeneral.toLocaleString();
+        if (DOM.countTotal)    DOM.countTotal.textContent    = STATE.totalGeneral.toLocaleString();
     }
 
     // =====================================================
@@ -749,21 +750,69 @@ if (!defined('SISTEMA_REGISTROS')) {
     }
 
     // =====================================================
-    // PERMISOS EN TIEMPO REAL
-    // Consulta get_permisos_usuario.php cada 5 segundos
-    // y oculta/muestra columnas, filtros y botones
+    // PERMISOS EN TIEMPO REAL + WATCHDOG DE SESIÓN
+    //
+    // Consulta get_permisos_usuario.php cada 5 segundos.
+    // Si el servidor responde session_invalida:true
+    // (usuario eliminado de la BD, p.ej. tras Reset),
+    // detiene todos los timers, muestra un aviso y
+    // redirige al login tras 3 segundos.
     // =====================================================
+    function expulsarSesion(mensaje) {
+        if (STATE.sesionInvalidada) return; // ejecutar solo una vez
+        STATE.sesionInvalidada = true;
+
+        // Detener todos los timers para no seguir haciendo peticiones
+        if (STATE.pollTimer)    clearInterval(STATE.pollTimer);
+        if (STATE.permisosTimer) clearInterval(STATE.permisosTimer);
+        STATE.isPollActive = false;
+
+        // Mostrar aviso
+        if (typeof mostrarToast === 'function') {
+            mostrarToast(mensaje || 'Tu sesión ha sido cerrada. Redirigiendo...', 'error', 4000);
+        }
+
+        // Oscurecer la pantalla y mostrar mensaje central
+        var overlay = document.createElement('div');
+        overlay.style.cssText = [
+            'position:fixed', 'inset:0', 'background:rgba(0,0,0,0.75)',
+            'z-index:99999', 'display:flex', 'align-items:center',
+            'justify-content:center', 'flex-direction:column', 'gap:16px'
+        ].join(';');
+        overlay.innerHTML =
+            '<i class="fas fa-lock" style="font-size:48px;color:#fff;"></i>' +
+            '<p style="color:#fff;font-size:16px;font-weight:600;margin:0;text-align:center;">' +
+                (mensaje || 'Tu sesión ha sido cerrada.') +
+            '</p>' +
+            '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;">Redirigiendo al inicio de sesión...</p>';
+        document.body.appendChild(overlay);
+
+        // Redirigir al login tras 3 segundos
+        setTimeout(function () {
+            window.location.href = 'index.php?session=expired';
+        }, 3000);
+    }
+
     function cargarYAplicarPermisos() {
+        if (STATE.sesionInvalidada) return; // ya expulsado, no seguir
+
         fetch('includes/ajax/get_permisos_usuario.php', { credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
         .then(function (data) {
+
+            // ─── WATCHDOG: sesión inválida (usuario eliminado/suspendido) ───
+            if (data.session_invalida === true) {
+                expulsarSesion(data.message || 'Tu cuenta ya no existe en el sistema.');
+                return;
+            }
+
             if (!data.success) return;
             if (data.es_admin) return; // Admin ve todo siempre
 
-            var p = data.permisos;
+            var p    = data.permisos;
             var dash = p.dashboard || {};
 
-            // === COLUMNAS: ocultar/mostrar por data-column en th y td por índice ===
+            // === COLUMNAS: ocultar/mostrar ===
             var colMap = {
                 'nombre': 'col_nombre', 'apellidos': 'col_apellidos', 'telefono': 'col_telefono',
                 'correo': 'col_correo', 'asesor': 'col_asesor', 'delegado': 'col_delegado',
@@ -773,16 +822,14 @@ if (!defined('SISTEMA_REGISTROS')) {
                 'file_url': 'col_file_url', 'formulario_id': 'col_formulario_id', 'web': 'col_web'
             };
 
-            // Obtener todos los th
             var allTh = DOM.tableHeaders.querySelectorAll('th');
             allTh.forEach(function (th, idx) {
                 var colKey = th.getAttribute('data-column');
                 if (colKey && colMap[colKey] !== undefined) {
-                    var permKey = colMap[colKey];
-                    var visible = (dash[permKey] !== undefined) ? dash[permKey] : true;
+                    var permKey    = colMap[colKey];
+                    var visible    = (dash[permKey] !== undefined) ? dash[permKey] : true;
                     var displayVal = visible ? '' : 'none';
                     th.style.display = displayVal;
-                    // Ocultar/mostrar las celdas td del mismo índice en todas las filas
                     var rows = DOM.tableBody.querySelectorAll('tr');
                     rows.forEach(function (row) {
                         var tds = row.querySelectorAll('td');
@@ -791,12 +838,16 @@ if (!defined('SISTEMA_REGISTROS')) {
                 }
             });
 
-            // === FILTROS: ocultar/mostrar por ID ===
+            // === FILTROS ===
             var filtroMap = {
-                'filtro_asesor': 'filterAsesor', 'filtro_delegado': 'filterDelegado',
-                'filtro_curso': 'filterCurso', 'filtro_pais': 'filterPais',
-                'filtro_ciudad': 'filterCiudad', 'filtro_moneda': 'filterMoneda',
-                'filtro_metodo_pago': 'filterMetodoPago', 'filtro_web': 'filterWeb'
+                'filtro_asesor':      'filterAsesor',
+                'filtro_delegado':    'filterDelegado',
+                'filtro_curso':       'filterCurso',
+                'filtro_pais':        'filterPais',
+                'filtro_ciudad':      'filterCiudad',
+                'filtro_moneda':      'filterMoneda',
+                'filtro_metodo_pago': 'filterMetodoPago',
+                'filtro_web':         'filterWeb'
             };
             Object.keys(filtroMap).forEach(function (permKey) {
                 var el = document.getElementById(filtroMap[permKey]);
@@ -811,22 +862,17 @@ if (!defined('SISTEMA_REGISTROS')) {
                 DOM.btnExportExcel.style.display = (dash.descargar_excel !== false) ? '' : 'none';
             }
 
-            // === EDICIÓN INLINE: ocultar botones de edición ===
+            // === EDICIÓN INLINE ===
             if (dash.edicion_inline === false) {
                 document.querySelectorAll('.edit-btn').forEach(function (btn) { btn.style.display = 'none'; });
             } else {
                 document.querySelectorAll('.edit-btn').forEach(function (btn) { btn.style.display = ''; });
             }
 
-            // === ESTADÍSTICAS: ocultar menú si no tiene acceso ===
-            var est = p.estadisticas || {};
-            if (est.acceso_estadisticas === false) {
-                var menuEst = document.querySelector('[data-page="estadisticas"]');
-                if (menuEst) menuEst.style.display = 'none';
-            } else {
-                var menuEst2 = document.querySelector('[data-page="estadisticas"]');
-                if (menuEst2) menuEst2.style.display = '';
-            }
+            // === MENÚ ESTADÍSTICAS ===
+            var est     = p.estadisticas || {};
+            var menuEst = document.querySelector('[data-page="estadisticas"]');
+            if (menuEst) menuEst.style.display = (est.acceso_estadisticas === false) ? 'none' : '';
         })
         .catch(function (err) { console.error('Error cargando permisos:', err); });
     }
@@ -836,8 +882,9 @@ if (!defined('SISTEMA_REGISTROS')) {
     // Verifica cambios cada 3 segundos
     // =====================================================
     var ultimasOpciones = {};
-    
+
     function verificarOpcionesGlobales() {
+        if (STATE.sesionInvalidada) return;
         fetch('includes/ajax/opciones_sistema.php?accion=get_opciones_globales_realtime', {
             credentials: 'same-origin'
         })
@@ -847,9 +894,7 @@ if (!defined('SISTEMA_REGISTROS')) {
                 if (data.opciones['sistema_nombre'] !== ultimasOpciones['sistema_nombre']) {
                     ultimasOpciones['sistema_nombre'] = data.opciones['sistema_nombre'];
                     var headerTitle = document.querySelector('.header-title, .navbar-brand, h1, .system-name, [data-system-name]');
-                    if (headerTitle) {
-                        headerTitle.textContent = data.opciones['sistema_nombre'];
-                    }
+                    if (headerTitle) headerTitle.textContent = data.opciones['sistema_nombre'];
                 }
             }
         })
@@ -860,9 +905,10 @@ if (!defined('SISTEMA_REGISTROS')) {
     verificarOpcionesGlobales();
 
     window.addEventListener('beforeunload', function () {
-        if (STATE.pollTimer) clearInterval(STATE.pollTimer);
+        if (STATE.pollTimer)     clearInterval(STATE.pollTimer);
         if (STATE.permisosTimer) clearInterval(STATE.permisosTimer);
     });
+
     init();
 })();
 </script>
