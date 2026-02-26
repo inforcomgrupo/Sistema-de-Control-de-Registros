@@ -1,14 +1,13 @@
 <?php
 /**
  * AJAX: Obtener permisos del usuario autenticado
- * Este endpoint devuelve los permisos del usuario actual
  * Se consulta desde dashboard-main, asesores, delegados, estadísticas
- * para aplicar permisos EN TIEMPO REAL
+ * para aplicar permisos EN TIEMPO REAL.
  *
- * La estructura coincide con los data-perm de opciones-sistema.php:
- *   dashboard.col_nombre, dashboard.filtro_asesor, etc.
- *   asesores_delegados.col_nombre, etc.
- *   estadisticas.acceso_estadisticas, etc.
+ * También actúa como watchdog de sesión:
+ * si el usuario fue eliminado de la BD (p.ej. tras un Reset),
+ * o fue SUSPENDIDO por el admin, devuelve session_invalida: true
+ * para que el frontend lo expulse.
  */
 
 define('SISTEMA_REGISTROS', true);
@@ -22,13 +21,16 @@ header('Content-Type: application/json; charset=utf-8');
 iniciarSesionSegura();
 
 if (!estaAutenticado()) {
-    echo json_encode(['success' => false, 'message' => 'No autenticado']);
+    echo json_encode([
+        'success'          => false,
+        'session_invalida' => true,
+        'message'          => 'Sesión no válida'
+    ]);
     exit;
 }
 
 /**
  * Permisos por defecto: TODO habilitado
- * Coincide EXACTAMENTE con los data-perm del HTML de opciones-sistema.php
  */
 function getPermisosDefault() {
     return [
@@ -66,14 +68,34 @@ function getPermisosDefault() {
 }
 
 try {
-    $db = Database::getInstance()->getConnection();
-    $userId = $_SESSION['user_id'];
+    $db       = Database::getInstance()->getConnection();
+    $userId   = (int)$_SESSION['user_id'];
     $userTipo = $_SESSION['user_tipo'];
+
+    // =====================================================
+    // WATCHDOG: verificar que el usuario existe en BD
+    // y que su estado es 'activo'.
+    // ── FIX: ahora también expulsa a usuarios SUSPENDIDOS ──
+    // =====================================================
+    $stmtCheck = $db->prepare("SELECT id, estado FROM usuarios WHERE id = :id LIMIT 1");
+    $stmtCheck->execute([':id' => $userId]);
+    $userRow = $stmtCheck->fetch();
+
+    if (!$userRow || $userRow['estado'] !== 'activo') {
+        // Usuario eliminado o suspendido → destruir sesión y avisar al JS
+        session_destroy();
+        echo json_encode([
+            'success'          => false,
+            'session_invalida' => true,
+            'message'          => 'Tu sesión ha sido cerrada porque tu cuenta ya no existe o fue suspendida.'
+        ]);
+        exit;
+    }
 
     // Administrador tiene todos los permisos
     if ($userTipo === 'administrador') {
         echo json_encode([
-            'success' => true,
+            'success'  => true,
             'es_admin' => true,
             'permisos' => getPermisosDefault()
         ]);
@@ -81,7 +103,10 @@ try {
     }
 
     // Consultor: buscar permisos en la BD
-    $stmt = $db->prepare("SELECT valor FROM opciones_sistema WHERE usuario_id = :uid AND seccion = 'permisos' AND opcion = 'permisos_usuario'");
+    $stmt = $db->prepare(
+        "SELECT valor FROM opciones_sistema
+         WHERE usuario_id = :uid AND seccion = 'permisos' AND opcion = 'permisos_usuario'"
+    );
     $stmt->execute([':uid' => $userId]);
     $row = $stmt->fetch();
 
@@ -101,7 +126,6 @@ try {
                 }
             }
         }
-
         $permisos = $permisosBD;
     } else {
         // Sin permisos guardados: todo habilitado por defecto
