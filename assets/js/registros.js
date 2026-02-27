@@ -160,20 +160,49 @@
                 llenarSelectFiltro(DOM.filterMoneda,     data.filtros.moneda,        'Moneda');
                 llenarSelectFiltro(DOM.filterMetodoPago, data.filtros.metodo_pago,   'Método de Pago');
                 llenarSelectFiltro(DOM.filterWeb,        data.filtros.web,           'Web');
+
+                // ── NUEVO: filtros dinámicos ──
+                if (data.campos_dinamicos && data.campos_dinamicos.length > 0) {
+                    renderFiltrosDinamicos(data.campos_dinamicos, data.filtros);
+                }
             }
         })
         .catch(function (err) { console.error('Error cargando filtros:', err); });
     }
 
-    function llenarSelectFiltro(select, valores, placeholder) {
-        if (!select || !valores) return;
-        var currentValue = select.value;
-        var html = '<option value="">' + placeholder + '</option>';
-        valores.forEach(function (v) {
-            html += '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>';
+    // ── NUEVO: renderizar selects dinámicos en la barra de filtros ──
+    function renderFiltrosDinamicos(camposDinamicos, filtros) {
+        var container = document.getElementById('filtrosDinamicosRow');
+        if (!container) return;
+
+        var html = '';
+        camposDinamicos.forEach(function (nc) {
+            var valores = filtros['dyn_' + nc] || [];
+            var currentVal = '';
+            var existing = document.getElementById('filterDyn_' + nc);
+            if (existing) currentVal = existing.value;
+
+            html += '<select class="filter-select' + (currentVal ? ' active-filter' : '') + '" '
+                  + 'id="filterDyn_' + nc + '" '
+                  + 'data-dyn-campo="' + nc + '" '
+                  + 'title="' + nc + '">'
+                  + '<option value="">' + nc + '</option>';
+            valores.forEach(function (v) {
+                html += '<option value="' + escapeHtml(v) + '"' + (v === currentVal ? ' selected' : '') + '>'
+                     + escapeHtml(v) + '</option>';
+            });
+            html += '</select>';
         });
-        select.innerHTML = html;
-        if (currentValue) select.value = currentValue;
+        container.innerHTML = html;
+
+        // Bind change events a los nuevos selects
+        container.querySelectorAll('select[data-dyn-campo]').forEach(function (sel) {
+            sel.addEventListener('change', function () {
+                if (this.value) this.classList.add('active-filter');
+                else this.classList.remove('active-filter');
+                cargarRegistros(true);
+            });
+        });
     }
 
     // =====================================================
@@ -421,6 +450,12 @@
         if (DOM.filterFechaHasta && DOM.filterFechaHasta.value       !== '') params.fecha_hasta   = DOM.filterFechaHasta.value;
         if (DOM.filterHoraDesde  && DOM.filterHoraDesde.value        !== '') params.hora_desde    = DOM.filterHoraDesde.value;
         if (DOM.filterHoraHasta  && DOM.filterHoraHasta.value        !== '') params.hora_hasta    = DOM.filterHoraHasta.value;
+        // ── NUEVO: filtros dinámicos ──
+        document.querySelectorAll('#filtrosDinamicosRow select[data-dyn-campo]').forEach(function (sel) {
+            if (sel.value !== '') {
+                params['dyn_' + sel.getAttribute('data-dyn-campo')] = sel.value;
+            }
+        });
         return params;
     }
 
