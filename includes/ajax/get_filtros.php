@@ -3,7 +3,7 @@
  * AJAX: Obtener valores únicos para filtros dependientes
  * Soporta vista_tipo: asesor, delegado, o vacío (dashboard)
  * Siempre devuelve estadísticas
- * Incluye filtros dinámicos (campos_extra con mostrar_filtro = 1)
+ * Incluye filtros dinámicos respetando mostrar_filtro / mostrar_filtro_asesor / mostrar_filtro_delegado
  */
 define('SISTEMA_REGISTROS', true);
 require_once __DIR__ . '/../../config/database.php';
@@ -39,7 +39,7 @@ try {
     function buildWhereExcluding($exclude, $ip, $vt) {
         $where = []; $params = [];
 
-        if ($vt === 'asesor') $where[] = "asesor IS NOT NULL AND asesor != ''";
+        if ($vt === 'asesor')   $where[] = "asesor IS NOT NULL AND asesor != ''";
         elseif ($vt === 'delegado') $where[] = "delegado IS NOT NULL AND delegado != ''";
 
         if ($exclude !== 'search' && $ip['search'] !== '') {
@@ -56,14 +56,14 @@ try {
         }
         if ($exclude !== 'fecha' && $ip['fechaDesde'] !== '') { $where[] = "fecha >= :fd"; $params[':fd'] = $ip['fechaDesde']; }
         if ($exclude !== 'fecha' && $ip['fechaHasta'] !== '') { $where[] = "fecha <= :fh"; $params[':fh'] = $ip['fechaHasta']; }
-        if ($exclude !== 'hora' && $ip['horaDesde'] !== '') { $where[] = "hora >= :hd"; $params[':hd'] = $ip['horaDesde']; }
-        if ($exclude !== 'hora' && $ip['horaHasta'] !== '') { $where[] = "hora <= :hh"; $params[':hh'] = $ip['horaHasta']; }
+        if ($exclude !== 'hora'  && $ip['horaDesde']  !== '') { $where[] = "hora >= :hd";  $params[':hd'] = $ip['horaDesde']; }
+        if ($exclude !== 'hora'  && $ip['horaHasta']  !== '') { $where[] = "hora <= :hh";  $params[':hh'] = $ip['horaHasta']; }
 
         $clause = count($where) > 0 ? 'WHERE ' . implode(' AND ', $where) : '';
         return ['clause' => $clause, 'params' => $params];
     }
 
-    // Obtener filtros de columnas fijas
+    // ── Filtros de columnas fijas ──
     $campos = ['formulario_id','asesor','delegado','curso','pais','ciudad','moneda','metodo_pago','web','categoria'];
     $filtros = [];
 
@@ -78,11 +78,25 @@ try {
         $filtros[$col] = $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // ── NUEVO: Filtros dinámicos (campos con mostrar_filtro = 1) ──
-    $stmtDyn = $db->query("SELECT nombre_campo FROM campos_dinamicos WHERE mostrar_filtro = 1 AND activo = 1 ORDER BY orden ASC");
-    $camposDinamicos = $stmtDyn->fetchAll(PDO::FETCH_COLUMN);
+    // ── Filtros dinámicos según vista_tipo ──
+    // Determinar qué columna de visibilidad usar
+    if ($vistaTipo === 'asesor') {
+        $colFiltro = 'mostrar_filtro_asesor';
+    } elseif ($vistaTipo === 'delegado') {
+        $colFiltro = 'mostrar_filtro_delegado';
+    } else {
+        $colFiltro = 'mostrar_filtro';
+    }
 
-    foreach ($camposDinamicos as $nc) {
+    $stmtDyn = $db->query(
+        "SELECT nombre_campo, nombre_mostrar FROM campos_dinamicos
+         WHERE $colFiltro = 1 AND activo = 1
+         ORDER BY orden ASC"
+    );
+    $camposDinamicos = $stmtDyn->fetchAll(PDO::FETCH_ASSOC);
+    $nombresCampos   = array_column($camposDinamicos, 'nombre_campo');
+
+    foreach ($nombresCampos as $nc) {
         $w   = buildWhereExcluding('none', $inputParams, $vistaTipo);
         $bw  = $w['clause'];
         $bp  = $w['params'];
@@ -105,54 +119,46 @@ try {
         $filtros['dyn_' . $nc] = $stmtF->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // Estadísticas (siempre se calculan)
+    // ── Estadísticas ──
     $baseWhere = buildWhereExcluding('none', $inputParams, $vistaTipo);
     $bw = $baseWhere['clause'];
     $bp = $baseWhere['params'];
     $and = $bw ? " AND" : " WHERE";
 
-    // Total filtrado
     $stmtTotal = $db->prepare("SELECT COUNT(*) as c FROM registros $bw");
     $stmtTotal->execute($bp);
     $total = (int)$stmtTotal->fetch()['c'];
 
-    // Hoy
     $hoy = date('Y-m-d');
     $bpHoy = $bp; $bpHoy[':stat_hoy'] = $hoy;
     $stmtHoy = $db->prepare("SELECT COUNT(*) as c FROM registros $bw $and fecha = :stat_hoy");
     $stmtHoy->execute($bpHoy);
     $totalHoy = (int)$stmtHoy->fetch()['c'];
 
-    // Semana
     $lunes = date('Y-m-d', strtotime('monday this week'));
     $bpSem = $bp; $bpSem[':stat_lunes'] = $lunes;
     $stmtSemana = $db->prepare("SELECT COUNT(*) as c FROM registros $bw $and fecha >= :stat_lunes");
     $stmtSemana->execute($bpSem);
     $totalSemana = (int)$stmtSemana->fetch()['c'];
 
-    // Mes
     $mes = date('Y-m-01');
     $bpMes = $bp; $bpMes[':stat_mes'] = $mes;
     $stmtMes = $db->prepare("SELECT COUNT(*) as c FROM registros $bw $and fecha >= :stat_mes");
     $stmtMes->execute($bpMes);
     $totalMes = (int)$stmtMes->fetch()['c'];
 
-    // Asesores únicos
     $stmtAse = $db->prepare("SELECT COUNT(DISTINCT asesor) as c FROM registros $bw $and asesor IS NOT NULL AND asesor != ''");
     $stmtAse->execute($bp);
     $totalAsesores = (int)$stmtAse->fetch()['c'];
 
-    // Delegados únicos
     $stmtDel = $db->prepare("SELECT COUNT(DISTINCT delegado) as c FROM registros $bw $and delegado IS NOT NULL AND delegado != ''");
     $stmtDel->execute($bp);
     $totalDelegados = (int)$stmtDel->fetch()['c'];
 
-    // Cursos únicos
     $stmtCur = $db->prepare("SELECT COUNT(DISTINCT curso) as c FROM registros $bw $and curso IS NOT NULL AND curso != ''");
     $stmtCur->execute($bp);
     $totalCursos = (int)$stmtCur->fetch()['c'];
 
-    // Países únicos
     $stmtPai = $db->prepare("SELECT COUNT(DISTINCT pais) as c FROM registros $bw $and pais IS NOT NULL AND pais != ''");
     $stmtPai->execute($bp);
     $totalPaises = (int)$stmtPai->fetch()['c'];
@@ -172,7 +178,7 @@ try {
         'success'          => true,
         'filtros'          => $filtros,
         'stats'            => $stats,
-        'campos_dinamicos' => $camposDinamicos, // ← el JS los usa para renderizar los selects
+        'campos_dinamicos' => $camposDinamicos, // [{nombre_campo, nombre_mostrar}, ...]
     ]);
 
 } catch (PDOException $e) {
