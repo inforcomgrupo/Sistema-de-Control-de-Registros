@@ -500,191 +500,108 @@ try {
 
         // =====================================================
         // CAMPOS DINÁMICOS - GUARDAR NUEVO (ADMIN SOLAMENTE)
-        // ── MODIFICADO: lee y guarda los 5 nuevos campos ──
         // =====================================================
         case 'save_campo_dinamico':
-            if (!esAdministrador()) {
-                echo json_encode(['success' => false, 'message' => 'No autorizado']);
-                exit;
-            }
+            if (!esAdministrador()) { echo json_encode(['success'=>false,'message'=>'No autorizado']); exit; }
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') { echo json_encode(['success'=>false,'message'=>'Método no permitido']); exit; }
+            if (!isset($_POST['csrf_token']) || !validarTokenCSRF($_POST['csrf_token'])) { echo json_encode(['success'=>false,'message'=>'Token inválido']); exit; }
 
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
-                exit;
-            }
+            $nombreCampo             = isset($_POST['nombre_campo'])                ? trim($_POST['nombre_campo'])                : '';
+            $nombreMostrar           = isset($_POST['nombre_mostrar'])              ? trim($_POST['nombre_mostrar'])              : '';
+            $tipoDato                = isset($_POST['tipo_dato'])                   ? trim($_POST['tipo_dato'])                   : 'texto';
+            $mostrarLista            = isset($_POST['mostrar_lista'])               ? (int)$_POST['mostrar_lista']               : 1;
+            $mostrarListaAsesor      = isset($_POST['mostrar_lista_asesor'])        ? (int)$_POST['mostrar_lista_asesor']        : 1;
+            $mostrarListaDelegado    = isset($_POST['mostrar_lista_delegado'])      ? (int)$_POST['mostrar_lista_delegado']      : 1;
+            $mostrarFiltro           = isset($_POST['mostrar_filtro'])              ? (int)$_POST['mostrar_filtro']              : 1;
+            $mostrarFiltroAsesor     = isset($_POST['mostrar_filtro_asesor'])       ? (int)$_POST['mostrar_filtro_asesor']       : 1;
+            $mostrarFiltroDelegado   = isset($_POST['mostrar_filtro_delegado'])     ? (int)$_POST['mostrar_filtro_delegado']     : 1;
+            $mostrarFiltroStats      = isset($_POST['mostrar_filtro_estadisticas']) ? (int)$_POST['mostrar_filtro_estadisticas'] : 0;
+            $mostrarEstadisticas     = isset($_POST['mostrar_estadisticas'])        ? (int)$_POST['mostrar_estadisticas']        : 0;
+            $mostrarExcel            = isset($_POST['mostrar_excel'])               ? (int)$_POST['mostrar_excel']               : 1;
+            $esObligatorio           = isset($_POST['es_obligatorio'])              ? (int)$_POST['es_obligatorio']              : 0;
 
-            if (!isset($_POST['csrf_token']) || !validarTokenCSRF($_POST['csrf_token'])) {
-                echo json_encode(['success' => false, 'message' => 'Token inválido']);
-                exit;
-            }
-
-            $nombreCampo               = isset($_POST['nombre_campo'])                ? trim($_POST['nombre_campo'])                : '';
-            $nombreMostrar             = isset($_POST['nombre_mostrar'])              ? trim($_POST['nombre_mostrar'])              : '';
-            $tipoDato                  = isset($_POST['tipo_dato'])                   ? trim($_POST['tipo_dato'])                   : 'texto';
-            $mostrarLista              = isset($_POST['mostrar_lista'])               ? (int)$_POST['mostrar_lista']               : 1;
-            $mostrarListaAsesor        = isset($_POST['mostrar_lista_asesor'])        ? (int)$_POST['mostrar_lista_asesor']        : 1;
-            $mostrarListaDelegado      = isset($_POST['mostrar_lista_delegado'])      ? (int)$_POST['mostrar_lista_delegado']      : 1;
-            $mostrarFiltro             = isset($_POST['mostrar_filtro'])              ? (int)$_POST['mostrar_filtro']              : 1;
-            $mostrarFiltroAsesor       = isset($_POST['mostrar_filtro_asesor'])       ? (int)$_POST['mostrar_filtro_asesor']       : 1;
-            $mostrarFiltroDelegado     = isset($_POST['mostrar_filtro_delegado'])     ? (int)$_POST['mostrar_filtro_delegado']     : 1;
-            $mostrarFiltroEstadisticas = isset($_POST['mostrar_filtro_estadisticas']) ? (int)$_POST['mostrar_filtro_estadisticas'] : 0;
-            $mostrarEstadisticas       = isset($_POST['mostrar_estadisticas'])        ? (int)$_POST['mostrar_estadisticas']        : 0;
-            $mostrarExcel              = isset($_POST['mostrar_excel'])               ? (int)$_POST['mostrar_excel']               : 1;
-            $esObligatorio             = isset($_POST['es_obligatorio'])              ? (int)$_POST['es_obligatorio']              : 0;
-
-            if (empty($nombreCampo) || empty($nombreMostrar)) {
-                echo json_encode(['success' => false, 'message' => 'Nombre interno y etiqueta son obligatorios']);
-                exit;
-            }
-
-            if (!preg_match('/^[a-zA-Z0-9_]+$/', $nombreCampo)) {
-                echo json_encode(['success' => false, 'message' => 'El nombre interno solo puede contener letras, números y guion bajo (_)']);
-                exit;
-            }
+            if (empty($nombreCampo) || empty($nombreMostrar)) { echo json_encode(['success'=>false,'message'=>'Nombre interno y etiqueta son obligatorios']); exit; }
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', $nombreCampo)) { echo json_encode(['success'=>false,'message'=>'El nombre interno solo puede contener letras, números y guion bajo (_)']); exit; }
 
             $stmtCheck = $db->prepare("SELECT id FROM campos_dinamicos WHERE nombre_campo = :nombre_campo");
             $stmtCheck->execute([':nombre_campo' => $nombreCampo]);
-            if ($stmtCheck->fetch()) {
-                echo json_encode(['success' => false, 'message' => 'Ya existe un campo con ese nombre interno']);
-                exit;
-            }
+            if ($stmtCheck->fetch()) { echo json_encode(['success'=>false,'message'=>'Ya existe un campo con ese nombre interno']); exit; }
 
-            $tiposPermitidos = ['texto', 'numero', 'lista', 'fecha'];
+            $tiposPermitidos = ['texto','numero','lista','fecha'];
             if (!in_array($tipoDato, $tiposPermitidos)) $tipoDato = 'texto';
 
-            $stmtOrden = $db->query("SELECT COALESCE(MAX(orden), 0) + 1 as next_orden FROM campos_dinamicos");
+            $stmtOrden = $db->query("SELECT COALESCE(MAX(orden),0)+1 as next_orden FROM campos_dinamicos");
             $nextOrden = (int)$stmtOrden->fetch()['next_orden'];
 
             $stmtIns = $db->prepare(
                 "INSERT INTO campos_dinamicos
                  (nombre_campo, nombre_mostrar, tipo_dato,
                   mostrar_lista, mostrar_lista_asesor, mostrar_lista_delegado,
-                  mostrar_filtro, mostrar_filtro_asesor, mostrar_filtro_delegado,
-                  mostrar_filtro_estadisticas,
-                  mostrar_estadisticas, mostrar_excel,
-                  es_obligatorio, activo, orden, fuente)
-                 VALUES
-                 (:nc, :nm, :td,
-                  :ml, :mla, :mld,
-                  :mf, :mfa, :mfd,
-                  :mfe,
-                  :me, :mx,
-                  :eo, 1, :orden, 'manual')"
+                  mostrar_filtro, mostrar_filtro_asesor, mostrar_filtro_delegado, mostrar_filtro_estadisticas,
+                  mostrar_estadisticas, mostrar_excel, es_obligatorio, activo, orden, fuente)
+                 VALUES (:nc,:nm,:td,:ml,:mla,:mld,:mf,:mfa,:mfd,:mfe,:me,:mx,:eo,1,:orden,'manual')"
             );
             $stmtIns->execute([
-                ':nc'    => $nombreCampo,
-                ':nm'    => $nombreMostrar,
-                ':td'    => $tipoDato,
-                ':ml'    => $mostrarLista,
-                ':mla'   => $mostrarListaAsesor,
-                ':mld'   => $mostrarListaDelegado,
-                ':mf'    => $mostrarFiltro,
-                ':mfa'   => $mostrarFiltroAsesor,
-                ':mfd'   => $mostrarFiltroDelegado,
-                ':mfe'   => $mostrarFiltroEstadisticas,
-                ':me'    => $mostrarEstadisticas,
-                ':mx'    => $mostrarExcel,
-                ':eo'    => $esObligatorio,
+                ':nc'    => $nombreCampo,   ':nm'  => $nombreMostrar,       ':td'  => $tipoDato,
+                ':ml'    => $mostrarLista,  ':mla' => $mostrarListaAsesor,  ':mld' => $mostrarListaDelegado,
+                ':mf'    => $mostrarFiltro, ':mfa' => $mostrarFiltroAsesor, ':mfd' => $mostrarFiltroDelegado, ':mfe' => $mostrarFiltroStats,
+                ':me'    => $mostrarEstadisticas, ':mx' => $mostrarExcel,   ':eo'  => $esObligatorio,
                 ':orden' => $nextOrden,
             ]);
 
-            registrarLog(
-                $_SESSION['user_id'],
-                $_SESSION['user_nombre'] . ' ' . $_SESSION['user_apellidos'],
-                $_SESSION['user_tipo'],
-                'Creó campo dinámico',
-                'Campo: ' . $nombreCampo . ' | Etiqueta: ' . $nombreMostrar
-            );
-
-            echo json_encode(['success' => true, 'message' => 'Campo dinámico creado correctamente']);
+            registrarLog($_SESSION['user_id'], $_SESSION['user_nombre'].' '.$_SESSION['user_apellidos'], $_SESSION['user_tipo'], 'Creó campo dinámico', 'Campo: '.$nombreCampo.' | Etiqueta: '.$nombreMostrar);
+            echo json_encode(['success'=>true,'message'=>'Campo dinámico creado correctamente']);
             break;
 
         // =====================================================
         // CAMPOS DINÁMICOS - ACTUALIZAR (ADMIN SOLAMENTE)
-        // ── MODIFICADO: actualiza los 5 nuevos campos ──
         // =====================================================
         case 'update_campo_dinamico':
-            if (!esAdministrador()) {
-                echo json_encode(['success' => false, 'message' => 'No autorizado']);
-                exit;
-            }
+            if (!esAdministrador()) { echo json_encode(['success'=>false,'message'=>'No autorizado']); exit; }
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') { echo json_encode(['success'=>false,'message'=>'Método no permitido']); exit; }
+            if (!isset($_POST['csrf_token']) || !validarTokenCSRF($_POST['csrf_token'])) { echo json_encode(['success'=>false,'message'=>'Token inválido']); exit; }
 
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
-                exit;
-            }
+            $id                      = isset($_POST['id'])                          ? (int)$_POST['id']                          : 0;
+            $nombreMostrar           = isset($_POST['nombre_mostrar'])              ? trim($_POST['nombre_mostrar'])              : '';
+            $tipoDato                = isset($_POST['tipo_dato'])                   ? trim($_POST['tipo_dato'])                   : 'texto';
+            $mostrarLista            = isset($_POST['mostrar_lista'])               ? (int)$_POST['mostrar_lista']               : 1;
+            $mostrarListaAsesor      = isset($_POST['mostrar_lista_asesor'])        ? (int)$_POST['mostrar_lista_asesor']        : 1;
+            $mostrarListaDelegado    = isset($_POST['mostrar_lista_delegado'])      ? (int)$_POST['mostrar_lista_delegado']      : 1;
+            $mostrarFiltro           = isset($_POST['mostrar_filtro'])              ? (int)$_POST['mostrar_filtro']              : 1;
+            $mostrarFiltroAsesor     = isset($_POST['mostrar_filtro_asesor'])       ? (int)$_POST['mostrar_filtro_asesor']       : 1;
+            $mostrarFiltroDelegado   = isset($_POST['mostrar_filtro_delegado'])     ? (int)$_POST['mostrar_filtro_delegado']     : 1;
+            $mostrarFiltroStats      = isset($_POST['mostrar_filtro_estadisticas']) ? (int)$_POST['mostrar_filtro_estadisticas'] : 0;
+            $mostrarEstadisticas     = isset($_POST['mostrar_estadisticas'])        ? (int)$_POST['mostrar_estadisticas']        : 0;
+            $mostrarExcel            = isset($_POST['mostrar_excel'])               ? (int)$_POST['mostrar_excel']               : 1;
+            $esObligatorio           = isset($_POST['es_obligatorio'])              ? (int)$_POST['es_obligatorio']              : 0;
+            $activo                  = isset($_POST['activo'])                      ? (int)$_POST['activo']                      : 1;
 
-            if (!isset($_POST['csrf_token']) || !validarTokenCSRF($_POST['csrf_token'])) {
-                echo json_encode(['success' => false, 'message' => 'Token inválido']);
-                exit;
-            }
+            if ($id <= 0 || empty($nombreMostrar)) { echo json_encode(['success'=>false,'message'=>'Datos inválidos']); exit; }
 
-            $id                        = isset($_POST['id'])                          ? (int)$_POST['id']                          : 0;
-            $nombreMostrar             = isset($_POST['nombre_mostrar'])              ? trim($_POST['nombre_mostrar'])              : '';
-            $tipoDato                  = isset($_POST['tipo_dato'])                   ? trim($_POST['tipo_dato'])                   : 'texto';
-            $mostrarLista              = isset($_POST['mostrar_lista'])               ? (int)$_POST['mostrar_lista']               : 1;
-            $mostrarListaAsesor        = isset($_POST['mostrar_lista_asesor'])        ? (int)$_POST['mostrar_lista_asesor']        : 1;
-            $mostrarListaDelegado      = isset($_POST['mostrar_lista_delegado'])      ? (int)$_POST['mostrar_lista_delegado']      : 1;
-            $mostrarFiltro             = isset($_POST['mostrar_filtro'])              ? (int)$_POST['mostrar_filtro']              : 1;
-            $mostrarFiltroAsesor       = isset($_POST['mostrar_filtro_asesor'])       ? (int)$_POST['mostrar_filtro_asesor']       : 1;
-            $mostrarFiltroDelegado     = isset($_POST['mostrar_filtro_delegado'])     ? (int)$_POST['mostrar_filtro_delegado']     : 1;
-            $mostrarFiltroEstadisticas = isset($_POST['mostrar_filtro_estadisticas']) ? (int)$_POST['mostrar_filtro_estadisticas'] : 0;
-            $mostrarEstadisticas       = isset($_POST['mostrar_estadisticas'])        ? (int)$_POST['mostrar_estadisticas']        : 0;
-            $mostrarExcel              = isset($_POST['mostrar_excel'])               ? (int)$_POST['mostrar_excel']               : 1;
-            $esObligatorio             = isset($_POST['es_obligatorio'])              ? (int)$_POST['es_obligatorio']              : 0;
-            $activo                    = isset($_POST['activo'])                      ? (int)$_POST['activo']                      : 1;
-
-            if ($id <= 0 || empty($nombreMostrar)) {
-                echo json_encode(['success' => false, 'message' => 'Datos inválidos']);
-                exit;
-            }
-
-            $tiposPermitidos = ['texto', 'numero', 'lista', 'fecha'];
+            $tiposPermitidos = ['texto','numero','lista','fecha'];
             if (!in_array($tipoDato, $tiposPermitidos)) $tipoDato = 'texto';
 
             $stmtUp = $db->prepare(
                 "UPDATE campos_dinamicos SET
-                 nombre_mostrar             = :nm,
-                 tipo_dato                  = :td,
-                 mostrar_lista              = :ml,
-                 mostrar_lista_asesor       = :mla,
-                 mostrar_lista_delegado     = :mld,
-                 mostrar_filtro             = :mf,
-                 mostrar_filtro_asesor      = :mfa,
-                 mostrar_filtro_delegado    = :mfd,
-                 mostrar_filtro_estadisticas= :mfe,
-                 mostrar_estadisticas       = :me,
-                 mostrar_excel              = :mx,
-                 es_obligatorio             = :eo,
-                 activo                     = :activo
+                 nombre_mostrar = :nm, tipo_dato = :td,
+                 mostrar_lista = :ml, mostrar_lista_asesor = :mla, mostrar_lista_delegado = :mld,
+                 mostrar_filtro = :mf, mostrar_filtro_asesor = :mfa, mostrar_filtro_delegado = :mfd,
+                 mostrar_filtro_estadisticas = :mfe,
+                 mostrar_estadisticas = :me, mostrar_excel = :mx,
+                 es_obligatorio = :eo, activo = :activo
                  WHERE id = :id"
             );
             $stmtUp->execute([
-                ':nm'     => $nombreMostrar,
-                ':td'     => $tipoDato,
-                ':ml'     => $mostrarLista,
-                ':mla'    => $mostrarListaAsesor,
-                ':mld'    => $mostrarListaDelegado,
-                ':mf'     => $mostrarFiltro,
-                ':mfa'    => $mostrarFiltroAsesor,
-                ':mfd'    => $mostrarFiltroDelegado,
-                ':mfe'    => $mostrarFiltroEstadisticas,
-                ':me'     => $mostrarEstadisticas,
-                ':mx'     => $mostrarExcel,
-                ':eo'     => $esObligatorio,
-                ':activo' => $activo,
-                ':id'     => $id,
+                ':nm'  => $nombreMostrar,       ':td'  => $tipoDato,
+                ':ml'  => $mostrarLista,        ':mla' => $mostrarListaAsesor,   ':mld' => $mostrarListaDelegado,
+                ':mf'  => $mostrarFiltro,       ':mfa' => $mostrarFiltroAsesor,  ':mfd' => $mostrarFiltroDelegado, ':mfe' => $mostrarFiltroStats,
+                ':me'  => $mostrarEstadisticas, ':mx'  => $mostrarExcel,
+                ':eo'  => $esObligatorio,       ':activo' => $activo,
+                ':id'  => $id,
             ]);
 
-            registrarLog(
-                $_SESSION['user_id'],
-                $_SESSION['user_nombre'] . ' ' . $_SESSION['user_apellidos'],
-                $_SESSION['user_tipo'],
-                'Actualizó campo dinámico',
-                'ID: ' . $id . ' | Etiqueta: ' . $nombreMostrar
-            );
-
-            echo json_encode(['success' => true, 'message' => 'Campo dinámico actualizado correctamente']);
+            registrarLog($_SESSION['user_id'], $_SESSION['user_nombre'].' '.$_SESSION['user_apellidos'], $_SESSION['user_tipo'], 'Actualizó campo dinámico', 'ID: '.$id.' | Etiqueta: '.$nombreMostrar);
+            echo json_encode(['success'=>true,'message'=>'Campo dinámico actualizado correctamente']);
             break;
 
         // =====================================================
