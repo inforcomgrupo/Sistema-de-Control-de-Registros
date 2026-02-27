@@ -97,13 +97,13 @@ if (!defined('SISTEMA_REGISTROS')) {
                     <option value="">Todos los Formularios</option>
                 </select>
 
-                <span class="filters-row-label" id="estLabelFechaGeneral" style="margin-left:12px;"><i class="fas fa-calendar"></i> Fecha:</span>
+                <span class="filters-row-label est-tendencia-label" id="estLabelFechaGeneral" style="margin-left:12px;"><i class="fas fa-calendar"></i> Fecha:</span>
                 <input type="date" class="filter-date-input" id="estFechaDesdeGeneral">
-                <span class="filter-separator">a</span>
+                <span class="filter-separator" id="estFechaSepGeneral">a</span>
                 <input type="date" class="filter-date-input" id="estFechaHastaGeneral">
 
-                <span class="filters-row-label" style="margin-left:12px;"><i class="fas fa-chart-line"></i> Tendencia:</span>
-                <select class="filter-select" id="estTendenciaGeneral" style="max-width:170px;">
+                <span class="filters-row-label est-tendencia-label" style="margin-left:12px;"><i class="fas fa-chart-line"></i> Tendencia:</span>
+                <select class="filter-select est-tendencia-select" id="estTendenciaGeneral" style="max-width:170px;">
                     <option value="dia" selected>Día</option>
                     <option value="semana">Semana</option>
                     <option value="mes">Mes</option>
@@ -127,13 +127,13 @@ if (!defined('SISTEMA_REGISTROS')) {
                     <option value="">Seleccionar Asesor</option>
                 </select>
 
-                <span class="filters-row-label" id="estLabelFechaAsesor" style="margin-left:12px;"><i class="fas fa-calendar"></i> Fecha:</span>
+                <span class="filters-row-label est-tendencia-label" id="estLabelFechaAsesor" style="margin-left:12px;"><i class="fas fa-calendar"></i> Fecha:</span>
                 <input type="date" class="filter-date-input" id="estFechaDesdeAsesor">
-                <span class="filter-separator">a</span>
+                <span class="filter-separator" id="estFechaSepAsesor">a</span>
                 <input type="date" class="filter-date-input" id="estFechaHastaAsesor">
 
-                <span class="filters-row-label" style="margin-left:12px;"><i class="fas fa-chart-line"></i> Tendencia:</span>
-                <select class="filter-select" id="estTendenciaAsesor" style="max-width:170px;">
+                <span class="filters-row-label est-tendencia-label" style="margin-left:12px;"><i class="fas fa-chart-line"></i> Tendencia:</span>
+                <select class="filter-select est-tendencia-select" id="estTendenciaAsesor" style="max-width:170px;">
                     <option value="dia" selected>Día</option>
                     <option value="semana">Semana</option>
                     <option value="mes">Mes</option>
@@ -157,13 +157,13 @@ if (!defined('SISTEMA_REGISTROS')) {
                     <option value="">Seleccionar Delegado</option>
                 </select>
 
-                <span class="filters-row-label" id="estLabelFechaDelegado" style="margin-left:12px;"><i class="fas fa-calendar"></i> Fecha:</span>
+                <span class="filters-row-label est-tendencia-label" id="estLabelFechaDelegado" style="margin-left:12px;"><i class="fas fa-calendar"></i> Fecha:</span>
                 <input type="date" class="filter-date-input" id="estFechaDescuDelegado">
-                <span class="filter-separator">a</span>
+                <span class="filter-separator" id="estFechaSepDelegado">a</span>
                 <input type="date" class="filter-date-input" id="estFechaHastaDelegado">
 
-                <span class="filters-row-label" style="margin-left:12px;"><i class="fas fa-chart-line"></i> Tendencia:</span>
-                <select class="filter-select" id="estTendenciaDelegado" style="max-width:170px;">
+                <span class="filters-row-label est-tendencia-label" style="margin-left:12px;"><i class="fas fa-chart-line"></i> Tendencia:</span>
+                <select class="filter-select est-tendencia-select" id="estTendenciaDelegado" style="max-width:170px;">
                     <option value="dia" selected>Día</option>
                     <option value="semana">Semana</option>
                     <option value="mes">Mes</option>
@@ -181,13 +181,16 @@ if (!defined('SISTEMA_REGISTROS')) {
 
         <!-- SUB-FILTROS (Siempre visibles) -->
         <div class="filters-row" id="estSubFiltrosRow" style="flex-wrap:wrap;">
-            <span class="filters-row-label"><i class="fas fa-sliders-h"></i> Sub filtros:</span>
+            <span class="filters-row-label" id="estSubFiltrosLabel"><i class="fas fa-sliders-h"></i> Sub filtros:</span>
             <select class="filter-select" id="estFilterCurso"><option value="">Curso</option></select>
             <select class="filter-select" id="estFilterPais"><option value="">País</option></select>
             <select class="filter-select" id="estFilterCiudad"><option value="">Ciudad</option></select>
             <select class="filter-select" id="estFilterMetodoPago"><option value="">Método de Pago</option></select>
             <select class="filter-select" id="estFilterWeb"><option value="">Web</option></select>
         </div>
+
+        <!-- ── NUEVO: fila de filtros dinámicos (campos con mostrar_filtro_estadisticas = 1) ── -->
+        <div class="filters-row" id="estFiltrosDinamicosRow" style="display:none;flex-wrap:wrap;"></div>
     </div>
 </div>
 
@@ -370,12 +373,14 @@ if (!defined('SISTEMA_REGISTROS')) {
         currentTab: 'general',
         permisosTimer: null,
         sesionInvalidada: false,
+        camposFiltroActivos: [],   // ── NUEVO
         filters: {
             general:  { fecha_desde: '', fecha_hasta: '', tendencia: 'dia', formulario_id: '' },
             asesor:   { asesor: '', fecha_desde: '', fecha_hasta: '', tendencia: 'dia' },
             delegado: { delegado: '', fecha_desde: '', fecha_hasta: '', tendencia: 'dia' }
         },
-        subFilters: { curso: '', pais: '', ciudad: '', metodo_pago: '', web: '' }
+        subFilters:     { curso: '', pais: '', ciudad: '', metodo_pago: '', web: '' },
+        dynFilters: {}  // ── NUEVO: valores de filtros dinámicos activos
     };
 
     var DOM = {};
@@ -407,6 +412,9 @@ if (!defined('SISTEMA_REGISTROS')) {
         DOM.estFilterCiudad       = document.getElementById('estFilterCiudad');
         DOM.estFilterMetodoPago   = document.getElementById('estFilterMetodoPago');
         DOM.estFilterWeb          = document.getElementById('estFilterWeb');
+
+        // ── NUEVO
+        DOM.filtrosDinamicosRow   = document.getElementById('estFiltrosDinamicosRow');
     }
 
     function init() {
@@ -414,7 +422,6 @@ if (!defined('SISTEMA_REGISTROS')) {
         cargarEstadisticas();
         cargarFiltros();
         bindEvents();
-        // Permisos en tiempo real
         cargarYAplicarPermisos();
         STATE.permisosTimer = setInterval(cargarYAplicarPermisos, 5000);
     }
@@ -423,8 +430,8 @@ if (!defined('SISTEMA_REGISTROS')) {
     // CAMBIAR TAB
     // =====================================================
     function cambiarTab(tabName) {
-        Array.prototype.forEach.call(DOM.tabButtons, function (btn) { btn.classList.remove('active'); });
-        Array.prototype.forEach.call(DOM.tabContents, function (c) { c.classList.remove('active'); c.style.display = 'none'; });
+        Array.prototype.forEach.call(DOM.tabButtons,  function (btn) { btn.classList.remove('active'); });
+        Array.prototype.forEach.call(DOM.tabContents, function (c)   { c.classList.remove('active'); c.style.display = 'none'; });
         STATE.currentTab = tabName;
         document.querySelector('[data-tab="' + tabName + '"]').classList.add('active');
         document.getElementById('tab-' + tabName).classList.add('active');
@@ -435,7 +442,7 @@ if (!defined('SISTEMA_REGISTROS')) {
     }
 
     // =====================================================
-    // LIMPIAR FILTROS
+    // LIMPIAR FILTROS  ── NUEVO: también limpia dinámicos
     // =====================================================
     function limpiarFiltrosCompleto() {
         if (STATE.currentTab === 'general') {
@@ -461,10 +468,17 @@ if (!defined('SISTEMA_REGISTROS')) {
         [DOM.estFilterCurso, DOM.estFilterPais, DOM.estFilterCiudad, DOM.estFilterMetodoPago, DOM.estFilterWeb].forEach(function (el) {
             if (el) { el.value = ''; el.classList.remove('active-filter'); }
         });
+        // ── NUEVO: limpiar filtros dinámicos
+        STATE.dynFilters = {};
+        STATE.camposFiltroActivos = [];
+        if (DOM.filtrosDinamicosRow) {
+            DOM.filtrosDinamicosRow.innerHTML = '';
+            DOM.filtrosDinamicosRow.style.display = 'none';
+        }
     }
 
     // =====================================================
-    // CONSTRUIR PARÁMETROS
+    // CONSTRUIR PARÁMETROS  ── NUEVO: incluye dynFilters
     // =====================================================
     function buildParams() {
         var p = { tab: STATE.currentTab };
@@ -484,16 +498,20 @@ if (!defined('SISTEMA_REGISTROS')) {
             if (STATE.filters.delegado.fecha_hasta)  p.fecha_hasta   = STATE.filters.delegado.fecha_hasta;
             if (STATE.filters.delegado.tendencia)    p.tendencia     = STATE.filters.delegado.tendencia;
         }
-        if (STATE.subFilters.curso)        p.curso        = STATE.subFilters.curso;
-        if (STATE.subFilters.pais)         p.pais         = STATE.subFilters.pais;
-        if (STATE.subFilters.ciudad)       p.ciudad       = STATE.subFilters.ciudad;
-        if (STATE.subFilters.metodo_pago)  p.metodo_pago  = STATE.subFilters.metodo_pago;
-        if (STATE.subFilters.web)          p.web          = STATE.subFilters.web;
+        if (STATE.subFilters.curso)       p.curso       = STATE.subFilters.curso;
+        if (STATE.subFilters.pais)        p.pais        = STATE.subFilters.pais;
+        if (STATE.subFilters.ciudad)      p.ciudad      = STATE.subFilters.ciudad;
+        if (STATE.subFilters.metodo_pago) p.metodo_pago = STATE.subFilters.metodo_pago;
+        if (STATE.subFilters.web)         p.web         = STATE.subFilters.web;
+        // ── NUEVO: filtros dinámicos activos
+        Object.keys(STATE.dynFilters).forEach(function (k) {
+            if (STATE.dynFilters[k] !== '') p['dyn_' + k] = STATE.dynFilters[k];
+        });
         return p;
     }
 
     // =====================================================
-    // CARGAR FILTROS
+    // CARGAR FILTROS  ── NUEVO: procesa campos_dinamicos
     // =====================================================
     function cargarFiltros() {
         var params = buildParams();
@@ -510,9 +528,67 @@ if (!defined('SISTEMA_REGISTROS')) {
                 llenarSelect(DOM.estFilterCiudad,      data.filtros.ciudad,        'Ciudad');
                 llenarSelect(DOM.estFilterMetodoPago,  data.filtros.metodo_pago,   'Método de Pago');
                 llenarSelect(DOM.estFilterWeb,         data.filtros.web,           'Web');
+
+                // ── NUEVO: campos dinámicos con mostrar_filtro_estadisticas = 1
+                var camposNuevos = (data.campos_dinamicos || []).filter(function (c) {
+                    return c.mostrar_filtro_estadisticas == 1;
+                });
+                var camposActuales    = STATE.camposFiltroActivos.map(function (c) { return c.nombre_campo; });
+                var camposNuevosNames = camposNuevos.map(function (c) { return c.nombre_campo; });
+                var necesitaRedibujar = JSON.stringify(camposActuales) !== JSON.stringify(camposNuevosNames);
+
+                if (DOM.filtrosDinamicosRow) {
+                    if (camposNuevos.length > 0) {
+                        DOM.filtrosDinamicosRow.style.display = '';
+                        if (necesitaRedibujar) {
+                            STATE.camposFiltroActivos = camposNuevos;
+                            renderFiltrosDinamicos(camposNuevos);
+                        } else {
+                            camposNuevos.forEach(function (cf) {
+                                var el = document.getElementById('estFilterDyn_' + cf.nombre_campo);
+                                if (el) llenarSelect(el, data.filtros['dyn_' + cf.nombre_campo] || [], cf.nombre_mostrar);
+                            });
+                        }
+                    } else {
+                        DOM.filtrosDinamicosRow.style.display = 'none';
+                        DOM.filtrosDinamicosRow.innerHTML = '';
+                        STATE.camposFiltroActivos = [];
+                    }
+                }
             }
         })
         .catch(function (err) { console.error('Error filtros:', err); });
+    }
+
+    // ── NUEVO: renderizar selects dinámicos de estadísticas
+    function renderFiltrosDinamicos(campos) {
+        if (!DOM.filtrosDinamicosRow) return;
+        var valoresActuales = {};
+        STATE.camposFiltroActivos.forEach(function (cf) {
+            var el = document.getElementById('estFilterDyn_' + cf.nombre_campo);
+            if (el) valoresActuales[cf.nombre_campo] = el.value;
+        });
+        DOM.filtrosDinamicosRow.innerHTML = '';
+        campos.forEach(function (cf) {
+            var sel = document.createElement('select');
+            sel.className = 'filter-select';
+            sel.id = 'estFilterDyn_' + cf.nombre_campo;
+            sel.title = cf.nombre_mostrar;
+            sel.setAttribute('data-dyn-campo', cf.nombre_campo);
+            sel.innerHTML = '<option value="">' + esc(cf.nombre_mostrar) + '</option>';
+            if (valoresActuales[cf.nombre_campo]) {
+                sel.value = valoresActuales[cf.nombre_campo];
+                sel.classList.add('active-filter');
+                STATE.dynFilters[cf.nombre_campo] = valoresActuales[cf.nombre_campo];
+            }
+            sel.addEventListener('change', function () {
+                STATE.dynFilters[cf.nombre_campo] = this.value;
+                this.classList.toggle('active-filter', this.value !== '');
+                cargarFiltros();
+                recargar();
+            });
+            DOM.filtrosDinamicosRow.appendChild(sel);
+        });
     }
 
     function llenarSelect(el, valores, placeholder) {
@@ -544,15 +620,14 @@ if (!defined('SISTEMA_REGISTROS')) {
     }
 
     function actualizarResumen(r) {
-        document.getElementById('estTotal').textContent    = (r.total     || 0).toLocaleString();
-        document.getElementById('estHoy').textContent      = (r.hoy       || 0).toLocaleString();
-        document.getElementById('estSemana').textContent   = (r.semana    || 0).toLocaleString();
-        document.getElementById('estMes').textContent      = (r.mes       || 0).toLocaleString();
-        document.getElementById('estAsesores').textContent = (r.asesores  || 0).toLocaleString();
-        // ── FIX: usar r.delegados no r.asesores ──
-        document.getElementById('estDelegados').textContent= (r.delegados || 0).toLocaleString();
-        document.getElementById('estCursos').textContent   = (r.cursos    || 0).toLocaleString();
-        document.getElementById('estPaises').textContent   = (r.paises    || 0).toLocaleString();
+        document.getElementById('estTotal').textContent     = (r.total     || 0).toLocaleString();
+        document.getElementById('estHoy').textContent       = (r.hoy       || 0).toLocaleString();
+        document.getElementById('estSemana').textContent    = (r.semana    || 0).toLocaleString();
+        document.getElementById('estMes').textContent       = (r.mes       || 0).toLocaleString();
+        document.getElementById('estAsesores').textContent  = (r.asesores  || 0).toLocaleString();
+        document.getElementById('estDelegados').textContent = (r.delegados || 0).toLocaleString();
+        document.getElementById('estCursos').textContent    = (r.cursos    || 0).toLocaleString();
+        document.getElementById('estPaises').textContent    = (r.paises    || 0).toLocaleString();
     }
 
     // =====================================================
@@ -560,29 +635,29 @@ if (!defined('SISTEMA_REGISTROS')) {
     // =====================================================
     function renderCharts(data) {
         renderTendencia(data);
-        renderBarras('chartAsesores',    data.por_asesor);
-        renderBarras('chartDelegados',   data.por_delegado);
-        renderBarras('chartCursos',      data.por_curso);
-        renderBarras('chartPaises',      data.por_pais);
-        renderDona('chartMetodoPago',    data.por_metodo_pago);
-        renderHoras('chartHoras',        data.por_hora);
+        renderBarras('chartAsesores',  data.por_asesor);
+        renderBarras('chartDelegados', data.por_delegado);
+        renderBarras('chartCursos',    data.por_curso);
+        renderBarras('chartPaises',    data.por_pais);
+        renderDona('chartMetodoPago',  data.por_metodo_pago);
+        renderHoras('chartHoras',      data.por_hora);
     }
 
     function renderTendencia(data) {
         var modo = STATE.filters[STATE.currentTab].tendencia || 'dia';
         var labels = [], valores = [], serie = [];
-        if (modo === 'dia')       serie = data.por_dia      || [];
-        else if (modo === 'semana')    serie = data.por_semana   || [];
-        else if (modo === 'mes')       serie = data.por_mes      || [];
-        else if (modo === 'bimestre')  serie = data.por_bimestre || [];
-        else if (modo === 'trimestre') serie = data.por_trimestre|| [];
-        else if (modo === 'semestre')  serie = data.por_semestre || [];
-        else if (modo === 'anio')      serie = data.por_anio     || [];
+        if      (modo === 'dia')       serie = data.por_dia       || [];
+        else if (modo === 'semana')    serie = data.por_semana    || [];
+        else if (modo === 'mes')       serie = data.por_mes       || [];
+        else if (modo === 'bimestre')  serie = data.por_bimestre  || [];
+        else if (modo === 'trimestre') serie = data.por_trimestre || [];
+        else if (modo === 'semestre')  serie = data.por_semestre  || [];
+        else if (modo === 'anio')      serie = data.por_anio      || [];
 
-        if (modo === 'dia')        serie.forEach(function (d) { labels.push(formatearFecha(d.dia));               valores.push(d.total); });
-        else if (modo === 'semana')     serie.forEach(function (d) { labels.push('Sem ' + formatearFecha(d.inicio_semana)); valores.push(d.total); });
-        else if (modo === 'mes')        serie.forEach(function (d) { labels.push(d.mes_nombre || d.periodo);      valores.push(d.total); });
-        else                            serie.forEach(function (d) { labels.push(d.periodo);                      valores.push(d.total); });
+        if      (modo === 'dia')    serie.forEach(function (d) { labels.push(formatearFecha(d.dia));                        valores.push(d.total); });
+        else if (modo === 'semana') serie.forEach(function (d) { labels.push('Sem ' + formatearFecha(d.inicio_semana));     valores.push(d.total); });
+        else if (modo === 'mes')    serie.forEach(function (d) { labels.push(d.mes_nombre || d.periodo);                   valores.push(d.total); });
+        else                        serie.forEach(function (d) { labels.push(d.periodo);                                   valores.push(d.total); });
 
         destroyChart('chartTendencia');
         var ctx = document.getElementById('chartTendencia').getContext('2d');
@@ -692,10 +767,10 @@ if (!defined('SISTEMA_REGISTROS')) {
         [DOM.estFechaDesdeGeneral, DOM.estFechaHastaGeneral, DOM.estTendenciaGeneral, DOM.estFormularioGeneral].forEach(function (el) {
             if (!el) return;
             el.addEventListener('change', function () {
-                if (el === DOM.estFechaDesdeGeneral)  STATE.filters.general.fecha_desde    = el.value;
-                else if (el === DOM.estFechaHastaGeneral) STATE.filters.general.fecha_hasta = el.value;
-                else if (el === DOM.estTendenciaGeneral)  STATE.filters.general.tendencia   = el.value;
-                else if (el === DOM.estFormularioGeneral) STATE.filters.general.formulario_id = el.value;
+                if      (el === DOM.estFechaDesdeGeneral)  STATE.filters.general.fecha_desde    = el.value;
+                else if (el === DOM.estFechaHastaGeneral)  STATE.filters.general.fecha_hasta    = el.value;
+                else if (el === DOM.estTendenciaGeneral)   STATE.filters.general.tendencia      = el.value;
+                else if (el === DOM.estFormularioGeneral)  STATE.filters.general.formulario_id  = el.value;
                 marcarFiltroActivo(el); recargar();
             });
         });
@@ -703,10 +778,10 @@ if (!defined('SISTEMA_REGISTROS')) {
         [DOM.estAsesor, DOM.estFechaDesdeAsesor, DOM.estFechaHastaAsesor, DOM.estTendenciaAsesor].forEach(function (el) {
             if (!el) return;
             el.addEventListener('change', function () {
-                if (el === DOM.estAsesor)             STATE.filters.asesor.asesor        = el.value;
-                else if (el === DOM.estFechaDesdeAsesor) STATE.filters.asesor.fecha_desde = el.value;
-                else if (el === DOM.estFechaHastaAsesor) STATE.filters.asesor.fecha_hasta = el.value;
-                else if (el === DOM.estTendenciaAsesor)  STATE.filters.asesor.tendencia   = el.value;
+                if      (el === DOM.estAsesor)            STATE.filters.asesor.asesor        = el.value;
+                else if (el === DOM.estFechaDesdeAsesor)  STATE.filters.asesor.fecha_desde   = el.value;
+                else if (el === DOM.estFechaHastaAsesor)  STATE.filters.asesor.fecha_hasta   = el.value;
+                else if (el === DOM.estTendenciaAsesor)   STATE.filters.asesor.tendencia     = el.value;
                 marcarFiltroActivo(el); recargar();
             });
         });
@@ -714,10 +789,10 @@ if (!defined('SISTEMA_REGISTROS')) {
         [DOM.estDelegado, DOM.estFechaDescuDelegado, DOM.estFechaHastaDelegado, DOM.estTendenciaDelegado].forEach(function (el) {
             if (!el) return;
             el.addEventListener('change', function () {
-                if (el === DOM.estDelegado)               STATE.filters.delegado.delegado    = el.value;
-                else if (el === DOM.estFechaDescuDelegado) STATE.filters.delegado.fecha_desde = el.value;
-                else if (el === DOM.estFechaHastaDelegado) STATE.filters.delegado.fecha_hasta = el.value;
-                else if (el === DOM.estTendenciaDelegado)  STATE.filters.delegado.tendencia   = el.value;
+                if      (el === DOM.estDelegado)            STATE.filters.delegado.delegado    = el.value;
+                else if (el === DOM.estFechaDescuDelegado)  STATE.filters.delegado.fecha_desde = el.value;
+                else if (el === DOM.estFechaHastaDelegado)  STATE.filters.delegado.fecha_hasta = el.value;
+                else if (el === DOM.estTendenciaDelegado)   STATE.filters.delegado.tendencia   = el.value;
                 marcarFiltroActivo(el); recargar();
             });
         });
@@ -725,11 +800,11 @@ if (!defined('SISTEMA_REGISTROS')) {
         [DOM.estFilterCurso, DOM.estFilterPais, DOM.estFilterCiudad, DOM.estFilterMetodoPago, DOM.estFilterWeb].forEach(function (el) {
             if (!el) return;
             el.addEventListener('change', function () {
-                if (el === DOM.estFilterCurso)       STATE.subFilters.curso       = el.value;
-                else if (el === DOM.estFilterPais)       STATE.subFilters.pais        = el.value;
-                else if (el === DOM.estFilterCiudad)     STATE.subFilters.ciudad      = el.value;
-                else if (el === DOM.estFilterMetodoPago) STATE.subFilters.metodo_pago = el.value;
-                else if (el === DOM.estFilterWeb)        STATE.subFilters.web         = el.value;
+                if      (el === DOM.estFilterCurso)       STATE.subFilters.curso       = el.value;
+                else if (el === DOM.estFilterPais)        STATE.subFilters.pais        = el.value;
+                else if (el === DOM.estFilterCiudad)      STATE.subFilters.ciudad      = el.value;
+                else if (el === DOM.estFilterMetodoPago)  STATE.subFilters.metodo_pago = el.value;
+                else if (el === DOM.estFilterWeb)         STATE.subFilters.web         = el.value;
                 marcarFiltroActivo(el); recargar();
             });
         });
@@ -812,7 +887,6 @@ if (!defined('SISTEMA_REGISTROS')) {
             }
 
             // ── 2. PESTAÑAS INDIVIDUALES ──
-            // Cada pestaña se controla por separado con su propio permiso
             var tabPermisos = {
                 'tab_general':  'estTabGeneral',
                 'tab_asesor':   'estTabAsesor',
@@ -821,9 +895,7 @@ if (!defined('SISTEMA_REGISTROS')) {
             Object.keys(tabPermisos).forEach(function(permKey){
                 var visible = (es[permKey] !== false);
                 setVisible(tabPermisos[permKey], visible);
-                // Si la pestaña activa se oculta, redirigir a la primera visible
                 if (!visible && STATE.currentTab === permKey.replace('tab_','')) {
-                    // Buscar la primera tab visible y activarla
                     var tabs = ['general','asesor','delegado'];
                     for (var i=0; i<tabs.length; i++) {
                         var tpk = 'tab_' + tabs[i];
@@ -834,29 +906,29 @@ if (!defined('SISTEMA_REGISTROS')) {
 
             // ── 3. FILTRO FORMULARIO / SELECTOR PRINCIPAL ──
             var mostrarFormulario = (es.filtro_formulario !== false);
-            setVisible('estLabelFormulario',  mostrarFormulario);
+            setVisible('estLabelFormulario', mostrarFormulario);
             setVisibleEl(DOM.estFormularioGeneral, mostrarFormulario);
-            setVisible('estLabelAsesor',      mostrarFormulario);
-            setVisibleEl(DOM.estAsesor,       mostrarFormulario);
-            setVisible('estLabelDelegado',    mostrarFormulario);
-            setVisibleEl(DOM.estDelegado,     mostrarFormulario);
+            setVisible('estLabelAsesor',     mostrarFormulario);
+            setVisibleEl(DOM.estAsesor,      mostrarFormulario);
+            setVisible('estLabelDelegado',   mostrarFormulario);
+            setVisibleEl(DOM.estDelegado,    mostrarFormulario);
 
-            // ── 4. FILTRO FECHA (incluye separadores "a") ──
+            // ── 4. FILTRO FECHA ──
             var mostrarFecha = (es.filtro_fecha_hora !== false);
-            setVisible('estLabelFechaGeneral',     mostrarFecha);
-            setVisibleEl(DOM.estFechaDesdeGeneral, mostrarFecha);
-            setVisible('estFechaSepGeneral',       mostrarFecha);
-            setVisibleEl(DOM.estFechaHastaGeneral, mostrarFecha);
-            setVisible('estLabelFechaAsesor',      mostrarFecha);
-            setVisibleEl(DOM.estFechaDesdeAsesor,  mostrarFecha);
-            setVisible('estFechaSepAsesor',        mostrarFecha);
-            setVisibleEl(DOM.estFechaHastaAsesor,  mostrarFecha);
-            setVisible('estLabelFechaDelegado',    mostrarFecha);
-            setVisibleEl(DOM.estFechaDescuDelegado,mostrarFecha);
-            setVisible('estFechaSepDelegado',      mostrarFecha);
-            setVisibleEl(DOM.estFechaHastaDelegado,mostrarFecha);
+            setVisible('estLabelFechaGeneral',      mostrarFecha);
+            setVisibleEl(DOM.estFechaDesdeGeneral,  mostrarFecha);
+            setVisible('estFechaSepGeneral',        mostrarFecha);
+            setVisibleEl(DOM.estFechaHastaGeneral,  mostrarFecha);
+            setVisible('estLabelFechaAsesor',       mostrarFecha);
+            setVisibleEl(DOM.estFechaDesdeAsesor,   mostrarFecha);
+            setVisible('estFechaSepAsesor',         mostrarFecha);
+            setVisibleEl(DOM.estFechaHastaAsesor,   mostrarFecha);
+            setVisible('estLabelFechaDelegado',     mostrarFecha);
+            setVisibleEl(DOM.estFechaDescuDelegado, mostrarFecha);
+            setVisible('estFechaSepDelegado',       mostrarFecha);
+            setVisibleEl(DOM.estFechaHastaDelegado, mostrarFecha);
 
-            // ── 5. FILTRO TENDENCIA ── (usa clases .est-tendencia-label / .est-tendencia-select)
+            // ── 5. FILTRO TENDENCIA ──
             var mostrarTendencia = (es.filtro_tendencia !== false);
             document.querySelectorAll('.est-tendencia-label').forEach(function(el){ el.style.display = mostrarTendencia ? '' : 'none'; });
             document.querySelectorAll('.est-tendencia-select').forEach(function(el){ el.style.display = mostrarTendencia ? '' : 'none'; });
