@@ -47,6 +47,30 @@ if (!estaAutenticado() || !esAdministrador()) {
     </div>
 </div>
 
+<!-- MODAL: CONFIRMAR ELIMINAR CAMPO DINÁMICO -->
+<div class="modal-overlay" id="modalConfirmCampo">
+    <div class="modal" style="max-width:420px;">
+        <div class="modal-header" style="background:linear-gradient(135deg,var(--rojo) 0%,#e63200 100%);">
+            <div class="modal-header-left">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Eliminar Campo Dinámico</h3>
+            </div>
+            <button class="modal-close-btn" id="btnCloseCampo"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" style="text-align:center;padding:24px 20px;">
+            <p id="modalCampoMsg" style="font-size:13px;color:var(--gris-oscuro);line-height:1.6;margin:0;"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancelar" id="btnCampoEliminarCancelar">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="button" class="btn" id="btnCampoEliminarAceptar" style="background:var(--rojo);color:var(--blanco);">
+                <i class="fas fa-trash"></i> Sí, eliminar todo
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="opciones-container" id="opcionesContainer">
 
     <!-- SECCIÓN 1: OPCIONES GLOBALES -->
@@ -333,6 +357,107 @@ if (!estaAutenticado() || !esAdministrador()) {
         </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- SECCIÓN 5: CAMPOS DINÁMICOS (NUEVA)               -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="opc-section">
+        <div class="opc-section-header" onclick="OPC.toggleSection(this)">
+            <h3><i class="fas fa-sliders-h"></i> Campos Dinámicos</h3>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="opc-section-body" id="secCamposDinamicos">
+            <div class="opc-info">
+                <i class="fas fa-info-circle"></i>
+                <span>Los campos dinámicos se almacenan en <code>campos_extra</code> y llegan desde el formulario de WordPress. Puedes crearlos antes o después de que lleguen los datos — los registros existentes se mostrarán automáticamente al crear el campo.</span>
+            </div>
+
+            <!-- Formulario agregar / editar campo -->
+            <div class="opc-cd-form" id="cdForm">
+                <div class="opc-row">
+                    <div class="opc-row-label"><i class="fas fa-code"></i> Nombre interno</div>
+                    <div class="opc-row-control">
+                        <input type="text" id="cdNombreCampo" placeholder="Ej: nivel_ingles" style="max-width:250px;">
+                        <span style="font-size:11px;color:#6b7280;margin-left:8px;">Solo letras, números y guion bajo. Debe coincidir exactamente con el campo del formulario.</span>
+                    </div>
+                </div>
+                <div class="opc-row">
+                    <div class="opc-row-label"><i class="fas fa-tag"></i> Etiqueta visible</div>
+                    <div class="opc-row-control">
+                        <input type="text" id="cdNombreMostrar" placeholder="Ej: Nivel de Inglés" style="max-width:250px;">
+                    </div>
+                </div>
+                <div class="opc-row">
+                    <div class="opc-row-label"><i class="fas fa-database"></i> Tipo de dato</div>
+                    <div class="opc-row-control">
+                        <select id="cdTipoDato" style="width:180px;" class="filter-select">
+                            <option value="texto">Texto</option>
+                            <option value="numero">Número</option>
+                            <option value="lista">Lista</option>
+                            <option value="fecha">Fecha</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="opc-row">
+                    <div class="opc-row-label"><i class="fas fa-toggle-on"></i> Opciones</div>
+                    <div class="opc-row-control" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;">
+                                <input type="checkbox" id="cdMostrarLista" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            Columna en tabla
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;">
+                                <input type="checkbox" id="cdMostrarFiltro" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            Filtro tipo lista
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;">
+                                <input type="checkbox" id="cdMostrarEstadisticas">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            Estadísticas
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;">
+                                <input type="checkbox" id="cdMostrarExcel" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            Exportar Excel
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;">
+                                <input type="checkbox" id="cdEsObligatorio">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            Obligatorio
+                        </label>
+                    </div>
+                </div>
+                <input type="hidden" id="cdEditId" value="">
+                <div class="opc-section-actions" style="padding-top:8px;">
+                    <button class="opc-btn opc-btn-success" id="btnGuardarCampo">
+                        <i class="fas fa-plus"></i> Agregar Campo
+                    </button>
+                    <button class="opc-btn" id="btnCancelarCampo" style="display:none;margin-left:8px;">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de campos configurados -->
+            <div style="margin-top:16px;">
+                <h4 style="font-size:13px;font-weight:600;color:var(--gris-oscuro);margin-bottom:8px;"><i class="fas fa-list"></i> Campos Configurados</h4>
+                <div id="camposDinamicosTabla">
+                    <div class="opc-empty"><i class="fas fa-spinner fa-spin"></i><p>Cargando...</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -342,6 +467,7 @@ var OPC = (function () {
     var CSRF = document.getElementById('csrfTokenDash') ? document.getElementById('csrfTokenDash').value : '';
     var selectedUserId = 0;
     var pendingConfirm = { uid: 0, estado: '' };
+    var pendingDeleteCampo = { id: 0, nombre: '' };
 
     // ── FIX: guardar el timer para poder limpiarlo al navegar ──
     var _consultoresTimer = null;
@@ -363,6 +489,7 @@ var OPC = (function () {
         cargarApiKeys();
         cargarUsuarios();
         cargarConsultoresOpc();
+        cargarCamposDinamicos();
         bindEvents();
 
         // ── FIX: guardar referencia del timer ──
@@ -437,9 +564,32 @@ var OPC = (function () {
                 if (e.target === overlay) cerrarModalConfirm();
             });
         }
+
+        // Campos dinámicos events
+        var btnGuardarCampo = document.getElementById('btnGuardarCampo');
+        if (btnGuardarCampo) btnGuardarCampo.addEventListener('click', guardarCampoDinamico);
+
+        var btnCancelarCampo = document.getElementById('btnCancelarCampo');
+        if (btnCancelarCampo) btnCancelarCampo.addEventListener('click', cancelarEditarCampo);
+
+        var btnCloseCampo = document.getElementById('btnCloseCampo');
+        if (btnCloseCampo) btnCloseCampo.addEventListener('click', cerrarModalCampo);
+
+        var btnCampoEliminarCancelar = document.getElementById('btnCampoEliminarCancelar');
+        if (btnCampoEliminarCancelar) btnCampoEliminarCancelar.addEventListener('click', cerrarModalCampo);
+
+        var btnCampoEliminarAceptar = document.getElementById('btnCampoEliminarAceptar');
+        if (btnCampoEliminarAceptar) btnCampoEliminarAceptar.addEventListener('click', ejecutarEliminarCampo);
+
+        var overlayCampo = document.getElementById('modalConfirmCampo');
+        if (overlayCampo) {
+            overlayCampo.addEventListener('click', function (e) {
+                if (e.target === overlayCampo) cerrarModalCampo();
+            });
+        }
     }
 
-    // MODAL CONFIRMAR
+    // MODAL CONFIRMAR CONSULTOR
     function abrirModalConfirm(uid, estado, nombre) {
         pendingConfirm.uid = uid;
         pendingConfirm.estado = estado;
@@ -754,14 +904,211 @@ var OPC = (function () {
         abrirModalConfirm(uid, estado, nombre || 'este consultor');
     }
 
+    // ══════════════════════════════════════════════════
+    // CAMPOS DINÁMICOS
+    // ══════════════════════════════════════════════════
+    function cargarCamposDinamicos() {
+        fetch('includes/ajax/opciones_sistema.php?accion=get_campos_dinamicos', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) renderCamposDinamicos(data.campos);
+            else document.getElementById('camposDinamicosTabla').innerHTML = '<div class="opc-empty"><i class="fas fa-exclamation-circle"></i><p>Error cargando campos</p></div>';
+        })
+        .catch(function () {
+            document.getElementById('camposDinamicosTabla').innerHTML = '<div class="opc-empty"><i class="fas fa-exclamation-circle"></i><p>Error de conexión</p></div>';
+        });
+    }
+
+    function renderCamposDinamicos(campos) {
+        var cont = document.getElementById('camposDinamicosTabla');
+        if (!campos || campos.length === 0) {
+            cont.innerHTML = '<div class="opc-empty"><i class="fas fa-sliders-h"></i><p>No hay campos dinámicos configurados aún.</p></div>';
+            return;
+        }
+        var html = '<table class="opc-api-table"><thead><tr>'
+            + '<th>Nombre interno</th><th>Etiqueta</th><th>Tipo</th>'
+            + '<th style="text-align:center;">Tabla</th>'
+            + '<th style="text-align:center;">Filtro</th>'
+            + '<th style="text-align:center;">Stats</th>'
+            + '<th style="text-align:center;">Excel</th>'
+            + '<th style="text-align:center;">Activo</th>'
+            + '<th style="width:110px;">Acciones</th>'
+            + '</tr></thead><tbody>';
+        campos.forEach(function (c) {
+            var icon = function(v) { return v == 1 ? '<span style="color:#059669;font-size:14px;">✔</span>' : '<span style="color:#d1d5db;font-size:14px;">✖</span>'; };
+            var activoClass = c.activo == 1 ? 'api-status-active' : 'api-status-inactive';
+            var activoText  = c.activo == 1 ? 'Activo' : 'Inactivo';
+            html += '<tr>';
+            html += '<td><code style="font-size:11px;">' + esc(c.nombre_campo) + '</code></td>';
+            html += '<td><strong>' + esc(c.nombre_mostrar) + '</strong></td>';
+            html += '<td><span style="font-size:11px;background:#f3f4f6;padding:2px 6px;border-radius:4px;">' + esc(c.tipo_dato) + '</span></td>';
+            html += '<td style="text-align:center;">' + icon(c.mostrar_lista) + '</td>';
+            html += '<td style="text-align:center;">' + icon(c.mostrar_filtro) + '</td>';
+            html += '<td style="text-align:center;">' + icon(c.mostrar_estadisticas) + '</td>';
+            html += '<td style="text-align:center;">' + icon(c.mostrar_excel) + '</td>';
+            html += '<td style="text-align:center;"><span class="' + activoClass + '">' + activoText + '</span></td>';
+            html += '<td>';
+            html += '<button class="opc-btn opc-btn-sm" style="background:#2271b1;color:#fff;" onclick="OPC.editarCampo(' + c.id + ')"><i class="fas fa-pencil-alt"></i></button> ';
+            html += '<button class="opc-btn opc-btn-sm opc-btn-danger" onclick="OPC.confirmarEliminarCampo(' + c.id + ',\'' + esc(c.nombre_campo) + '\',\'' + esc(c.nombre_mostrar) + '\')"><i class="fas fa-trash"></i></button>';
+            html += '</td></tr>';
+        });
+        html += '</tbody></table>';
+        cont.innerHTML = html;
+    }
+
+    function guardarCampoDinamico() {
+        var editId       = document.getElementById('cdEditId').value;
+        var nombreCampo  = document.getElementById('cdNombreCampo').value.trim();
+        var nombreMostrar= document.getElementById('cdNombreMostrar').value.trim();
+        var tipoDato     = document.getElementById('cdTipoDato').value;
+        var mostrarLista = document.getElementById('cdMostrarLista').checked ? 1 : 0;
+        var mostrarFiltro= document.getElementById('cdMostrarFiltro').checked ? 1 : 0;
+        var mostrarStats = document.getElementById('cdMostrarEstadisticas').checked ? 1 : 0;
+        var mostrarExcel = document.getElementById('cdMostrarExcel').checked ? 1 : 0;
+        var esOblig      = document.getElementById('cdEsObligatorio').checked ? 1 : 0;
+
+        if (!nombreMostrar) { if (typeof mostrarToast === 'function') mostrarToast('La etiqueta visible es obligatoria', 'error'); return; }
+        if (!editId && !nombreCampo) { if (typeof mostrarToast === 'function') mostrarToast('El nombre interno es obligatorio', 'error'); return; }
+
+        var accionAjax = editId ? 'update_campo_dinamico' : 'save_campo_dinamico';
+        var btn = document.getElementById('btnGuardarCampo');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        var fd = new FormData();
+        fd.append('accion',               accionAjax);
+        fd.append('csrf_token',           CSRF);
+        fd.append('nombre_mostrar',       nombreMostrar);
+        fd.append('tipo_dato',            tipoDato);
+        fd.append('mostrar_lista',        mostrarLista);
+        fd.append('mostrar_filtro',       mostrarFiltro);
+        fd.append('mostrar_estadisticas', mostrarStats);
+        fd.append('mostrar_excel',        mostrarExcel);
+        fd.append('es_obligatorio',       esOblig);
+        if (editId) {
+            fd.append('id',     editId);
+            fd.append('activo', 1);
+        } else {
+            fd.append('nombre_campo', nombreCampo);
+        }
+
+        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            btn.disabled = false;
+            btn.innerHTML = editId ? '<i class="fas fa-save"></i> Guardar Cambios' : '<i class="fas fa-plus"></i> Agregar Campo';
+            if (data.success) {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success');
+                cancelarEditarCampo();
+                cargarCamposDinamicos();
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
+            }
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus"></i> Agregar Campo';
+            if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
+        });
+    }
+
+    function editarCampo(id) {
+        fetch('includes/ajax/opciones_sistema.php?accion=get_campos_dinamicos', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (!data.success) return;
+            var campo = null;
+            data.campos.forEach(function (c) { if (c.id == id) campo = c; });
+            if (!campo) return;
+
+            document.getElementById('cdEditId').value              = campo.id;
+            document.getElementById('cdNombreCampo').value         = campo.nombre_campo;
+            document.getElementById('cdNombreCampo').disabled      = true; // no editar nombre interno
+            document.getElementById('cdNombreMostrar').value       = campo.nombre_mostrar;
+            document.getElementById('cdTipoDato').value            = campo.tipo_dato;
+            document.getElementById('cdMostrarLista').checked      = campo.mostrar_lista == 1;
+            document.getElementById('cdMostrarFiltro').checked     = campo.mostrar_filtro == 1;
+            document.getElementById('cdMostrarEstadisticas').checked = campo.mostrar_estadisticas == 1;
+            document.getElementById('cdMostrarExcel').checked      = campo.mostrar_excel == 1;
+            document.getElementById('cdEsObligatorio').checked     = campo.es_obligatorio == 1;
+
+            var btn = document.getElementById('btnGuardarCampo');
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+
+            document.getElementById('btnCancelarCampo').style.display = '';
+
+            // Scroll al formulario
+            var secBody = document.getElementById('secCamposDinamicos');
+            if (secBody) secBody.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    function cancelarEditarCampo() {
+        document.getElementById('cdEditId').value              = '';
+        document.getElementById('cdNombreCampo').value         = '';
+        document.getElementById('cdNombreCampo').disabled      = false;
+        document.getElementById('cdNombreMostrar').value       = '';
+        document.getElementById('cdTipoDato').value            = 'texto';
+        document.getElementById('cdMostrarLista').checked      = true;
+        document.getElementById('cdMostrarFiltro').checked     = true;
+        document.getElementById('cdMostrarEstadisticas').checked = false;
+        document.getElementById('cdMostrarExcel').checked      = true;
+        document.getElementById('cdEsObligatorio').checked     = false;
+        var btn = document.getElementById('btnGuardarCampo');
+        btn.innerHTML = '<i class="fas fa-plus"></i> Agregar Campo';
+        document.getElementById('btnCancelarCampo').style.display = 'none';
+    }
+
+    function confirmarEliminarCampo(id, nombreCampo, nombreMostrar) {
+        pendingDeleteCampo.id     = id;
+        pendingDeleteCampo.nombre = nombreMostrar;
+        document.getElementById('modalCampoMsg').innerHTML =
+            '¿Está seguro que desea eliminar el campo <strong>"' + esc(nombreMostrar) + '"</strong> (<code>' + esc(nombreCampo) + '</code>)?<br><br>' +
+            '<span style="color:#dc2626;font-size:11px;">⚠️ Esta acción eliminará el campo de la configuración <strong>y borrará sus datos de TODOS los registros</strong>. Esta acción es <strong>irreversible</strong>.</span>';
+        document.getElementById('modalConfirmCampo').classList.add('active');
+    }
+
+    function cerrarModalCampo() {
+        document.getElementById('modalConfirmCampo').classList.remove('active');
+        pendingDeleteCampo.id = 0;
+        pendingDeleteCampo.nombre = '';
+    }
+
+    function ejecutarEliminarCampo() {
+        if (pendingDeleteCampo.id <= 0) return;
+        var id = pendingDeleteCampo.id;
+        cerrarModalCampo();
+
+        var fd = new FormData();
+        fd.append('accion',      'delete_campo_dinamico');
+        fd.append('id',          id);
+        fd.append('csrf_token',  CSRF);
+
+        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success');
+                cargarCamposDinamicos();
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
+            }
+        })
+        .catch(function () {
+            if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
+        });
+    }
+
     init();
 
     return {
-        toggleSection:  toggleSection,
-        toggleApiKey:   toggleApiKey,
-        eliminarApiKey: eliminarApiKey,
-        copiarTexto:    copiarTexto,
-        toggleConsultor:toggleConsultor
+        toggleSection:         toggleSection,
+        toggleApiKey:          toggleApiKey,
+        eliminarApiKey:        eliminarApiKey,
+        copiarTexto:           copiarTexto,
+        toggleConsultor:       toggleConsultor,
+        editarCampo:           editarCampo,
+        confirmarEliminarCampo:confirmarEliminarCampo
     };
 
 })();
