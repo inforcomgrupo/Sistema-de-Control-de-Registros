@@ -51,7 +51,7 @@ try {
                 $opciones[$row['opcion']] = $row['valor'];
             }
             echo json_encode([
-                'success' => true,
+                'success'  => true,
                 'opciones' => $opciones
             ]);
             break;
@@ -72,7 +72,7 @@ try {
             }
 
             echo json_encode([
-                'success' => true,
+                'success'  => true,
                 'opciones' => $opciones
             ]);
             break;
@@ -170,7 +170,6 @@ try {
                 exit;
             }
 
-            // Validar que no exista
             $stmtCheck = $db->prepare("SELECT id FROM api_keys WHERE dominio = :dominio");
             $stmtCheck->execute([':dominio' => $dominio]);
             if ($stmtCheck->fetch()) {
@@ -178,7 +177,6 @@ try {
                 exit;
             }
 
-            // Generar API Key y Secret
             $apiKey    = bin2hex(random_bytes(32)); // 64 caracteres
             $apiSecret = bin2hex(random_bytes(64)); // 128 caracteres
 
@@ -341,11 +339,7 @@ try {
             $stmt->execute([':uid' => $usuarioId]);
             $row = $stmt->fetch();
 
-            if ($row) {
-                $permisos = json_decode($row['valor'], true);
-            } else {
-                $permisos = [];
-            }
+            $permisos = $row ? json_decode($row['valor'], true) : [];
 
             echo json_encode(['success' => true, 'permisos' => $permisos]);
             break;
@@ -482,6 +476,7 @@ try {
 
         // =====================================================
         // CAMPOS DINÁMICOS - LISTAR (ADMIN SOLAMENTE)
+        // ── MODIFICADO: incluye los 5 nuevos campos de BD ──
         // =====================================================
         case 'get_campos_dinamicos':
             if (!esAdministrador()) {
@@ -489,13 +484,23 @@ try {
                 exit;
             }
 
-            $stmt = $db->query("SELECT id, nombre_campo, nombre_mostrar, tipo_dato, mostrar_lista, mostrar_filtro, mostrar_estadisticas, mostrar_excel, es_obligatorio, activo, orden, fecha_creacion FROM campos_dinamicos ORDER BY orden ASC, fecha_creacion ASC");
+            $stmt = $db->query(
+                "SELECT id, nombre_campo, nombre_mostrar, tipo_dato,
+                        mostrar_lista, mostrar_lista_asesor, mostrar_lista_delegado,
+                        mostrar_filtro, mostrar_filtro_asesor, mostrar_filtro_delegado,
+                        mostrar_filtro_estadisticas,
+                        mostrar_estadisticas, mostrar_excel,
+                        es_obligatorio, activo, orden, fecha_creacion
+                 FROM campos_dinamicos
+                 ORDER BY orden ASC, fecha_creacion ASC"
+            );
             $campos = $stmt->fetchAll();
             echo json_encode(['success' => true, 'campos' => $campos]);
             break;
 
         // =====================================================
         // CAMPOS DINÁMICOS - GUARDAR NUEVO (ADMIN SOLAMENTE)
+        // ── MODIFICADO: lee y guarda los 5 nuevos campos ──
         // =====================================================
         case 'save_campo_dinamico':
             if (!esAdministrador()) {
@@ -513,27 +518,30 @@ try {
                 exit;
             }
 
-            $nombreCampo         = isset($_POST['nombre_campo'])         ? trim($_POST['nombre_campo'])         : '';
-            $nombreMostrar       = isset($_POST['nombre_mostrar'])       ? trim($_POST['nombre_mostrar'])       : '';
-            $tipoDato            = isset($_POST['tipo_dato'])            ? trim($_POST['tipo_dato'])            : 'texto';
-            $mostrarLista        = isset($_POST['mostrar_lista'])        ? (int)$_POST['mostrar_lista']        : 1;
-            $mostrarFiltro       = isset($_POST['mostrar_filtro'])       ? (int)$_POST['mostrar_filtro']       : 1;
-            $mostrarEstadisticas = isset($_POST['mostrar_estadisticas']) ? (int)$_POST['mostrar_estadisticas'] : 0;
-            $mostrarExcel        = isset($_POST['mostrar_excel'])        ? (int)$_POST['mostrar_excel']        : 1;
-            $esObligatorio       = isset($_POST['es_obligatorio'])       ? (int)$_POST['es_obligatorio']       : 0;
+            $nombreCampo               = isset($_POST['nombre_campo'])                ? trim($_POST['nombre_campo'])                : '';
+            $nombreMostrar             = isset($_POST['nombre_mostrar'])              ? trim($_POST['nombre_mostrar'])              : '';
+            $tipoDato                  = isset($_POST['tipo_dato'])                   ? trim($_POST['tipo_dato'])                   : 'texto';
+            $mostrarLista              = isset($_POST['mostrar_lista'])               ? (int)$_POST['mostrar_lista']               : 1;
+            $mostrarListaAsesor        = isset($_POST['mostrar_lista_asesor'])        ? (int)$_POST['mostrar_lista_asesor']        : 1;
+            $mostrarListaDelegado      = isset($_POST['mostrar_lista_delegado'])      ? (int)$_POST['mostrar_lista_delegado']      : 1;
+            $mostrarFiltro             = isset($_POST['mostrar_filtro'])              ? (int)$_POST['mostrar_filtro']              : 1;
+            $mostrarFiltroAsesor       = isset($_POST['mostrar_filtro_asesor'])       ? (int)$_POST['mostrar_filtro_asesor']       : 1;
+            $mostrarFiltroDelegado     = isset($_POST['mostrar_filtro_delegado'])     ? (int)$_POST['mostrar_filtro_delegado']     : 1;
+            $mostrarFiltroEstadisticas = isset($_POST['mostrar_filtro_estadisticas']) ? (int)$_POST['mostrar_filtro_estadisticas'] : 0;
+            $mostrarEstadisticas       = isset($_POST['mostrar_estadisticas'])        ? (int)$_POST['mostrar_estadisticas']        : 0;
+            $mostrarExcel              = isset($_POST['mostrar_excel'])               ? (int)$_POST['mostrar_excel']               : 1;
+            $esObligatorio             = isset($_POST['es_obligatorio'])              ? (int)$_POST['es_obligatorio']              : 0;
 
             if (empty($nombreCampo) || empty($nombreMostrar)) {
                 echo json_encode(['success' => false, 'message' => 'Nombre interno y etiqueta son obligatorios']);
                 exit;
             }
 
-            // Validar formato nombre_campo (solo letras, números y guion bajo)
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $nombreCampo)) {
                 echo json_encode(['success' => false, 'message' => 'El nombre interno solo puede contener letras, números y guion bajo (_)']);
                 exit;
             }
 
-            // Verificar que no exista
             $stmtCheck = $db->prepare("SELECT id FROM campos_dinamicos WHERE nombre_campo = :nombre_campo");
             $stmtCheck->execute([':nombre_campo' => $nombreCampo]);
             if ($stmtCheck->fetch()) {
@@ -544,21 +552,36 @@ try {
             $tiposPermitidos = ['texto', 'numero', 'lista', 'fecha'];
             if (!in_array($tipoDato, $tiposPermitidos)) $tipoDato = 'texto';
 
-            // Obtener el máximo orden actual
             $stmtOrden = $db->query("SELECT COALESCE(MAX(orden), 0) + 1 as next_orden FROM campos_dinamicos");
             $nextOrden = (int)$stmtOrden->fetch()['next_orden'];
 
             $stmtIns = $db->prepare(
                 "INSERT INTO campos_dinamicos
-                 (nombre_campo, nombre_mostrar, tipo_dato, mostrar_lista, mostrar_filtro, mostrar_estadisticas, mostrar_excel, es_obligatorio, activo, orden, fuente)
-                 VALUES (:nc, :nm, :td, :ml, :mf, :me, :mx, :eo, 1, :orden, 'manual')"
+                 (nombre_campo, nombre_mostrar, tipo_dato,
+                  mostrar_lista, mostrar_lista_asesor, mostrar_lista_delegado,
+                  mostrar_filtro, mostrar_filtro_asesor, mostrar_filtro_delegado,
+                  mostrar_filtro_estadisticas,
+                  mostrar_estadisticas, mostrar_excel,
+                  es_obligatorio, activo, orden, fuente)
+                 VALUES
+                 (:nc, :nm, :td,
+                  :ml, :mla, :mld,
+                  :mf, :mfa, :mfd,
+                  :mfe,
+                  :me, :mx,
+                  :eo, 1, :orden, 'manual')"
             );
             $stmtIns->execute([
                 ':nc'    => $nombreCampo,
                 ':nm'    => $nombreMostrar,
                 ':td'    => $tipoDato,
                 ':ml'    => $mostrarLista,
+                ':mla'   => $mostrarListaAsesor,
+                ':mld'   => $mostrarListaDelegado,
                 ':mf'    => $mostrarFiltro,
+                ':mfa'   => $mostrarFiltroAsesor,
+                ':mfd'   => $mostrarFiltroDelegado,
+                ':mfe'   => $mostrarFiltroEstadisticas,
                 ':me'    => $mostrarEstadisticas,
                 ':mx'    => $mostrarExcel,
                 ':eo'    => $esObligatorio,
@@ -578,6 +601,7 @@ try {
 
         // =====================================================
         // CAMPOS DINÁMICOS - ACTUALIZAR (ADMIN SOLAMENTE)
+        // ── MODIFICADO: actualiza los 5 nuevos campos ──
         // =====================================================
         case 'update_campo_dinamico':
             if (!esAdministrador()) {
@@ -595,15 +619,20 @@ try {
                 exit;
             }
 
-            $id                  = isset($_POST['id'])                   ? (int)$_POST['id']                   : 0;
-            $nombreMostrar       = isset($_POST['nombre_mostrar'])       ? trim($_POST['nombre_mostrar'])       : '';
-            $tipoDato            = isset($_POST['tipo_dato'])            ? trim($_POST['tipo_dato'])            : 'texto';
-            $mostrarLista        = isset($_POST['mostrar_lista'])        ? (int)$_POST['mostrar_lista']        : 1;
-            $mostrarFiltro       = isset($_POST['mostrar_filtro'])       ? (int)$_POST['mostrar_filtro']       : 1;
-            $mostrarEstadisticas = isset($_POST['mostrar_estadisticas']) ? (int)$_POST['mostrar_estadisticas'] : 0;
-            $mostrarExcel        = isset($_POST['mostrar_excel'])        ? (int)$_POST['mostrar_excel']        : 1;
-            $esObligatorio       = isset($_POST['es_obligatorio'])       ? (int)$_POST['es_obligatorio']       : 0;
-            $activo              = isset($_POST['activo'])               ? (int)$_POST['activo']               : 1;
+            $id                        = isset($_POST['id'])                          ? (int)$_POST['id']                          : 0;
+            $nombreMostrar             = isset($_POST['nombre_mostrar'])              ? trim($_POST['nombre_mostrar'])              : '';
+            $tipoDato                  = isset($_POST['tipo_dato'])                   ? trim($_POST['tipo_dato'])                   : 'texto';
+            $mostrarLista              = isset($_POST['mostrar_lista'])               ? (int)$_POST['mostrar_lista']               : 1;
+            $mostrarListaAsesor        = isset($_POST['mostrar_lista_asesor'])        ? (int)$_POST['mostrar_lista_asesor']        : 1;
+            $mostrarListaDelegado      = isset($_POST['mostrar_lista_delegado'])      ? (int)$_POST['mostrar_lista_delegado']      : 1;
+            $mostrarFiltro             = isset($_POST['mostrar_filtro'])              ? (int)$_POST['mostrar_filtro']              : 1;
+            $mostrarFiltroAsesor       = isset($_POST['mostrar_filtro_asesor'])       ? (int)$_POST['mostrar_filtro_asesor']       : 1;
+            $mostrarFiltroDelegado     = isset($_POST['mostrar_filtro_delegado'])     ? (int)$_POST['mostrar_filtro_delegado']     : 1;
+            $mostrarFiltroEstadisticas = isset($_POST['mostrar_filtro_estadisticas']) ? (int)$_POST['mostrar_filtro_estadisticas'] : 0;
+            $mostrarEstadisticas       = isset($_POST['mostrar_estadisticas'])        ? (int)$_POST['mostrar_estadisticas']        : 0;
+            $mostrarExcel              = isset($_POST['mostrar_excel'])               ? (int)$_POST['mostrar_excel']               : 1;
+            $esObligatorio             = isset($_POST['es_obligatorio'])              ? (int)$_POST['es_obligatorio']              : 0;
+            $activo                    = isset($_POST['activo'])                      ? (int)$_POST['activo']                      : 1;
 
             if ($id <= 0 || empty($nombreMostrar)) {
                 echo json_encode(['success' => false, 'message' => 'Datos inválidos']);
@@ -615,16 +644,31 @@ try {
 
             $stmtUp = $db->prepare(
                 "UPDATE campos_dinamicos SET
-                 nombre_mostrar = :nm, tipo_dato = :td, mostrar_lista = :ml,
-                 mostrar_filtro = :mf, mostrar_estadisticas = :me, mostrar_excel = :mx,
-                 es_obligatorio = :eo, activo = :activo
+                 nombre_mostrar             = :nm,
+                 tipo_dato                  = :td,
+                 mostrar_lista              = :ml,
+                 mostrar_lista_asesor       = :mla,
+                 mostrar_lista_delegado     = :mld,
+                 mostrar_filtro             = :mf,
+                 mostrar_filtro_asesor      = :mfa,
+                 mostrar_filtro_delegado    = :mfd,
+                 mostrar_filtro_estadisticas= :mfe,
+                 mostrar_estadisticas       = :me,
+                 mostrar_excel              = :mx,
+                 es_obligatorio             = :eo,
+                 activo                     = :activo
                  WHERE id = :id"
             );
             $stmtUp->execute([
                 ':nm'     => $nombreMostrar,
                 ':td'     => $tipoDato,
                 ':ml'     => $mostrarLista,
+                ':mla'    => $mostrarListaAsesor,
+                ':mld'    => $mostrarListaDelegado,
                 ':mf'     => $mostrarFiltro,
+                ':mfa'    => $mostrarFiltroAsesor,
+                ':mfd'    => $mostrarFiltroDelegado,
+                ':mfe'    => $mostrarFiltroEstadisticas,
                 ':me'     => $mostrarEstadisticas,
                 ':mx'     => $mostrarExcel,
                 ':eo'     => $esObligatorio,
@@ -646,6 +690,7 @@ try {
         // =====================================================
         // CAMPOS DINÁMICOS - ELIMINAR (ADMIN SOLAMENTE)
         // Elimina el campo Y limpia sus datos de todos los registros
+        // ── Sin cambios funcionales ──
         // =====================================================
         case 'delete_campo_dinamico':
             if (!esAdministrador()) {
@@ -669,7 +714,6 @@ try {
                 exit;
             }
 
-            // Obtener nombre_campo antes de eliminar
             $stmtGet = $db->prepare("SELECT nombre_campo, nombre_mostrar FROM campos_dinamicos WHERE id = :id");
             $stmtGet->execute([':id' => $id]);
             $campo = $stmtGet->fetch();
@@ -682,11 +726,11 @@ try {
             $nombreCampo   = $campo['nombre_campo'];
             $nombreMostrar = $campo['nombre_mostrar'];
 
-            // 1. Eliminar el campo dinámico
+            // 1. Eliminar la configuración del campo
             $stmtDel = $db->prepare("DELETE FROM campos_dinamicos WHERE id = :id");
             $stmtDel->execute([':id' => $id]);
 
-            // 2. Limpiar los datos de ESE campo en todos los registros
+            // 2. Limpiar los datos de ese campo en TODOS los registros
             $stmtClean = $db->prepare(
                 "UPDATE registros
                  SET campos_extra = JSON_REMOVE(campos_extra, :path)
