@@ -90,8 +90,24 @@ try {
     }
     unset($reg);
 
-    $stmtDyn = $db->query("SELECT nombre_campo, nombre_mostrar, tipo_dato, mostrar_lista, mostrar_filtro FROM campos_dinamicos WHERE activo = 1 ORDER BY orden ASC");
-    $camposDinamicos = $stmtDyn->fetchAll();
+    // ── Devolver todos los campos de visibilidad según vista_tipo ──
+    $colVisibilidad = 'mostrar_lista';
+    if ($vistaTipo === 'asesor')   $colVisibilidad = 'mostrar_lista_asesor';
+    if ($vistaTipo === 'delegado') $colVisibilidad = 'mostrar_lista_delegado';
+
+    $stmtDyn = $db->query(
+        "SELECT nombre_campo, nombre_mostrar, tipo_dato,
+                mostrar_lista, mostrar_lista_asesor, mostrar_lista_delegado,
+                mostrar_filtro, mostrar_filtro_asesor, mostrar_filtro_delegado,
+                mostrar_filtro_estadisticas
+         FROM campos_dinamicos WHERE activo = 1 ORDER BY orden ASC"
+    );
+    $camposDinamicosAll = $stmtDyn->fetchAll();
+
+    // Filtrar solo los que se muestran en esta vista
+    $camposDinamicos = array_values(array_filter($camposDinamicosAll, function($cd) use ($colVisibilidad) {
+        return $cd[$colVisibilidad] == 1;
+    }));
 
     if ($vistaTipo === 'asesor') {
         $stmtTotal = $db->query("SELECT COUNT(*) as total FROM registros WHERE asesor IS NOT NULL AND asesor != ''");
@@ -103,16 +119,15 @@ try {
     $totalGeneral = (int)$stmtTotal->fetch()['total'];
 
     echo json_encode([
-        'success'        => true,
-        'registros'      => $registros,
-        'total_filtered' => $totalFiltered,
-        'total_general'  => $totalGeneral,
-        'offset'         => $offset,
-        'limit'          => $limit,
-        'has_more'       => ($offset + $limit) < $totalFiltered,
+        'success'          => true,
+        'registros'        => $registros,
+        'total_filtered'   => $totalFiltered,
+        'total_general'    => $totalGeneral,
+        'offset'           => $offset,
+        'limit'            => $limit,
+        'has_more'         => ($offset + $limit) < $totalFiltered,
         'campos_dinamicos' => $camposDinamicos,
-        // ── FIX: timestamp del servidor para inicializar STATE.lastTs ──
-        'server_ts'      => date('Y-m-d H:i:s')
+        'server_ts'        => date('Y-m-d H:i:s')
     ]);
 
 } catch (PDOException $e) {
