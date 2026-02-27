@@ -358,7 +358,7 @@ if (!estaAutenticado() || !esAdministrador()) {
     </div>
 
     <!-- ══════════════════════════════════════════════════ -->
-    <!-- SECCIÓN 5: CAMPOS DINÁMICOS (NUEVA)               -->
+    <!-- SECCIÓN 5: CAMPOS DINÁMICOS                        -->
     <!-- ══════════════════════════════════════════════════ -->
     <div class="opc-section">
         <div class="opc-section-header" onclick="OPC.toggleSection(this)">
@@ -368,7 +368,7 @@ if (!estaAutenticado() || !esAdministrador()) {
         <div class="opc-section-body" id="secCamposDinamicos">
             <div class="opc-info">
                 <i class="fas fa-info-circle"></i>
-                <span>Los campos dinámicos se almacenan en <code>campos_extra</code> y llegan desde el formulario de WordPress. Puedes crearlos antes o después de que lleguen los datos — los registros existentes se mostrarán automáticamente al crear el campo.</span>
+                <span>Los campos dinámicos se almacenan en <code>campos_extra</code> y llegan desde el formulario de WordPress.</span>
             </div>
 
             <!-- Formulario agregar / editar campo -->
@@ -377,7 +377,7 @@ if (!estaAutenticado() || !esAdministrador()) {
                     <div class="opc-row-label"><i class="fas fa-code"></i> Nombre interno</div>
                     <div class="opc-row-control">
                         <input type="text" id="cdNombreCampo" placeholder="Ej: nivel_ingles" style="max-width:250px;">
-                        <span style="font-size:11px;color:#6b7280;margin-left:8px;">Solo letras, números y guion bajo. Debe coincidir exactamente con el campo del formulario.</span>
+                        <span style="font-size:11px;color:#6b7280;margin-left:8px;">Solo letras, números y guion bajo.</span>
                     </div>
                 </div>
                 <div class="opc-row">
@@ -397,42 +397,63 @@ if (!estaAutenticado() || !esAdministrador()) {
                         </select>
                     </div>
                 </div>
+
+                <!-- COLUMNA EN TABLA -->
                 <div class="opc-row">
-                    <div class="opc-row-label"><i class="fas fa-toggle-on"></i> Opciones</div>
-                    <div class="opc-row-control" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
+                    <div class="opc-row-label"><i class="fas fa-table"></i> Columna en tabla</div>
+                    <div class="opc-row-control" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;">
                         <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
-                            <label class="toggle-switch" style="margin:0;">
-                                <input type="checkbox" id="cdMostrarLista" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            Columna en tabla
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarLista" checked><span class="toggle-slider"></span></label>
+                            Dashboard
                         </label>
                         <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
-                            <label class="toggle-switch" style="margin:0;">
-                                <input type="checkbox" id="cdMostrarFiltro" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            Filtro tipo lista
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarListaAsesor" checked><span class="toggle-slider"></span></label>
+                            Asesores
                         </label>
                         <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
-                            <label class="toggle-switch" style="margin:0;">
-                                <input type="checkbox" id="cdMostrarEstadisticas">
-                                <span class="toggle-slider"></span>
-                            </label>
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarListaDelegado" checked><span class="toggle-slider"></span></label>
+                            Delegados
+                        </label>
+                    </div>
+                </div>
+
+                <!-- FILTRO TIPO LISTA -->
+                <div class="opc-row">
+                    <div class="opc-row-label"><i class="fas fa-filter"></i> Filtro tipo lista</div>
+                    <div class="opc-row-control" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;">
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarFiltro" checked><span class="toggle-slider"></span></label>
+                            Dashboard
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarFiltroAsesor" checked><span class="toggle-slider"></span></label>
+                            Asesores
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarFiltroDelegado" checked><span class="toggle-slider"></span></label>
+                            Delegados
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarFiltroEstadisticas"><span class="toggle-slider"></span></label>
                             Estadísticas
                         </label>
+                    </div>
+                </div>
+
+                <!-- OTRAS OPCIONES -->
+                <div class="opc-row">
+                    <div class="opc-row-label"><i class="fas fa-toggle-on"></i> Otras opciones</div>
+                    <div class="opc-row-control" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
                         <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
-                            <label class="toggle-switch" style="margin:0;">
-                                <input type="checkbox" id="cdMostrarExcel" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarEstadisticas"><span class="toggle-slider"></span></label>
+                            Estadísticas (gráfico)
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarExcel" checked><span class="toggle-slider"></span></label>
                             Exportar Excel
                         </label>
                         <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
-                            <label class="toggle-switch" style="margin:0;">
-                                <input type="checkbox" id="cdEsObligatorio">
-                                <span class="toggle-slider"></span>
-                            </label>
+                            <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdEsObligatorio"><span class="toggle-slider"></span></label>
                             Obligatorio
                         </label>
                     </div>
