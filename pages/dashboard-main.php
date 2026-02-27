@@ -130,6 +130,8 @@ if (!defined('SISTEMA_REGISTROS')) {
         <select class="filter-select" id="filterMoneda" title="Moneda"><option value="">Moneda</option></select>
         <select class="filter-select" id="filterMetodoPago" title="Método de Pago"><option value="">Método de Pago</option></select>
         <select class="filter-select" id="filterWeb" title="Web"><option value="">Web</option></select>
+        <!-- Filtros dinámicos (se renderizan por JS) -->
+        <div id="filtrosDinamicosRow" style="display:contents;"></div>
     </div>
 </div>
 
