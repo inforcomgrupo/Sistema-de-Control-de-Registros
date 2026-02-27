@@ -202,7 +202,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_moneda" checked> Moneda</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_metodo_pago" checked> Método de Pago</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_web" checked> Web</label></div>
-                            <!-- ── NUEVOS FILTROS DASHBOARD ── -->
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_formulario" checked> Formulario</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_busqueda" checked> Búsqueda</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="dashboard.filtro_mostrando" checked> Mostrando</label></div>
@@ -259,7 +258,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_moneda" checked> Moneda</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_metodo_pago" checked> Método de Pago</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_web" checked> Web</label></div>
-                            <!-- ── NUEVOS FILTROS ASESORES/DELEGADOS ── -->
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_formulario" checked> Formulario</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_busqueda" checked> Búsqueda</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="asesores_delegados.filtro_mostrando" checked> Mostrando</label></div>
@@ -284,14 +282,10 @@ if (!estaAutenticado() || !esAdministrador()) {
                 <!-- ========== ESTADÍSTICAS ========== -->
                 <div class="opc-perm-group">
                     <div class="opc-perm-group-title"><i class="fas fa-chart-bar"></i> Estadísticas</div>
-
-                    <!-- Acceso general -->
                     <div class="opc-perm-item">
                         <span class="opc-perm-item-label"><i class="fas fa-chart-pie"></i> Acceso a Estadísticas</span>
                         <label class="toggle-switch"><input type="checkbox" data-perm="estadisticas.acceso_estadisticas" checked><span class="toggle-slider"></span></label>
                     </div>
-
-                    <!-- Pestañas (una por una) -->
                     <div class="opc-perm-subgroup">
                         <div class="opc-perm-subgroup-title"><i class="fas fa-folder"></i> Pestañas</div>
                         <div class="opc-perm-grid">
@@ -300,14 +294,13 @@ if (!estaAutenticado() || !esAdministrador()) {
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.tab_delegado" checked> Delegado</label></div>
                         </div>
                     </div>
-
-                    <!-- Filtros visibles -->
                     <div class="opc-perm-subgroup">
                         <div class="opc-perm-subgroup-title"><i class="fas fa-filter"></i> Filtros visibles</div>
                         <div class="opc-perm-grid">
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_formulario" checked> Formulario / Selector</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_fecha_hora" checked> Fecha y Hora</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_limpiar" checked> Limpiar</label></div>
+                            <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_tendencia" checked> Tendencia</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_curso" checked> Sub-filtro Curso</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_pais" checked> Sub-filtro País</label></div>
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_ciudad" checked> Sub-filtro Ciudad</label></div>
@@ -315,8 +308,6 @@ if (!estaAutenticado() || !esAdministrador()) {
                             <div class="opc-perm-item-mini"><label><input type="checkbox" data-perm="estadisticas.filtro_web" checked> Sub-filtro Web</label></div>
                         </div>
                     </div>
-
-                    <!-- Gráficos visibles -->
                     <div class="opc-perm-subgroup">
                         <div class="opc-perm-subgroup-title"><i class="fas fa-chart-line"></i> Gráficos visibles</div>
                         <div class="opc-perm-grid">
@@ -433,6 +424,7 @@ if (!estaAutenticado() || !esAdministrador()) {
                             <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarFiltroDelegado" checked><span class="toggle-slider"></span></label>
                             Delegados
                         </label>
+                        <!-- ── CORREGIDO: era checkbox sin checked, ahora se restaura correctamente en JS ── -->
                         <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
                             <label class="toggle-switch" style="margin:0;"><input type="checkbox" id="cdMostrarFiltroEstadisticas"><span class="toggle-slider"></span></label>
                             Estadísticas
@@ -489,8 +481,6 @@ var OPC = (function () {
     var selectedUserId = 0;
     var pendingConfirm = { uid: 0, estado: '' };
     var pendingDeleteCampo = { id: 0, nombre: '' };
-
-    // ── FIX: guardar el timer para poder limpiarlo al navegar ──
     var _consultoresTimer = null;
 
     function toggleSection(header) {
@@ -512,23 +502,14 @@ var OPC = (function () {
         cargarConsultoresOpc();
         cargarCamposDinamicos();
         bindEvents();
-
-        // ── FIX: guardar referencia del timer ──
         _consultoresTimer = setInterval(cargarConsultoresOpc, 8000);
-
-        // ── FIX: limpiar el timer cuando se navegue a otra página ──
         var _self = document.getElementById('opcionesContainer');
         if (_self) {
             var observer = new MutationObserver(function () {
-                if (!document.getElementById('opcionesContainer')) {
-                    clearInterval(_consultoresTimer);
-                    observer.disconnect();
-                }
+                if (!document.getElementById('opcionesContainer')) { clearInterval(_consultoresTimer); observer.disconnect(); }
             });
             var contentArea = document.getElementById('contentArea');
-            if (contentArea) {
-                observer.observe(contentArea, { childList: true, subtree: false });
-            }
+            if (contentArea) observer.observe(contentArea, { childList: true, subtree: false });
         }
     }
 
@@ -538,599 +519,306 @@ var OPC = (function () {
             toggleLogin.addEventListener('change', function () {
                 var status = document.getElementById('optLoginStatus');
                 var rowMsg = document.getElementById('rowLoginMensaje');
-                if (this.checked) {
-                    status.textContent = 'Habilitado';
-                    status.className = 'toggle-status on';
-                    rowMsg.style.display = 'none';
-                } else {
-                    status.textContent = 'Deshabilitado';
-                    status.className = 'toggle-status off';
-                    rowMsg.style.display = '';
-                }
+                if (this.checked) { status.textContent = 'Habilitado'; status.className = 'toggle-status on'; rowMsg.style.display = 'none'; }
+                else              { status.textContent = 'Deshabilitado'; status.className = 'toggle-status off'; rowMsg.style.display = ''; }
             });
         }
-
-        var btnG = document.getElementById('btnGuardarGlobales');
-        if (btnG) btnG.addEventListener('click', guardarGlobales);
-
-        var btnA = document.getElementById('btnCrearApiKey');
-        if (btnA) btnA.addEventListener('click', crearApiKey);
-
-        var sel = document.getElementById('permUserSelect');
+        var btnG = document.getElementById('btnGuardarGlobales');   if (btnG) btnG.addEventListener('click', guardarGlobales);
+        var btnA = document.getElementById('btnCrearApiKey');        if (btnA) btnA.addEventListener('click', crearApiKey);
+        var sel  = document.getElementById('permUserSelect');
         if (sel) sel.addEventListener('change', function () {
             selectedUserId = parseInt(this.value) || 0;
-            if (selectedUserId > 0) {
-                cargarPermisosUsuario(selectedUserId);
-                document.getElementById('permisosWrapper').classList.add('active');
-            } else {
-                document.getElementById('permisosWrapper').classList.remove('active');
-            }
+            if (selectedUserId > 0) { cargarPermisosUsuario(selectedUserId); document.getElementById('permisosWrapper').classList.add('active'); }
+            else { document.getElementById('permisosWrapper').classList.remove('active'); }
         });
-
-        var btnP = document.getElementById('btnGuardarPermisos');
-        if (btnP) btnP.addEventListener('click', guardarPermisos);
-
-        var btnCancelar = document.getElementById('btnConfirmCancelar');
-        if (btnCancelar) btnCancelar.addEventListener('click', cerrarModalConfirm);
-
-        var btnClose = document.getElementById('btnCloseConfirm');
-        if (btnClose) btnClose.addEventListener('click', cerrarModalConfirm);
-
-        var btnAceptar = document.getElementById('btnConfirmAceptar');
-        if (btnAceptar) btnAceptar.addEventListener('click', ejecutarToggleConsultor);
-
+        var btnP = document.getElementById('btnGuardarPermisos');    if (btnP) btnP.addEventListener('click', guardarPermisos);
+        var btnCancelar = document.getElementById('btnConfirmCancelar'); if (btnCancelar) btnCancelar.addEventListener('click', cerrarModalConfirm);
+        var btnClose    = document.getElementById('btnCloseConfirm');    if (btnClose)    btnClose.addEventListener('click', cerrarModalConfirm);
+        var btnAceptar  = document.getElementById('btnConfirmAceptar');  if (btnAceptar)  btnAceptar.addEventListener('click', ejecutarToggleConsultor);
         var overlay = document.getElementById('modalConfirmConsultor');
-        if (overlay) {
-            overlay.addEventListener('click', function (e) {
-                if (e.target === overlay) cerrarModalConfirm();
-            });
-        }
-
-        // Campos dinámicos events
-        var btnGuardarCampo = document.getElementById('btnGuardarCampo');
-        if (btnGuardarCampo) btnGuardarCampo.addEventListener('click', guardarCampoDinamico);
-
-        var btnCancelarCampo = document.getElementById('btnCancelarCampo');
-        if (btnCancelarCampo) btnCancelarCampo.addEventListener('click', cancelarEditarCampo);
-
-        var btnCloseCampo = document.getElementById('btnCloseCampo');
-        if (btnCloseCampo) btnCloseCampo.addEventListener('click', cerrarModalCampo);
-
-        var btnCampoEliminarCancelar = document.getElementById('btnCampoEliminarCancelar');
-        if (btnCampoEliminarCancelar) btnCampoEliminarCancelar.addEventListener('click', cerrarModalCampo);
-
-        var btnCampoEliminarAceptar = document.getElementById('btnCampoEliminarAceptar');
-        if (btnCampoEliminarAceptar) btnCampoEliminarAceptar.addEventListener('click', ejecutarEliminarCampo);
-
+        if (overlay) overlay.addEventListener('click', function (e) { if (e.target === overlay) cerrarModalConfirm(); });
+        var btnGuardarCampo    = document.getElementById('btnGuardarCampo');        if (btnGuardarCampo)    btnGuardarCampo.addEventListener('click', guardarCampoDinamico);
+        var btnCancelarCampo   = document.getElementById('btnCancelarCampo');       if (btnCancelarCampo)   btnCancelarCampo.addEventListener('click', cancelarEditarCampo);
+        var btnCloseCampo      = document.getElementById('btnCloseCampo');          if (btnCloseCampo)      btnCloseCampo.addEventListener('click', cerrarModalCampo);
+        var btnElimCancelar    = document.getElementById('btnCampoEliminarCancelar');if (btnElimCancelar)   btnElimCancelar.addEventListener('click', cerrarModalCampo);
+        var btnElimAceptar     = document.getElementById('btnCampoEliminarAceptar');if (btnElimAceptar)     btnElimAceptar.addEventListener('click', ejecutarEliminarCampo);
         var overlayCampo = document.getElementById('modalConfirmCampo');
-        if (overlayCampo) {
-            overlayCampo.addEventListener('click', function (e) {
-                if (e.target === overlayCampo) cerrarModalCampo();
-            });
-        }
+        if (overlayCampo) overlayCampo.addEventListener('click', function (e) { if (e.target === overlayCampo) cerrarModalCampo(); });
     }
 
-    // MODAL CONFIRMAR CONSULTOR
+    // ── MODAL CONSULTOR ──
     function abrirModalConfirm(uid, estado, nombre) {
-        pendingConfirm.uid = uid;
-        pendingConfirm.estado = estado;
-
-        var header       = document.getElementById('modalConfirmHeader');
-        var icon         = document.getElementById('modalConfirmIcon');
-        var title        = document.getElementById('modalConfirmTitle');
-        var msg          = document.getElementById('modalConfirmMsg');
-        var btnAceptar   = document.getElementById('btnConfirmAceptar');
-        var btnTexto     = document.getElementById('btnConfirmTexto');
-        var btnIconAction= document.getElementById('btnConfirmIconAction');
-
+        pendingConfirm.uid = uid; pendingConfirm.estado = estado;
+        var header = document.getElementById('modalConfirmHeader'), icon = document.getElementById('modalConfirmIcon'),
+            title  = document.getElementById('modalConfirmTitle'),  msg  = document.getElementById('modalConfirmMsg'),
+            btnA   = document.getElementById('btnConfirmAceptar'),  btnT = document.getElementById('btnConfirmTexto'),
+            btnI   = document.getElementById('btnConfirmIconAction');
         if (estado === 'suspendido') {
-            header.style.background = 'linear-gradient(135deg, var(--rojo) 0%, #e63200 100%)';
-            icon.className = 'fas fa-user-slash';
+            header.style.background = 'linear-gradient(135deg,var(--rojo) 0%,#e63200 100%)'; icon.className = 'fas fa-user-slash';
             title.textContent = 'Suspender Consultor';
             msg.innerHTML = '¿Está seguro que desea <strong>suspender</strong> a<br><strong>' + esc(nombre) + '</strong>?<br><br><span style="font-size:11px;color:#92400e;">El consultor no podrá ingresar al sistema.</span>';
-            btnAceptar.style.background = 'var(--rojo)';
-            btnTexto.textContent = 'Suspender';
-            btnIconAction.className = 'fas fa-user-slash';
+            btnA.style.background = 'var(--rojo)'; btnT.textContent = 'Suspender'; btnI.className = 'fas fa-user-slash';
         } else {
-            header.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
-            icon.className = 'fas fa-user-check';
+            header.style.background = 'linear-gradient(135deg,#059669 0%,#047857 100%)'; icon.className = 'fas fa-user-check';
             title.textContent = 'Activar Consultor';
             msg.innerHTML = '¿Está seguro que desea <strong>activar</strong> a<br><strong>' + esc(nombre) + '</strong>?<br><br><span style="font-size:11px;color:#059669;">El consultor podrá ingresar al sistema nuevamente.</span>';
-            btnAceptar.style.background = '#059669';
-            btnTexto.textContent = 'Activar';
-            btnIconAction.className = 'fas fa-user-check';
+            btnA.style.background = '#059669'; btnT.textContent = 'Activar'; btnI.className = 'fas fa-user-check';
         }
-
         document.getElementById('modalConfirmConsultor').classList.add('active');
     }
-
-    function cerrarModalConfirm() {
-        document.getElementById('modalConfirmConsultor').classList.remove('active');
-        pendingConfirm.uid = 0;
-        pendingConfirm.estado = '';
-    }
-
+    function cerrarModalConfirm() { document.getElementById('modalConfirmConsultor').classList.remove('active'); pendingConfirm.uid = 0; pendingConfirm.estado = ''; }
     function ejecutarToggleConsultor() {
         if (pendingConfirm.uid <= 0) return;
-        var uid    = pendingConfirm.uid;
-        var estado = pendingConfirm.estado;
-        cerrarModalConfirm();
-
-        var fd = new FormData();
-        fd.append('accion',     'toggle_consultor');
-        fd.append('usuario_id', uid);
-        fd.append('estado',     estado);
-        fd.append('csrf_token', CSRF);
-
-        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) {
-                if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success');
-                cargarConsultoresOpc();
-                cargarUsuarios();
-            } else {
-                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
-            }
-        })
-        .catch(function () { if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error'); });
+        var uid = pendingConfirm.uid, estado = pendingConfirm.estado; cerrarModalConfirm();
+        var fd = new FormData(); fd.append('accion','toggle_consultor'); fd.append('usuario_id',uid); fd.append('estado',estado); fd.append('csrf_token',CSRF);
+        fetch('includes/ajax/opciones_sistema.php',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){
+            if (data.success) { if (typeof mostrarToast==='function') mostrarToast(data.message,'success'); cargarConsultoresOpc(); cargarUsuarios(); }
+            else { if (typeof mostrarToast==='function') mostrarToast(data.message||'Error','error'); }
+        }).catch(function(){ if (typeof mostrarToast==='function') mostrarToast('Error de conexión','error'); });
     }
 
-    // OPCIONES GLOBALES
+    // ── OPCIONES GLOBALES ──
     function cargarOpcionesGlobales() {
-        fetch('includes/ajax/opciones_sistema.php?accion=get_globales', { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
+        fetch('includes/ajax/opciones_sistema.php?accion=get_globales',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){
             if (data.success) {
                 var o = data.opciones;
                 document.getElementById('optSistemaNombre').value = o.sistema_nombre || '';
-                var loginHab  = document.getElementById('optLoginHabilitado');
-                var isEnabled = (o.login_habilitado !== '0');
+                var loginHab = document.getElementById('optLoginHabilitado'), isEnabled = (o.login_habilitado !== '0');
                 loginHab.checked = isEnabled;
-                var status = document.getElementById('optLoginStatus');
-                status.textContent = isEnabled ? 'Habilitado' : 'Deshabilitado';
-                status.className   = 'toggle-status ' + (isEnabled ? 'on' : 'off');
-                document.getElementById('rowLoginMensaje').style.display = isEnabled ? 'none' : '';
-                document.getElementById('optLoginMensaje').value = o.login_mensaje || '';
+                var status = document.getElementById('optLoginStatus'); status.textContent = isEnabled?'Habilitado':'Deshabilitado'; status.className='toggle-status '+(isEnabled?'on':'off');
+                document.getElementById('rowLoginMensaje').style.display = isEnabled?'none':'';
+                document.getElementById('optLoginMensaje').value = o.login_mensaje||'';
             }
-        })
-        .catch(function (err) { console.error('Error cargando opciones globales:', err); });
+        }).catch(function(err){console.error('Error cargando opciones globales:',err);});
     }
-
     function guardarGlobales() {
-        var btn = document.getElementById('btnGuardarGlobales');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-
-        var fd = new FormData();
-        fd.append('accion',          'save_globales');
-        fd.append('sistema_nombre',  document.getElementById('optSistemaNombre').value.trim());
-        fd.append('login_habilitado',document.getElementById('optLoginHabilitado').checked ? 1 : 0);
-        fd.append('login_mensaje',   document.getElementById('optLoginMensaje').value.trim());
-        fd.append('csrf_token',      CSRF);
-
-        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Opciones Globales';
-            if (data.success) {
-                if (typeof mostrarToast === 'function') mostrarToast('Opciones globales guardadas', 'success');
-                var nuevoNombre = document.getElementById('optSistemaNombre').value.trim();
-                var headerH1 = document.querySelector('.header-title h1');
-                if (headerH1) headerH1.textContent = nuevoNombre;
-                document.title = nuevoNombre;
-            } else {
-                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
-            }
-        })
-        .catch(function () {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Opciones Globales';
-            if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
-        });
+        var btn = document.getElementById('btnGuardarGlobales'); btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        var fd = new FormData(); fd.append('accion','save_globales'); fd.append('sistema_nombre',document.getElementById('optSistemaNombre').value.trim());
+        fd.append('login_habilitado',document.getElementById('optLoginHabilitado').checked?1:0); fd.append('login_mensaje',document.getElementById('optLoginMensaje').value.trim()); fd.append('csrf_token',CSRF);
+        fetch('includes/ajax/opciones_sistema.php',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){
+            btn.disabled=false; btn.innerHTML='<i class="fas fa-save"></i> Guardar Opciones Globales';
+            if (data.success) { if (typeof mostrarToast==='function') mostrarToast('Opciones globales guardadas','success'); var h1=document.querySelector('.header-title h1'); if(h1) h1.textContent=document.getElementById('optSistemaNombre').value.trim(); }
+            else { if (typeof mostrarToast==='function') mostrarToast(data.message||'Error','error'); }
+        }).catch(function(){ btn.disabled=false; btn.innerHTML='<i class="fas fa-save"></i> Guardar Opciones Globales'; if(typeof mostrarToast==='function') mostrarToast('Error de conexión','error'); });
     }
 
-    // API KEYS
+    // ── API KEYS ──
     function cargarApiKeys() {
-        fetch('includes/ajax/opciones_sistema.php?accion=get_api_keys', { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) { if (data.success) renderApiKeys(data.api_keys); })
-        .catch(function (err) { console.error('Error cargando API Keys:', err); });
+        fetch('includes/ajax/opciones_sistema.php?accion=get_api_keys',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){if(data.success)renderApiKeys(data.api_keys);}).catch(function(err){console.error('Error cargando API Keys:',err);});
     }
-
     function renderApiKeys(keys) {
         var tbody = document.getElementById('apiKeysBody');
-        if (!keys || keys.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6"><div class="opc-empty"><i class="fas fa-key"></i><p>No hay API Keys registradas</p></div></td></tr>';
-            return;
-        }
-        var html = '';
-        keys.forEach(function (k) {
-            var isActive    = k.activo == 1;
-            var statusClass = isActive ? 'api-status-active' : 'api-status-inactive';
-            var statusText  = isActive ? 'Activa' : 'Inactiva';
-            var toggleIcon  = isActive ? 'fa-pause' : 'fa-play';
-            var toggleClass = isActive ? 'opc-btn-danger' : 'opc-btn-success';
-            var ultimoUso   = k.ultimo_uso || 'Nunca';
-            html += '<tr>';
-            html += '<td><strong>' + esc(k.dominio) + '</strong></td>';
-            html += '<td><span class="api-key-text" title="Clic para copiar" onclick="OPC.copiarTexto(\'' + esc(k.api_key) + '\')">' + esc(k.api_key.substring(0, 16)) + '...</span></td>';
-            html += '<td><span class="' + statusClass + '">' + statusText + '</span></td>';
-            html += '<td>' + esc(k.fecha_creacion) + '</td>';
-            html += '<td>' + esc(ultimoUso) + '</td>';
-            html += '<td>';
-            html += '<button class="opc-btn opc-btn-sm ' + toggleClass + '" onclick="OPC.toggleApiKey(' + k.id + ',' + (isActive ? 0 : 1) + ')"><i class="fas ' + toggleIcon + '"></i></button> ';
-            html += '<button class="opc-btn opc-btn-sm opc-btn-danger" onclick="OPC.eliminarApiKey(' + k.id + ',\'' + esc(k.dominio) + '\')"><i class="fas fa-trash"></i></button>';
-            html += '</td></tr>';
+        if (!keys||keys.length===0){tbody.innerHTML='<tr><td colspan="6"><div class="opc-empty"><i class="fas fa-key"></i><p>No hay API Keys registradas</p></div></td></tr>';return;}
+        var html=''; keys.forEach(function(k){
+            var isActive=k.activo==1,statusClass=isActive?'api-status-active':'api-status-inactive',statusText=isActive?'Activa':'Inactiva',toggleIcon=isActive?'fa-pause':'fa-play',toggleClass=isActive?'opc-btn-danger':'opc-btn-success',ultimoUso=k.ultimo_uso||'Nunca';
+            html+='<tr><td><strong>'+esc(k.dominio)+'</strong></td><td><span class="api-key-text" title="Clic para copiar" onclick="OPC.copiarTexto(\''+esc(k.api_key)+'\')">'+esc(k.api_key.substring(0,16))+'...</span></td><td><span class="'+statusClass+'">'+statusText+'</span></td><td>'+esc(k.fecha_creacion)+'</td><td>'+esc(ultimoUso)+'</td><td>';
+            html+='<button class="opc-btn opc-btn-sm '+toggleClass+'" onclick="OPC.toggleApiKey('+k.id+','+(isActive?0:1)+')"><i class="fas '+toggleIcon+'"></i></button> ';
+            html+='<button class="opc-btn opc-btn-sm opc-btn-danger" onclick="OPC.eliminarApiKey('+k.id+',\''+esc(k.dominio)+'\')"><i class="fas fa-trash"></i></button></td></tr>';
         });
-        tbody.innerHTML = html;
+        tbody.innerHTML=html;
     }
-
     function crearApiKey() {
-        var dominio = document.getElementById('apiNewDominio').value.trim();
-        if (!dominio) { if (typeof mostrarToast === 'function') mostrarToast('Ingrese un dominio', 'error'); return; }
-        var fd = new FormData();
-        fd.append('accion', 'create_api_key'); fd.append('dominio', dominio); fd.append('csrf_token', CSRF);
-        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) {
-                document.getElementById('apiNewDominio').value = '';
-                if (typeof mostrarToast === 'function') mostrarToast('API Key creada. Secret: ' + data.api_secret.substring(0, 20) + '... (copiado al portapapeles)', 'success', 8000);
-                try { navigator.clipboard.writeText(data.api_secret); } catch (e) {}
-                cargarApiKeys();
-            } else { if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error'); }
-        })
-        .catch(function () { if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error'); });
+        var dominio=document.getElementById('apiNewDominio').value.trim();
+        if(!dominio){if(typeof mostrarToast==='function')mostrarToast('Ingrese un dominio','error');return;}
+        var fd=new FormData(); fd.append('accion','create_api_key'); fd.append('dominio',dominio); fd.append('csrf_token',CSRF);
+        fetch('includes/ajax/opciones_sistema.php',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){
+            if(data.success){document.getElementById('apiNewDominio').value='';if(typeof mostrarToast==='function')mostrarToast('API Key creada. Secret: '+data.api_secret.substring(0,20)+'... (copiado al portapapeles)','success',8000);try{navigator.clipboard.writeText(data.api_secret);}catch(e){}cargarApiKeys();}
+            else{if(typeof mostrarToast==='function')mostrarToast(data.message||'Error','error');}
+        }).catch(function(){if(typeof mostrarToast==='function')mostrarToast('Error de conexión','error');});
+    }
+    function toggleApiKey(id,activo){var fd=new FormData();fd.append('accion','toggle_api_key');fd.append('id',id);fd.append('activo',activo);fd.append('csrf_token',CSRF);fetch('includes/ajax/opciones_sistema.php',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){if(data.success){if(typeof mostrarToast==='function')mostrarToast(data.message,'success');cargarApiKeys();}else{if(typeof mostrarToast==='function')mostrarToast(data.message||'Error','error');}});}
+    function eliminarApiKey(id,dominio){if(!confirm('¿Eliminar la API Key del dominio "'+dominio+'"?'))return;var fd=new FormData();fd.append('accion','delete_api_key');fd.append('id',id);fd.append('csrf_token',CSRF);fetch('includes/ajax/opciones_sistema.php',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){if(data.success){if(typeof mostrarToast==='function')mostrarToast(data.message,'success');cargarApiKeys();}else{if(typeof mostrarToast==='function')mostrarToast(data.message||'Error','error');}});}
+    function copiarTexto(texto){try{navigator.clipboard.writeText(texto);if(typeof mostrarToast==='function')mostrarToast('Copiado al portapapeles','success');}catch(e){if(typeof mostrarToast==='function')mostrarToast('No se pudo copiar','error');}}
+
+    // ── PERMISOS ──
+    function cargarUsuarios(){fetch('includes/ajax/opciones_sistema.php?accion=get_usuarios',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){if(data.success){var sel=document.getElementById('permUserSelect');sel.innerHTML='<option value="">— Seleccione un usuario —</option>';data.usuarios.forEach(function(u){var badge=u.tipo==='administrador'?' [Admin]':' [Consultor]',estado=u.estado==='suspendido'?' (Suspendido)':'';sel.innerHTML+='<option value="'+u.id+'">'+esc(u.nombre+' '+u.apellidos)+badge+estado+'</option>';});}}).catch(function(err){console.error('Error cargando usuarios:',err);});}
+    function cargarPermisosUsuario(uid){fetch('includes/ajax/opciones_sistema.php?accion=get_permisos&usuario_id='+uid,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){if(data.success){var permisos=data.permisos||{};document.querySelectorAll('[data-perm]').forEach(function(cb){var parts=cb.getAttribute('data-perm').split('.'),seccion=parts[0],permiso=parts[1],val=true;if(permisos[seccion]!==undefined&&permisos[seccion][permiso]!==undefined)val=permisos[seccion][permiso];cb.checked=val;});}}).catch(function(err){console.error('Error cargando permisos:',err);});}
+    function guardarPermisos(){
+        if(selectedUserId<=0){if(typeof mostrarToast==='function')mostrarToast('Seleccione un usuario','error');return;}
+        var btn=document.getElementById('btnGuardarPermisos');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        var permisos={};document.querySelectorAll('[data-perm]').forEach(function(cb){var parts=cb.getAttribute('data-perm').split('.');if(!permisos[parts[0]])permisos[parts[0]]={};permisos[parts[0]][parts[1]]=cb.checked;});
+        var fd=new FormData();fd.append('accion','save_permisos');fd.append('usuario_id',selectedUserId);fd.append('permisos',JSON.stringify(permisos));fd.append('csrf_token',CSRF);
+        fetch('includes/ajax/opciones_sistema.php',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Guardar Permisos';if(data.success){if(typeof mostrarToast==='function')mostrarToast('Permisos guardados correctamente. Se aplican en tiempo real.','success');}else{if(typeof mostrarToast==='function')mostrarToast(data.message||'Error','error');}}).catch(function(){btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Guardar Permisos';if(typeof mostrarToast==='function')mostrarToast('Error de conexión','error');});
     }
 
-    function toggleApiKey(id, activo) {
-        var fd = new FormData();
-        fd.append('accion', 'toggle_api_key'); fd.append('id', id); fd.append('activo', activo); fd.append('csrf_token', CSRF);
-        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) { if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success'); cargarApiKeys(); }
-            else { if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error'); }
-        });
-    }
-
-    function eliminarApiKey(id, dominio) {
-        if (!confirm('¿Eliminar la API Key del dominio "' + dominio + '"?')) return;
-        var fd = new FormData();
-        fd.append('accion', 'delete_api_key'); fd.append('id', id); fd.append('csrf_token', CSRF);
-        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) { if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success'); cargarApiKeys(); }
-            else { if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error'); }
-        });
-    }
-
-    function copiarTexto(texto) {
-        try { navigator.clipboard.writeText(texto); if (typeof mostrarToast === 'function') mostrarToast('Copiado al portapapeles', 'success'); }
-        catch (e) { if (typeof mostrarToast === 'function') mostrarToast('No se pudo copiar', 'error'); }
-    }
-
-    // PERMISOS
-    function cargarUsuarios() {
-        fetch('includes/ajax/opciones_sistema.php?accion=get_usuarios', { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) {
-                var sel = document.getElementById('permUserSelect');
-                sel.innerHTML = '<option value="">— Seleccione un usuario —</option>';
-                data.usuarios.forEach(function (u) {
-                    var badge  = u.tipo === 'administrador' ? ' [Admin]' : ' [Consultor]';
-                    var estado = u.estado === 'suspendido' ? ' (Suspendido)' : '';
-                    sel.innerHTML += '<option value="' + u.id + '">' + esc(u.nombre + ' ' + u.apellidos) + badge + estado + '</option>';
-                });
-            }
-        })
-        .catch(function (err) { console.error('Error cargando usuarios:', err); });
-    }
-
-    function cargarPermisosUsuario(uid) {
-        fetch('includes/ajax/opciones_sistema.php?accion=get_permisos&usuario_id=' + uid, { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) {
-                var permisos = data.permisos || {};
-                document.querySelectorAll('[data-perm]').forEach(function (cb) {
-                    var parts   = cb.getAttribute('data-perm').split('.');
-                    var seccion = parts[0];
-                    var permiso = parts[1];
-                    var val = true;
-                    if (permisos[seccion] !== undefined && permisos[seccion][permiso] !== undefined) val = permisos[seccion][permiso];
-                    cb.checked = val;
-                });
-            }
-        })
-        .catch(function (err) { console.error('Error cargando permisos:', err); });
-    }
-
-    function guardarPermisos() {
-        if (selectedUserId <= 0) { if (typeof mostrarToast === 'function') mostrarToast('Seleccione un usuario', 'error'); return; }
-        var btn = document.getElementById('btnGuardarPermisos');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-
-        var permisos = {};
-        document.querySelectorAll('[data-perm]').forEach(function (cb) {
-            var parts = cb.getAttribute('data-perm').split('.');
-            if (!permisos[parts[0]]) permisos[parts[0]] = {};
-            permisos[parts[0]][parts[1]] = cb.checked;
-        });
-
-        var fd = new FormData();
-        fd.append('accion', 'save_permisos'); fd.append('usuario_id', selectedUserId);
-        fd.append('permisos', JSON.stringify(permisos)); fd.append('csrf_token', CSRF);
-
-        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Permisos';
-            if (data.success) { if (typeof mostrarToast === 'function') mostrarToast('Permisos guardados correctamente. Se aplican en tiempo real.', 'success'); }
-            else { if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error'); }
-        })
-        .catch(function () {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Permisos';
-            if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
-        });
-    }
-
-    // CONSULTORES
-    function cargarConsultoresOpc() {
-        fetch('includes/ajax/consultores.php?action=listar', { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) renderConsultoresOpc(data.consultores);
-        })
-        .catch(function (err) { console.error('cargarConsultoresOpc:', err); });
-    }
-
-    function renderConsultoresOpc(consultores) {
-        var container = document.getElementById('consultoresListOpc');
-        if (!container) return;
-        if (!consultores || consultores.length === 0) {
-            container.innerHTML = '<div class="opc-empty"><i class="fas fa-users"></i><p>No hay consultores registrados</p></div>';
-            return;
-        }
-        var html = '<table class="opc-api-table"><thead><tr><th>Nombre</th><th>Usuario</th><th>País</th><th>Estado</th><th style="width:120px;">Acción</th></tr></thead><tbody>';
-        consultores.forEach(function (c) {
-            var isActive    = c.estado === 'activo';
-            var estadoClass = isActive ? 'api-status-active' : 'api-status-inactive';
-            var estadoText  = isActive ? 'Activo' : 'Suspendido';
-            var btnText     = isActive ? 'Suspender' : 'Activar';
-            var btnClass    = isActive ? 'opc-btn-danger' : 'opc-btn-success';
-            var btnIcon     = isActive ? 'fa-user-slash' : 'fa-user-check';
-            var nuevoEstado = isActive ? 'suspendido' : 'activo';
-            var nombreCompleto = (c.nombre + ' ' + c.apellidos).replace(/'/g, "\\'");
-            html += '<tr>';
-            html += '<td><strong>' + esc(c.nombre + ' ' + c.apellidos) + '</strong></td>';
-            html += '<td>' + esc(c.usuario) + '</td>';
-            html += '<td>' + esc(c.pais) + '</td>';
-            html += '<td><span class="' + estadoClass + '">' + estadoText + '</span></td>';
-            html += '<td><button class="opc-btn opc-btn-sm ' + btnClass + '" onclick="OPC.toggleConsultor(' + c.id + ',\'' + nuevoEstado + '\',\'' + nombreCompleto + '\')"><i class="fas ' + btnIcon + '"></i> ' + btnText + '</button></td>';
-            html += '</tr>';
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
-    }
-
-    function toggleConsultor(uid, estado, nombre) {
-        abrirModalConfirm(uid, estado, nombre || 'este consultor');
-    }
+    // ── CONSULTORES ──
+    function cargarConsultoresOpc(){fetch('includes/ajax/consultores.php?action=listar',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){if(data.success)renderConsultoresOpc(data.consultores);}).catch(function(err){console.error('cargarConsultoresOpc:',err);});}
+    function renderConsultoresOpc(consultores){var container=document.getElementById('consultoresListOpc');if(!container)return;if(!consultores||consultores.length===0){container.innerHTML='<div class="opc-empty"><i class="fas fa-users"></i><p>No hay consultores registrados</p></div>';return;}var html='<table class="opc-api-table"><thead><tr><th>Nombre</th><th>Usuario</th><th>País</th><th>Estado</th><th style="width:120px;">Acción</th></tr></thead><tbody>';consultores.forEach(function(c){var isActive=c.estado==='activo',estadoClass=isActive?'api-status-active':'api-status-inactive',estadoText=isActive?'Activo':'Suspendido',btnClass=isActive?'opc-btn-danger':'opc-btn-success',btnIcon=isActive?'fa-user-slash':'fa-user-check',nuevoEstado=isActive?'suspendido':'activo',btnText=isActive?'Suspender':'Activar',nombreCompleto=(c.nombre+' '+c.apellidos).replace(/'/g,"\\'");html+='<tr><td><strong>'+esc(c.nombre+' '+c.apellidos)+'</strong></td><td>'+esc(c.usuario)+'</td><td>'+esc(c.pais)+'</td><td><span class="'+estadoClass+'">'+estadoText+'</span></td><td><button class="opc-btn opc-btn-sm '+btnClass+'" onclick="OPC.toggleConsultor('+c.id+',\''+nuevoEstado+'\',\''+nombreCompleto+'\')"><i class="fas '+btnIcon+'"></i> '+btnText+'</button></td></tr>';});html+='</tbody></table>';container.innerHTML=html;}
+    function toggleConsultor(uid,estado,nombre){abrirModalConfirm(uid,estado,nombre||'este consultor');}
 
     // ══════════════════════════════════════════════════
     // CAMPOS DINÁMICOS
     // ══════════════════════════════════════════════════
-    function cargarCamposDinamicos() {
-        fetch('includes/ajax/opciones_sistema.php?accion=get_campos_dinamicos', { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) renderCamposDinamicos(data.campos);
-            else document.getElementById('camposDinamicosTabla').innerHTML = '<div class="opc-empty"><i class="fas fa-exclamation-circle"></i><p>Error cargando campos</p></div>';
-        })
-        .catch(function () {
-            document.getElementById('camposDinamicosTabla').innerHTML = '<div class="opc-empty"><i class="fas fa-exclamation-circle"></i><p>Error de conexión</p></div>';
-        });
+    function cargarCamposDinamicos(){
+        fetch('includes/ajax/opciones_sistema.php?accion=get_campos_dinamicos',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){
+            if(data.success)renderCamposDinamicos(data.campos);
+            else document.getElementById('camposDinamicosTabla').innerHTML='<div class="opc-empty"><i class="fas fa-exclamation-circle"></i><p>Error cargando campos</p></div>';
+        }).catch(function(){document.getElementById('camposDinamicosTabla').innerHTML='<div class="opc-empty"><i class="fas fa-exclamation-circle"></i><p>Error de conexión</p></div>';});
     }
 
-    function renderCamposDinamicos(campos) {
-        var cont = document.getElementById('camposDinamicosTabla');
-        if (!campos || campos.length === 0) {
-            cont.innerHTML = '<div class="opc-empty"><i class="fas fa-sliders-h"></i><p>No hay campos dinámicos configurados aún.</p></div>';
-            return;
-        }
-        var html = '<table class="opc-api-table"><thead><tr>'
-            + '<th>Nombre interno</th><th>Etiqueta</th><th>Tipo</th>'
-            + '<th style="text-align:center;">Tabla</th>'
-            + '<th style="text-align:center;">Filtro</th>'
-            + '<th style="text-align:center;">Stats</th>'
-            + '<th style="text-align:center;">Excel</th>'
-            + '<th style="text-align:center;">Activo</th>'
-            + '<th style="width:110px;">Acciones</th>'
-            + '</tr></thead><tbody>';
-        campos.forEach(function (c) {
-            var icon = function(v) { return v == 1 ? '<span style="color:#059669;font-size:14px;">✔</span>' : '<span style="color:#d1d5db;font-size:14px;">✖</span>'; };
-            var activoClass = c.activo == 1 ? 'api-status-active' : 'api-status-inactive';
-            var activoText  = c.activo == 1 ? 'Activo' : 'Inactivo';
-            html += '<tr>';
-            html += '<td><code style="font-size:11px;">' + esc(c.nombre_campo) + '</code></td>';
-            html += '<td><strong>' + esc(c.nombre_mostrar) + '</strong></td>';
-            html += '<td><span style="font-size:11px;background:#f3f4f6;padding:2px 6px;border-radius:4px;">' + esc(c.tipo_dato) + '</span></td>';
-            html += '<td style="text-align:center;">' + icon(c.mostrar_lista) + '</td>';
-            html += '<td style="text-align:center;">' + icon(c.mostrar_filtro) + '</td>';
-            html += '<td style="text-align:center;">' + icon(c.mostrar_estadisticas) + '</td>';
-            html += '<td style="text-align:center;">' + icon(c.mostrar_excel) + '</td>';
-            html += '<td style="text-align:center;"><span class="' + activoClass + '">' + activoText + '</span></td>';
-            html += '<td>';
-            html += '<button class="opc-btn opc-btn-sm" style="background:#2271b1;color:#fff;" onclick="OPC.editarCampo(' + c.id + ')"><i class="fas fa-pencil-alt"></i></button> ';
-            html += '<button class="opc-btn opc-btn-sm opc-btn-danger" onclick="OPC.confirmarEliminarCampo(' + c.id + ',\'' + esc(c.nombre_campo) + '\',\'' + esc(c.nombre_mostrar) + '\')"><i class="fas fa-trash"></i></button>';
-            html += '</td></tr>';
+    function renderCamposDinamicos(campos){
+        var cont=document.getElementById('camposDinamicosTabla');
+        if(!campos||campos.length===0){cont.innerHTML='<div class="opc-empty"><i class="fas fa-sliders-h"></i><p>No hay campos dinámicos configurados aún.</p></div>';return;}
+        var html='<table class="opc-api-table"><thead><tr>'
+            +'<th>Nombre interno</th><th>Etiqueta</th><th>Tipo</th>'
+            +'<th style="text-align:center;">Tabla</th>'
+            +'<th style="text-align:center;">Filtro</th>'
+            +'<th style="text-align:center;">Filtro Est.</th>'
+            +'<th style="text-align:center;">Stats (gráfico)</th>'
+            +'<th style="text-align:center;">Excel</th>'
+            +'<th style="text-align:center;">Activo</th>'
+            +'<th style="width:110px;">Acciones</th>'
+            +'</tr></thead><tbody>';
+        campos.forEach(function(c){
+            var icon=function(v){return v==1?'<span style="color:#059669;font-size:14px;">✔</span>':'<span style="color:#d1d5db;font-size:14px;">✖</span>';};
+            var activoClass=c.activo==1?'api-status-active':'api-status-inactive', activoText=c.activo==1?'Activo':'Inactivo';
+            html+='<tr>';
+            html+='<td><code style="font-size:11px;">'+esc(c.nombre_campo)+'</code></td>';
+            html+='<td><strong>'+esc(c.nombre_mostrar)+'</strong></td>';
+            html+='<td><span style="font-size:11px;background:#f3f4f6;padding:2px 6px;border-radius:4px;">'+esc(c.tipo_dato)+'</span></td>';
+            html+='<td style="text-align:center;">'+icon(c.mostrar_lista)+'</td>';
+            html+='<td style="text-align:center;">'+icon(c.mostrar_filtro)+'</td>';
+            html+='<td style="text-align:center;">'+icon(c.mostrar_filtro_estadisticas)+'</td>';
+            html+='<td style="text-align:center;">'+icon(c.mostrar_estadisticas)+'</td>';
+            html+='<td style="text-align:center;">'+icon(c.mostrar_excel)+'</td>';
+            html+='<td style="text-align:center;"><span class="'+activoClass+'">'+activoText+'</span></td>';
+            html+='<td>';
+            html+='<button class="opc-btn opc-btn-sm" style="background:#2271b1;color:#fff;" onclick="OPC.editarCampo('+c.id+')"><i class="fas fa-pencil-alt"></i></button> ';
+            html+='<button class="opc-btn opc-btn-sm opc-btn-danger" onclick="OPC.confirmarEliminarCampo('+c.id+',\''+esc(c.nombre_campo)+'\',\''+esc(c.nombre_mostrar)+'\')"><i class="fas fa-trash"></i></button>';
+            html+='</td></tr>';
         });
-        html += '</tbody></table>';
-        cont.innerHTML = html;
+        html+='</tbody></table>';
+        cont.innerHTML=html;
     }
 
-    function guardarCampoDinamico() {
-        var editId       = document.getElementById('cdEditId').value;
-        var nombreCampo  = document.getElementById('cdNombreCampo').value.trim();
-        var nombreMostrar= document.getElementById('cdNombreMostrar').value.trim();
-        var tipoDato     = document.getElementById('cdTipoDato').value;
-        var mostrarLista = document.getElementById('cdMostrarLista').checked ? 1 : 0;
-        var mostrarFiltro= document.getElementById('cdMostrarFiltro').checked ? 1 : 0;
-        var mostrarStats = document.getElementById('cdMostrarEstadisticas').checked ? 1 : 0;
-        var mostrarExcel = document.getElementById('cdMostrarExcel').checked ? 1 : 0;
-        var esOblig      = document.getElementById('cdEsObligatorio').checked ? 1 : 0;
+    function guardarCampoDinamico(){
+        var editId            = document.getElementById('cdEditId').value;
+        var nombreCampo       = document.getElementById('cdNombreCampo').value.trim();
+        var nombreMostrar     = document.getElementById('cdNombreMostrar').value.trim();
+        var tipoDato          = document.getElementById('cdTipoDato').value;
+        // Columna en tabla
+        var mostrarLista      = document.getElementById('cdMostrarLista').checked         ? 1 : 0;
+        var mostrarListaAse   = document.getElementById('cdMostrarListaAsesor').checked   ? 1 : 0;
+        var mostrarListaDel   = document.getElementById('cdMostrarListaDelegado').checked ? 1 : 0;
+        // Filtro tipo lista
+        var mostrarFiltro     = document.getElementById('cdMostrarFiltro').checked              ? 1 : 0;
+        var mostrarFiltroAse  = document.getElementById('cdMostrarFiltroAsesor').checked        ? 1 : 0;
+        var mostrarFiltroDel  = document.getElementById('cdMostrarFiltroDelegado').checked      ? 1 : 0;
+        var mostrarFiltroEst  = document.getElementById('cdMostrarFiltroEstadisticas').checked  ? 1 : 0;
+        // Otras opciones
+        var mostrarStats      = document.getElementById('cdMostrarEstadisticas').checked ? 1 : 0;
+        var mostrarExcel      = document.getElementById('cdMostrarExcel').checked        ? 1 : 0;
+        var esOblig           = document.getElementById('cdEsObligatorio').checked       ? 1 : 0;
 
-        if (!nombreMostrar) { if (typeof mostrarToast === 'function') mostrarToast('La etiqueta visible es obligatoria', 'error'); return; }
-        if (!editId && !nombreCampo) { if (typeof mostrarToast === 'function') mostrarToast('El nombre interno es obligatorio', 'error'); return; }
+        if (!nombreMostrar) { if (typeof mostrarToast==='function') mostrarToast('La etiqueta visible es obligatoria','error'); return; }
+        if (!editId && !nombreCampo) { if (typeof mostrarToast==='function') mostrarToast('El nombre interno es obligatorio','error'); return; }
 
         var accionAjax = editId ? 'update_campo_dinamico' : 'save_campo_dinamico';
-        var btn = document.getElementById('btnGuardarCampo');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        var btn = document.getElementById('btnGuardarCampo'); btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
         var fd = new FormData();
-        fd.append('accion',               accionAjax);
-        fd.append('csrf_token',           CSRF);
-        fd.append('nombre_mostrar',       nombreMostrar);
-        fd.append('tipo_dato',            tipoDato);
-        fd.append('mostrar_lista',        mostrarLista);
-        fd.append('mostrar_filtro',       mostrarFiltro);
-        fd.append('mostrar_estadisticas', mostrarStats);
-        fd.append('mostrar_excel',        mostrarExcel);
-        fd.append('es_obligatorio',       esOblig);
-        if (editId) {
-            fd.append('id',     editId);
-            fd.append('activo', 1);
-        } else {
-            fd.append('nombre_campo', nombreCampo);
-        }
+        fd.append('accion',                      accionAjax);
+        fd.append('csrf_token',                  CSRF);
+        fd.append('nombre_mostrar',              nombreMostrar);
+        fd.append('tipo_dato',                   tipoDato);
+        fd.append('mostrar_lista',               mostrarLista);
+        fd.append('mostrar_lista_asesor',        mostrarListaAse);
+        fd.append('mostrar_lista_delegado',      mostrarListaDel);
+        fd.append('mostrar_filtro',              mostrarFiltro);
+        fd.append('mostrar_filtro_asesor',       mostrarFiltroAse);
+        fd.append('mostrar_filtro_delegado',     mostrarFiltroDel);
+        fd.append('mostrar_filtro_estadisticas', mostrarFiltroEst);
+        fd.append('mostrar_estadisticas',        mostrarStats);
+        fd.append('mostrar_excel',               mostrarExcel);
+        fd.append('es_obligatorio',              esOblig);
+        if (editId) { fd.append('id',editId); fd.append('activo',1); }
+        else        { fd.append('nombre_campo',nombreCampo); }
 
-        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            btn.disabled = false;
-            btn.innerHTML = editId ? '<i class="fas fa-save"></i> Guardar Cambios' : '<i class="fas fa-plus"></i> Agregar Campo';
-            if (data.success) {
-                if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success');
-                cancelarEditarCampo();
-                cargarCamposDinamicos();
-            } else {
-                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
-            }
-        })
-        .catch(function () {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plus"></i> Agregar Campo';
-            if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
-        });
+        fetch('includes/ajax/opciones_sistema.php',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){
+            btn.disabled=false; btn.innerHTML=editId?'<i class="fas fa-save"></i> Guardar Cambios':'<i class="fas fa-plus"></i> Agregar Campo';
+            if(data.success){if(typeof mostrarToast==='function')mostrarToast(data.message,'success');cancelarEditarCampo();cargarCamposDinamicos();}
+            else{if(typeof mostrarToast==='function')mostrarToast(data.message||'Error','error');}
+        }).catch(function(){btn.disabled=false;btn.innerHTML='<i class="fas fa-plus"></i> Agregar Campo';if(typeof mostrarToast==='function')mostrarToast('Error de conexión','error');});
     }
 
-    function editarCampo(id) {
-        fetch('includes/ajax/opciones_sistema.php?accion=get_campos_dinamicos', { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (!data.success) return;
-            var campo = null;
-            data.campos.forEach(function (c) { if (c.id == id) campo = c; });
-            if (!campo) return;
+    function editarCampo(id){
+        fetch('includes/ajax/opciones_sistema.php?accion=get_campos_dinamicos',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){
+            if(!data.success)return;
+            var campo=null; data.campos.forEach(function(c){if(c.id==id)campo=c;});
+            if(!campo)return;
+            document.getElementById('cdEditId').value                       = campo.id;
+            document.getElementById('cdNombreCampo').value                  = campo.nombre_campo;
+            document.getElementById('cdNombreCampo').disabled               = true;
+            document.getElementById('cdNombreMostrar').value                = campo.nombre_mostrar;
+            document.getElementById('cdTipoDato').value                     = campo.tipo_dato;
+            // Columna en tabla
+            document.getElementById('cdMostrarLista').checked               = campo.mostrar_lista         == 1;
+            document.getElementById('cdMostrarListaAsesor').checked         = campo.mostrar_lista_asesor   == 1;
+            document.getElementById('cdMostrarListaDelegado').checked       = campo.mostrar_lista_delegado == 1;
+            // Filtro tipo lista  ← CORRECCIÓN PRINCIPAL
+            document.getElementById('cdMostrarFiltro').checked              = campo.mostrar_filtro              == 1;
+            document.getElementById('cdMostrarFiltroAsesor').checked        = campo.mostrar_filtro_asesor       == 1;
+            document.getElementById('cdMostrarFiltroDelegado').checked      = campo.mostrar_filtro_delegado     == 1;
+            document.getElementById('cdMostrarFiltroEstadisticas').checked  = campo.mostrar_filtro_estadisticas == 1; // ← este faltaba
+            // Otras opciones
+            document.getElementById('cdMostrarEstadisticas').checked        = campo.mostrar_estadisticas == 1;
+            document.getElementById('cdMostrarExcel').checked               = campo.mostrar_excel        == 1;
+            document.getElementById('cdEsObligatorio').checked              = campo.es_obligatorio       == 1;
 
-            document.getElementById('cdEditId').value              = campo.id;
-            document.getElementById('cdNombreCampo').value         = campo.nombre_campo;
-            document.getElementById('cdNombreCampo').disabled      = true; // no editar nombre interno
-            document.getElementById('cdNombreMostrar').value       = campo.nombre_mostrar;
-            document.getElementById('cdTipoDato').value            = campo.tipo_dato;
-            document.getElementById('cdMostrarLista').checked      = campo.mostrar_lista == 1;
-            document.getElementById('cdMostrarFiltro').checked     = campo.mostrar_filtro == 1;
-            document.getElementById('cdMostrarEstadisticas').checked = campo.mostrar_estadisticas == 1;
-            document.getElementById('cdMostrarExcel').checked      = campo.mostrar_excel == 1;
-            document.getElementById('cdEsObligatorio').checked     = campo.es_obligatorio == 1;
-
-            var btn = document.getElementById('btnGuardarCampo');
-            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
-
+            document.getElementById('btnGuardarCampo').innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
             document.getElementById('btnCancelarCampo').style.display = '';
-
-            // Scroll al formulario
-            var secBody = document.getElementById('secCamposDinamicos');
-            if (secBody) secBody.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            var secBody=document.getElementById('secCamposDinamicos'); if(secBody)secBody.scrollIntoView({behavior:'smooth',block:'start'});
         });
     }
 
-    function cancelarEditarCampo() {
-        document.getElementById('cdEditId').value              = '';
-        document.getElementById('cdNombreCampo').value         = '';
-        document.getElementById('cdNombreCampo').disabled      = false;
-        document.getElementById('cdNombreMostrar').value       = '';
-        document.getElementById('cdTipoDato').value            = 'texto';
-        document.getElementById('cdMostrarLista').checked      = true;
-        document.getElementById('cdMostrarFiltro').checked     = true;
-        document.getElementById('cdMostrarEstadisticas').checked = false;
-        document.getElementById('cdMostrarExcel').checked      = true;
-        document.getElementById('cdEsObligatorio').checked     = false;
-        var btn = document.getElementById('btnGuardarCampo');
-        btn.innerHTML = '<i class="fas fa-plus"></i> Agregar Campo';
+    function cancelarEditarCampo(){
+        document.getElementById('cdEditId').value                      = '';
+        document.getElementById('cdNombreCampo').value                 = '';
+        document.getElementById('cdNombreCampo').disabled              = false;
+        document.getElementById('cdNombreMostrar').value               = '';
+        document.getElementById('cdTipoDato').value                    = 'texto';
+        // Columna en tabla
+        document.getElementById('cdMostrarLista').checked              = true;
+        document.getElementById('cdMostrarListaAsesor').checked        = true;
+        document.getElementById('cdMostrarListaDelegado').checked      = true;
+        // Filtro tipo lista
+        document.getElementById('cdMostrarFiltro').checked             = true;
+        document.getElementById('cdMostrarFiltroAsesor').checked       = true;
+        document.getElementById('cdMostrarFiltroDelegado').checked     = true;
+        document.getElementById('cdMostrarFiltroEstadisticas').checked = false; // ← default OFF
+        // Otras opciones
+        document.getElementById('cdMostrarEstadisticas').checked       = false;
+        document.getElementById('cdMostrarExcel').checked              = true;
+        document.getElementById('cdEsObligatorio').checked             = false;
+        document.getElementById('btnGuardarCampo').innerHTML = '<i class="fas fa-plus"></i> Agregar Campo';
         document.getElementById('btnCancelarCampo').style.display = 'none';
     }
 
-    function confirmarEliminarCampo(id, nombreCampo, nombreMostrar) {
-        pendingDeleteCampo.id     = id;
-        pendingDeleteCampo.nombre = nombreMostrar;
-        document.getElementById('modalCampoMsg').innerHTML =
-            '¿Está seguro que desea eliminar el campo <strong>"' + esc(nombreMostrar) + '"</strong> (<code>' + esc(nombreCampo) + '</code>)?<br><br>' +
-            '<span style="color:#dc2626;font-size:11px;">⚠️ Esta acción eliminará el campo de la configuración <strong>y borrará sus datos de TODOS los registros</strong>. Esta acción es <strong>irreversible</strong>.</span>';
+    function confirmarEliminarCampo(id,nombreCampo,nombreMostrar){
+        pendingDeleteCampo.id=id; pendingDeleteCampo.nombre=nombreMostrar;
+        document.getElementById('modalCampoMsg').innerHTML='¿Está seguro que desea eliminar el campo <strong>"'+esc(nombreMostrar)+'"</strong> (<code>'+esc(nombreCampo)+'</code>)?<br><br><span style="color:#dc2626;font-size:11px;">⚠️ Esta acción eliminará el campo de la configuración <strong>y borrará sus datos de TODOS los registros</strong>. Esta acción es <strong>irreversible</strong>.</span>';
         document.getElementById('modalConfirmCampo').classList.add('active');
     }
-
-    function cerrarModalCampo() {
-        document.getElementById('modalConfirmCampo').classList.remove('active');
-        pendingDeleteCampo.id = 0;
-        pendingDeleteCampo.nombre = '';
-    }
-
-    function ejecutarEliminarCampo() {
-        if (pendingDeleteCampo.id <= 0) return;
-        var id = pendingDeleteCampo.id;
-        cerrarModalCampo();
-
-        var fd = new FormData();
-        fd.append('accion',      'delete_campo_dinamico');
-        fd.append('id',          id);
-        fd.append('csrf_token',  CSRF);
-
-        fetch('includes/ajax/opciones_sistema.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) {
-                if (typeof mostrarToast === 'function') mostrarToast(data.message, 'success');
-                cargarCamposDinamicos();
-            } else {
-                if (typeof mostrarToast === 'function') mostrarToast(data.message || 'Error', 'error');
-            }
-        })
-        .catch(function () {
-            if (typeof mostrarToast === 'function') mostrarToast('Error de conexión', 'error');
-        });
+    function cerrarModalCampo(){document.getElementById('modalConfirmCampo').classList.remove('active');pendingDeleteCampo.id=0;pendingDeleteCampo.nombre='';}
+    function ejecutarEliminarCampo(){
+        if(pendingDeleteCampo.id<=0)return; var id=pendingDeleteCampo.id; cerrarModalCampo();
+        var fd=new FormData();fd.append('accion','delete_campo_dinamico');fd.append('id',id);fd.append('csrf_token',CSRF);
+        fetch('includes/ajax/opciones_sistema.php',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(data){
+            if(data.success){if(typeof mostrarToast==='function')mostrarToast(data.message,'success');cargarCamposDinamicos();}
+            else{if(typeof mostrarToast==='function')mostrarToast(data.message||'Error','error');}
+        }).catch(function(){if(typeof mostrarToast==='function')mostrarToast('Error de conexión','error');});
     }
 
     init();
 
     return {
-        toggleSection:         toggleSection,
-        toggleApiKey:          toggleApiKey,
-        eliminarApiKey:        eliminarApiKey,
-        copiarTexto:           copiarTexto,
-        toggleConsultor:       toggleConsultor,
-        editarCampo:           editarCampo,
-        confirmarEliminarCampo:confirmarEliminarCampo
+        toggleSection:          toggleSection,
+        toggleApiKey:           toggleApiKey,
+        eliminarApiKey:         eliminarApiKey,
+        copiarTexto:            copiarTexto,
+        toggleConsultor:        toggleConsultor,
+        editarCampo:            editarCampo,
+        confirmarEliminarCampo: confirmarEliminarCampo
     };
-
 })();
 </script>
