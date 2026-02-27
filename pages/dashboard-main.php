@@ -130,7 +130,7 @@ if (!defined('SISTEMA_REGISTROS')) {
         <select class="filter-select" id="filterMoneda" title="Moneda"><option value="">Moneda</option></select>
         <select class="filter-select" id="filterMetodoPago" title="Método de Pago"><option value="">Método de Pago</option></select>
         <select class="filter-select" id="filterWeb" title="Web"><option value="">Web</option></select>
-        <!-- Filtros dinámicos (se renderizan por JS) -->
+        <!-- Filtros dinámicos (se renderizan por JS según campos_dinamicos con mostrar_filtro=1) -->
         <div id="filtrosDinamicosRow" style="display:contents;"></div>
     </div>
 </div>
@@ -162,8 +162,10 @@ if (!defined('SISTEMA_REGISTROS')) {
         sortColumn: 'fecha_registro', sortDir: 'DESC', searchTimer: null,
         pollTimer: null, camposDinamicos: [], editingCell: null,
         requestId: 0, permisosTimer: null,
-        sesionInvalidada: false,  // ← flag para evitar múltiples redirects
-        reordenarPermitido: true  // ← FIX: control de reordenamiento
+        sesionInvalidada: false,
+        reordenarPermitido: true,
+        // Campos dinámicos de filtro activos en esta vista
+        camposFiltroActivos: []  // [{nombre_campo, nombre_mostrar}, ...]
     };
 
     var COLUMNAS_BASE = [
@@ -216,6 +218,7 @@ if (!defined('SISTEMA_REGISTROS')) {
         DOM.filterPageSize    = document.getElementById('filterPageSize');
         DOM.btnClearFilters   = document.getElementById('btnClearFilters');
         DOM.btnExportExcel    = document.getElementById('btnExportExcel');
+        DOM.filtrosDinamicosRow = document.getElementById('filtrosDinamicosRow');
     }
 
     function init() {
@@ -227,13 +230,12 @@ if (!defined('SISTEMA_REGISTROS')) {
         cargarRegistros(true);
         bindEvents();
         iniciarPolling();
-        // Permisos en tiempo real
         cargarYAplicarPermisos();
         STATE.permisosTimer = setInterval(cargarYAplicarPermisos, 5000);
     }
 
     // =====================================================
-    // FORMATO FECHA: aaaa-mm-dd → dd/mm/aaaa
+    // FORMATO FECHA
     // =====================================================
     function formatearFecha(fecha) {
         if (!fecha) return '';
@@ -243,7 +245,7 @@ if (!defined('SISTEMA_REGISTROS')) {
     }
 
     // =====================================================
-    // LLENAR SELECTS DE HORA Y MINUTOS
+    // SELECTS DE HORA
     // =====================================================
     function llenarSelectsHora() {
         [DOM.filterHoraDesdeH, DOM.filterHoraHastaH].forEach(function (sel) {
@@ -286,7 +288,6 @@ if (!defined('SISTEMA_REGISTROS')) {
     function renderHeaders() {
         var html = '';
         COLUMNAS_BASE.forEach(function (col) {
-            // ── FIX reordenar: si no está permitido, tratar todas como no-sort ──
             var esSortable = col.sortable && STATE.reordenarPermitido;
             var sc = '', si = '<i class="fas fa-sort sort-icon"></i>';
             if (esSortable && col.key === STATE.sortColumn) {
@@ -297,7 +298,9 @@ if (!defined('SISTEMA_REGISTROS')) {
             html += '<th class="' + sc + noSortClass + '" data-column="' + col.key + '" data-sortable="' + (esSortable ? 'true' : 'false') + '">' + col.label + (esSortable ? ' ' + si : '') + '</th>';
         });
         STATE.camposDinamicos.forEach(function (cd) {
-            if (cd.mostrar_lista == 1) html += '<th data-column="dyn_' + cd.nombre_campo + '" data-sortable="false" class="no-sort">' + cd.nombre_mostrar + '</th>';
+            if (cd.mostrar_lista == 1) {
+                html += '<th data-column="dyn_' + cd.nombre_campo + '" data-sortable="false" class="no-sort">' + cd.nombre_mostrar + '</th>';
+            }
         });
         DOM.tableHeaders.innerHTML = html;
     }
@@ -344,6 +347,11 @@ if (!defined('SISTEMA_REGISTROS')) {
         var hHasta = getHoraHasta();
         if (hDesde !== '') p.hora_desde = hDesde;
         if (hHasta !== '') p.hora_hasta = hHasta;
+        // Filtros dinámicos activos
+        STATE.camposFiltroActivos.forEach(function (cf) {
+            var el = document.getElementById('filterDyn_' + cf.nombre_campo);
+            if (el && el.value !== '') p['dyn_' + cf.nombre_campo] = el.value;
+        });
         return p;
     }
 
@@ -358,20 +366,69 @@ if (!defined('SISTEMA_REGISTROS')) {
         fetch('includes/ajax/get_filtros.php?' + qs, { credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            if (data.success) {
-                llenarSelect(DOM.filterFormulario, data.filtros.formulario_id, 'Todos los Formularios');
-                llenarSelect(DOM.filterAsesor,     data.filtros.asesor,        'Asesor');
-                llenarSelect(DOM.filterDelegado,   data.filtros.delegado,      'Delegado');
-                llenarSelect(DOM.filterCurso,      data.filtros.curso,         'Curso');
-                llenarSelect(DOM.filterPais,       data.filtros.pais,          'País');
-                llenarSelect(DOM.filterCiudad,     data.filtros.ciudad,        'Ciudad');
-                llenarSelect(DOM.filterMoneda,     data.filtros.moneda,        'Moneda');
-                llenarSelect(DOM.filterMetodoPago, data.filtros.metodo_pago,   'Método de Pago');
-                llenarSelect(DOM.filterWeb,        data.filtros.web,           'Web');
-                if (data.stats) actualizarStats(data.stats);
+            if (!data.success) return;
+
+            llenarSelect(DOM.filterFormulario, data.filtros.formulario_id, 'Todos los Formularios');
+            llenarSelect(DOM.filterAsesor,     data.filtros.asesor,        'Asesor');
+            llenarSelect(DOM.filterDelegado,   data.filtros.delegado,      'Delegado');
+            llenarSelect(DOM.filterCurso,      data.filtros.curso,         'Curso');
+            llenarSelect(DOM.filterPais,       data.filtros.pais,          'País');
+            llenarSelect(DOM.filterCiudad,     data.filtros.ciudad,        'Ciudad');
+            llenarSelect(DOM.filterMoneda,     data.filtros.moneda,        'Moneda');
+            llenarSelect(DOM.filterMetodoPago, data.filtros.metodo_pago,   'Método de Pago');
+            llenarSelect(DOM.filterWeb,        data.filtros.web,           'Web');
+
+            if (data.stats) actualizarStats(data.stats);
+
+            // ── Renderizar selects de campos dinámicos ──
+            var camposNuevos = data.campos_dinamicos || [];
+            var camposActuales = STATE.camposFiltroActivos.map(function(c){ return c.nombre_campo; });
+            var camposNuevosNombres = camposNuevos.map(function(c){ return c.nombre_campo; });
+            var necesitaRedibujar = JSON.stringify(camposActuales) !== JSON.stringify(camposNuevosNombres);
+
+            if (necesitaRedibujar && DOM.filtrosDinamicosRow) {
+                STATE.camposFiltroActivos = camposNuevos;
+                renderFiltrosDinamicos(camposNuevos);
+            } else {
+                // Solo actualizar las opciones de los selects existentes
+                camposNuevos.forEach(function (cf) {
+                    var el = document.getElementById('filterDyn_' + cf.nombre_campo);
+                    if (el) llenarSelect(el, data.filtros['dyn_' + cf.nombre_campo] || [], cf.nombre_mostrar);
+                });
             }
         })
         .catch(function (err) { console.error('Error filtros:', err); });
+    }
+
+    function renderFiltrosDinamicos(campos) {
+        if (!DOM.filtrosDinamicosRow) return;
+        // Guardar valores actuales antes de redibujar
+        var valoresActuales = {};
+        STATE.camposFiltroActivos.forEach(function (cf) {
+            var el = document.getElementById('filterDyn_' + cf.nombre_campo);
+            if (el) valoresActuales[cf.nombre_campo] = el.value;
+        });
+
+        DOM.filtrosDinamicosRow.innerHTML = '';
+
+        campos.forEach(function (cf) {
+            var sel = document.createElement('select');
+            sel.className = 'filter-select';
+            sel.id = 'filterDyn_' + cf.nombre_campo;
+            sel.title = cf.nombre_mostrar;
+            sel.innerHTML = '<option value="">' + escapeHtml(cf.nombre_mostrar) + '</option>';
+            // Restaurar valor previo si existía
+            if (valoresActuales[cf.nombre_campo]) {
+                sel.value = valoresActuales[cf.nombre_campo];
+                sel.classList.add('active-filter');
+            }
+            sel.addEventListener('change', function () {
+                this.classList.toggle('active-filter', this.value !== '');
+                cargarFiltros();
+                cargarRegistros(true);
+            });
+            DOM.filtrosDinamicosRow.appendChild(sel);
+        });
     }
 
     function llenarSelect(el, valores, placeholder) {
@@ -541,7 +598,6 @@ if (!defined('SISTEMA_REGISTROS')) {
         }
 
         STATE.editingCell = { element: cellContent, id: id, campo: campo, originalValue: currentVal, originalHtml: cellContent.innerHTML };
-
         cellContent.innerHTML = '<input type="text" class="inline-edit-input" value="' + escapeHtml(currentVal) + '"><div class="inline-edit-actions"><button class="inline-edit-save"><i class="fas fa-check"></i></button><button class="inline-edit-cancel"><i class="fas fa-times"></i></button></div>';
 
         var input = cellContent.querySelector('.inline-edit-input');
@@ -633,7 +689,6 @@ if (!defined('SISTEMA_REGISTROS')) {
 
         if (DOM.tableHeaders) {
             DOM.tableHeaders.addEventListener('click', function (e) {
-                // ── FIX: si reordenar no está permitido, ignorar todos los clicks ──
                 if (!STATE.reordenarPermitido) return;
                 var th = e.target.closest('th');
                 if (!th || th.getAttribute('data-sortable') === 'false') return;
@@ -673,6 +728,11 @@ if (!defined('SISTEMA_REGISTROS')) {
         if (DOM.filterHoraHastaH) DOM.filterHoraHastaH.value = '';
         if (DOM.filterHoraHastaM) DOM.filterHoraHastaM.value = '';
         if (DOM.filterPageSize) DOM.filterPageSize.value = '50';
+        // Limpiar filtros dinámicos
+        STATE.camposFiltroActivos.forEach(function (cf) {
+            var el = document.getElementById('filterDyn_' + cf.nombre_campo);
+            if (el) { el.value = ''; el.classList.remove('active-filter'); }
+        });
         STATE.sortColumn = 'fecha_registro'; STATE.sortDir = 'DESC';
         renderHeaders(); cargarFiltros(); cargarRegistros(true);
     }
@@ -763,54 +823,29 @@ if (!defined('SISTEMA_REGISTROS')) {
     function expulsarSesion(mensaje) {
         if (STATE.sesionInvalidada) return;
         STATE.sesionInvalidada = true;
-
         if (STATE.pollTimer)     clearInterval(STATE.pollTimer);
         if (STATE.permisosTimer) clearInterval(STATE.permisosTimer);
         STATE.isPollActive = false;
-
-        if (typeof mostrarToast === 'function') {
-            mostrarToast(mensaje || 'Tu sesión ha sido cerrada. Redirigiendo...', 'error', 4000);
-        }
-
+        if (typeof mostrarToast === 'function') mostrarToast(mensaje || 'Tu sesión ha sido cerrada. Redirigiendo...', 'error', 4000);
         var overlay = document.createElement('div');
-        overlay.style.cssText = [
-            'position:fixed', 'inset:0', 'background:rgba(0,0,0,0.75)',
-            'z-index:99999', 'display:flex', 'align-items:center',
-            'justify-content:center', 'flex-direction:column', 'gap:16px'
-        ].join(';');
-        overlay.innerHTML =
-            '<i class="fas fa-lock" style="font-size:48px;color:#fff;"></i>' +
-            '<p style="color:#fff;font-size:16px;font-weight:600;margin:0;text-align:center;">' +
-                (mensaje || 'Tu sesión ha sido cerrada.') +
-            '</p>' +
-            '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;">Redirigiendo al inicio de sesión...</p>';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px';
+        overlay.innerHTML = '<i class="fas fa-lock" style="font-size:48px;color:#fff;"></i><p style="color:#fff;font-size:16px;font-weight:600;margin:0;text-align:center;">' + (mensaje || 'Tu sesión ha sido cerrada.') + '</p><p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;">Redirigiendo al inicio de sesión...</p>';
         document.body.appendChild(overlay);
-
-        setTimeout(function () {
-            window.location.href = 'index.php?session=expired';
-        }, 3000);
+        setTimeout(function () { window.location.href = 'index.php?session=expired'; }, 3000);
     }
 
     function cargarYAplicarPermisos() {
         if (STATE.sesionInvalidada) return;
-
         fetch('includes/ajax/get_permisos_usuario.php', { credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-
-            // ─── WATCHDOG: sesión inválida ───
-            if (data.session_invalida === true) {
-                expulsarSesion(data.message || 'Tu cuenta ya no existe en el sistema.');
-                return;
-            }
-
+            if (data.session_invalida === true) { expulsarSesion(data.message || 'Tu cuenta ya no existe en el sistema.'); return; }
             if (!data.success) return;
-            if (data.es_admin) return; // Admin ve todo siempre
+            if (data.es_admin) return;
 
             var p    = data.permisos;
             var dash = p.dashboard || {};
 
-            // === COLUMNAS: ocultar/mostrar ===
             var colMap = {
                 'nombre': 'col_nombre', 'apellidos': 'col_apellidos', 'telefono': 'col_telefono',
                 'correo': 'col_correo', 'asesor': 'col_asesor', 'delegado': 'col_delegado',
@@ -819,96 +854,64 @@ if (!defined('SISTEMA_REGISTROS')) {
                 'fecha': 'col_fecha', 'hora': 'col_hora', 'categoria': 'col_categoria',
                 'file_url': 'col_file_url', 'formulario_id': 'col_formulario_id', 'web': 'col_web'
             };
-
             var allTh = DOM.tableHeaders.querySelectorAll('th');
             allTh.forEach(function (th, idx) {
                 var colKey = th.getAttribute('data-column');
                 if (colKey && colMap[colKey] !== undefined) {
-                    var permKey    = colMap[colKey];
-                    var visible    = (dash[permKey] !== undefined) ? dash[permKey] : true;
-                    var displayVal = visible ? '' : 'none';
-                    th.style.display = displayVal;
-                    var rows = DOM.tableBody.querySelectorAll('tr');
-                    rows.forEach(function (row) {
+                    var visible = (dash[colMap[colKey]] !== undefined) ? dash[colMap[colKey]] : true;
+                    var dv = visible ? '' : 'none';
+                    th.style.display = dv;
+                    DOM.tableBody.querySelectorAll('tr').forEach(function (row) {
                         var tds = row.querySelectorAll('td');
-                        if (tds[idx]) tds[idx].style.display = displayVal;
+                        if (tds[idx]) tds[idx].style.display = dv;
                     });
                 }
             });
 
-            // === FILTROS SELECTORES (fila 3) ===
             var filtroMap = {
-                'filtro_asesor':      'filterAsesor',
-                'filtro_delegado':    'filterDelegado',
-                'filtro_curso':       'filterCurso',
-                'filtro_pais':        'filterPais',
-                'filtro_ciudad':      'filterCiudad',
-                'filtro_moneda':      'filterMoneda',
-                'filtro_metodo_pago': 'filterMetodoPago',
-                'filtro_web':         'filterWeb'
+                'filtro_asesor': 'filterAsesor', 'filtro_delegado': 'filterDelegado',
+                'filtro_curso': 'filterCurso', 'filtro_pais': 'filterPais',
+                'filtro_ciudad': 'filterCiudad', 'filtro_moneda': 'filterMoneda',
+                'filtro_metodo_pago': 'filterMetodoPago', 'filtro_web': 'filterWeb'
             };
             Object.keys(filtroMap).forEach(function (permKey) {
                 var el = document.getElementById(filtroMap[permKey]);
-                if (el) {
-                    var visible = (dash[permKey] !== undefined) ? dash[permKey] : true;
-                    el.style.display = visible ? '' : 'none';
-                }
+                if (el) el.style.display = ((dash[permKey] !== undefined) ? dash[permKey] : true) ? '' : 'none';
             });
 
-            // === FILTROS FILA 1: Formulario, Búsqueda, Mostrando, Limpiar ===
-            // filtro_formulario → label + select juntos (wrapper)
             var wFormulario = document.getElementById('filtroFormularioWrapper');
             var selectFormulario = document.getElementById('filterFormulario');
             var visFormulario = (dash.filtro_formulario !== false);
             if (wFormulario) wFormulario.style.display = visFormulario ? '' : 'none';
             if (selectFormulario) selectFormulario.style.display = visFormulario ? '' : 'none';
 
-            // filtro_busqueda → input de búsqueda
             var wBusqueda = document.getElementById('filtroBusquedaWrapper');
             if (wBusqueda) wBusqueda.style.display = (dash.filtro_busqueda !== false) ? '' : 'none';
 
-            // filtro_mostrando → contador "Mostrando X de Y"
             var wMostrando = document.getElementById('filtroMostrandoWrapper');
             if (wMostrando) wMostrando.style.display = (dash.filtro_mostrando !== false) ? '' : 'none';
 
-            // filtro_limpiar → botón Limpiar
-            if (DOM.btnClearFilters) {
-                DOM.btnClearFilters.style.display = (dash.filtro_limpiar !== false) ? '' : 'none';
-            }
+            if (DOM.btnClearFilters) DOM.btnClearFilters.style.display = (dash.filtro_limpiar !== false) ? '' : 'none';
 
-            // === FILTROS FILA 2: Fecha y Hora ===
             var wFechaHora = document.getElementById('filtersRow2');
             if (wFechaHora) wFechaHora.style.display = (dash.filtro_fecha_hora !== false) ? '' : 'none';
 
-            // === REORDENAR COLUMNAS ===
             var nuevoReordenar = (dash.reordenar_columnas !== false);
-            if (nuevoReordenar !== STATE.reordenarPermitido) {
-                STATE.reordenarPermitido = nuevoReordenar;
-                // Re-renderizar headers para aplicar/quitar clase no-sort y data-sortable
-                renderHeaders();
-            }
-            // Cursor visual en thead: si no puede reordenar, deshabilitar pointer
+            if (nuevoReordenar !== STATE.reordenarPermitido) { STATE.reordenarPermitido = nuevoReordenar; renderHeaders(); }
             if (DOM.tableHeaders) {
                 DOM.tableHeaders.style.cursor = nuevoReordenar ? '' : 'default';
-                DOM.tableHeaders.querySelectorAll('th').forEach(function (th) {
-                    th.style.pointerEvents = nuevoReordenar ? '' : 'none';
-                });
+                DOM.tableHeaders.querySelectorAll('th').forEach(function (th) { th.style.pointerEvents = nuevoReordenar ? '' : 'none'; });
             }
 
-            // === BOTÓN EXCEL ===
-            if (DOM.btnExportExcel) {
-                DOM.btnExportExcel.style.display = (dash.descargar_excel !== false) ? '' : 'none';
-            }
+            if (DOM.btnExportExcel) DOM.btnExportExcel.style.display = (dash.descargar_excel !== false) ? '' : 'none';
 
-            // === EDICIÓN INLINE ===
             if (dash.edicion_inline === false) {
                 document.querySelectorAll('.edit-btn').forEach(function (btn) { btn.style.display = 'none'; });
             } else {
                 document.querySelectorAll('.edit-btn').forEach(function (btn) { btn.style.display = ''; });
             }
 
-            // === MENÚ ESTADÍSTICAS ===
-            var est     = p.estadisticas || {};
+            var est = p.estadisticas || {};
             var menuEst = document.querySelector('[data-page="estadisticas"]');
             if (menuEst) menuEst.style.display = (est.acceso_estadisticas === false) ? 'none' : '';
         })
@@ -916,15 +919,12 @@ if (!defined('SISTEMA_REGISTROS')) {
     }
 
     // =====================================================
-    // POLLING: OPCIONES GLOBALES EN TIEMPO REAL
+    // POLLING: OPCIONES GLOBALES
     // =====================================================
     var ultimasOpciones = {};
-
     function verificarOpcionesGlobales() {
         if (STATE.sesionInvalidada) return;
-        fetch('includes/ajax/opciones_sistema.php?accion=get_opciones_globales_realtime', {
-            credentials: 'same-origin'
-        })
+        fetch('includes/ajax/opciones_sistema.php?accion=get_opciones_globales_realtime', { credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
         .then(function (data) {
             if (data.success && data.opciones) {
