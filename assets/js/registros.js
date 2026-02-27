@@ -659,6 +659,30 @@
         if (DOM.tableBody.firstChild) DOM.tableBody.insertBefore(tr, DOM.tableBody.firstChild);
         else DOM.tableBody.appendChild(tr);
         if (DOM.noResults) DOM.noResults.style.display = 'none';
+
+        // 🔔 NOTIFICACIÓN — toast + sonido opcional
+        if (typeof mostrarToast === 'function') {
+            var nombre = (reg.nombre || '') + ' ' + (reg.apellidos || '');
+            var curso  = reg.curso  ? ' · ' + reg.curso  : '';
+            var pais   = reg.pais   ? ' · ' + reg.pais   : '';
+            mostrarToast(
+                '🔔 Nuevo registro: <strong>' + escapeHtml(nombre.trim()) + '</strong>' + curso + pais,
+                'info',
+                6000   // 6 segundos visible
+            );
+        }
+
+        // Hacer sonar un beep suave (opcional — elimina si no quieres sonido)
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine'; osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+        } catch(e) { /* silencioso si el browser bloquea audio */ }
     }
 
     // =====================================================
