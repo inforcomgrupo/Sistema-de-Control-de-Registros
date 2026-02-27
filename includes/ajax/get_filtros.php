@@ -3,6 +3,7 @@
  * AJAX: Obtener valores únicos para filtros dependientes
  * Soporta vista_tipo: asesor, delegado, o vacío (dashboard)
  * Siempre devuelve estadísticas
+ * Incluye filtros dinámicos (campos_extra con mostrar_filtro = 1)
  */
 define('SISTEMA_REGISTROS', true);
 require_once __DIR__ . '/../../config/database.php';
@@ -62,7 +63,7 @@ try {
         return ['clause' => $clause, 'params' => $params];
     }
 
-    // Obtener filtros
+    // Obtener filtros de columnas fijas
     $campos = ['formulario_id','asesor','delegado','curso','pais','ciudad','moneda','metodo_pago','web','categoria'];
     $filtros = [];
 
@@ -75,6 +76,33 @@ try {
         $stmt = $db->prepare($sql);
         $stmt->execute($w['params']);
         $filtros[$col] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    // ── NUEVO: Filtros dinámicos (campos con mostrar_filtro = 1) ──
+    $stmtDyn = $db->query("SELECT nombre_campo FROM campos_dinamicos WHERE mostrar_filtro = 1 AND activo = 1 ORDER BY orden ASC");
+    $camposDinamicos = $stmtDyn->fetchAll(PDO::FETCH_COLUMN);
+
+    foreach ($camposDinamicos as $nc) {
+        $w   = buildWhereExcluding('none', $inputParams, $vistaTipo);
+        $bw  = $w['clause'];
+        $bp  = $w['params'];
+        $and = $bw ? ' AND' : ' WHERE';
+
+        $path = '$.' . $nc;
+        $sql  = "SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(campos_extra, :path)) as val
+                 FROM registros
+                 $bw
+                 $and JSON_EXTRACT(campos_extra, :path2) IS NOT NULL
+                   AND JSON_UNQUOTE(JSON_EXTRACT(campos_extra, :path3)) != ''
+                 ORDER BY val ASC";
+
+        $bp[':path']  = $path;
+        $bp[':path2'] = $path;
+        $bp[':path3'] = $path;
+
+        $stmtF = $db->prepare($sql);
+        $stmtF->execute($bp);
+        $filtros['dyn_' . $nc] = $stmtF->fetchAll(PDO::FETCH_COLUMN);
     }
 
     // Estadísticas (siempre se calculan)
@@ -130,17 +158,22 @@ try {
     $totalPaises = (int)$stmtPai->fetch()['c'];
 
     $stats = [
-        'total' => $total,
-        'hoy' => $totalHoy,
-        'semana' => $totalSemana,
-        'mes' => $totalMes,
-        'asesores' => $totalAsesores,
+        'total'     => $total,
+        'hoy'       => $totalHoy,
+        'semana'    => $totalSemana,
+        'mes'       => $totalMes,
+        'asesores'  => $totalAsesores,
         'delegados' => $totalDelegados,
-        'cursos' => $totalCursos,
-        'paises' => $totalPaises
+        'cursos'    => $totalCursos,
+        'paises'    => $totalPaises
     ];
 
-    echo json_encode(['success' => true, 'filtros' => $filtros, 'stats' => $stats]);
+    echo json_encode([
+        'success'          => true,
+        'filtros'          => $filtros,
+        'stats'            => $stats,
+        'campos_dinamicos' => $camposDinamicos, // ← el JS los usa para renderizar los selects
+    ]);
 
 } catch (PDOException $e) {
     error_log("Error get_filtros: " . $e->getMessage());
