@@ -128,6 +128,9 @@ if (!defined('SISTEMA_REGISTROS')) {
         <select class="filter-select" id="asesorFilterMetodoPago"><option value="">Método de Pago</option></select>
         <select class="filter-select" id="asesorFilterWeb"><option value="">Web</option></select>
     </div>
+
+    <!-- ── NUEVO: fila de filtros dinámicos (campos con mostrar_filtro_asesor = 1) ── -->
+    <div class="filters-row" id="asesorFiltrosDinamicosRow" style="display:none;"></div>
 </div>
 
 <!-- Tabla -->
@@ -161,7 +164,8 @@ if (!defined('SISTEMA_REGISTROS')) {
         isPollActive: true, lastId: 0, totalFiltered: 0, totalGeneral: 0,
         sortColumn: 'fecha_registro', sortDir: 'DESC', searchTimer: null,
         pollTimer: null, camposDinamicos: [], editingCell: null, requestId: 0,
-        permisosTimer: null, sesionInvalidada: false, reordenarPermitido: true
+        permisosTimer: null, sesionInvalidada: false, reordenarPermitido: true,
+        camposFiltroActivos: []  // ── NUEVO
     };
 
     var COLUMNAS = [
@@ -187,30 +191,31 @@ if (!defined('SISTEMA_REGISTROS')) {
     var DOM = {};
 
     function cacheDom() {
-        DOM.tableHeaders    = document.getElementById(PREFIX + 'TableHeaders');
-        DOM.tableBody       = document.getElementById(PREFIX + 'TableBody');
-        DOM.tableScroll     = document.getElementById(PREFIX + 'TableScroll');
-        DOM.tableLoader     = document.getElementById(PREFIX + 'TableLoader');
-        DOM.noResults       = document.getElementById(PREFIX + 'NoResults');
-        DOM.countFiltered   = document.getElementById(PREFIX + 'CountFiltered');
-        DOM.countTotal      = document.getElementById(PREFIX + 'CountTotal');
-        DOM.filterSearch    = document.getElementById(PREFIX + 'FilterSearch');
-        DOM.filterPrincipal = document.getElementById(PREFIX + 'FilterAsesor');
-        DOM.filterCurso     = document.getElementById(PREFIX + 'FilterCurso');
-        DOM.filterPais      = document.getElementById(PREFIX + 'FilterPais');
-        DOM.filterCiudad    = document.getElementById(PREFIX + 'FilterCiudad');
-        DOM.filterMoneda    = document.getElementById(PREFIX + 'FilterMoneda');
-        DOM.filterMetodoPago= document.getElementById(PREFIX + 'FilterMetodoPago');
-        DOM.filterWeb       = document.getElementById(PREFIX + 'FilterWeb');
-        DOM.filterFechaDesde= document.getElementById(PREFIX + 'FilterFechaDesde');
-        DOM.filterFechaHasta= document.getElementById(PREFIX + 'FilterFechaHasta');
-        DOM.filterHoraDesdeH= document.getElementById(PREFIX + 'FilterHoraDesdeH');
-        DOM.filterHoraDesdeM= document.getElementById(PREFIX + 'FilterHoraDesdeM');
-        DOM.filterHoraHastaH= document.getElementById(PREFIX + 'FilterHoraHastaH');
-        DOM.filterHoraHastaM= document.getElementById(PREFIX + 'FilterHoraHastaM');
-        DOM.filterPageSize  = document.getElementById(PREFIX + 'FilterPageSize');
-        DOM.btnClear        = document.getElementById(PREFIX + 'BtnClear');
-        DOM.btnExcel        = document.getElementById(PREFIX + 'BtnExcel');
+        DOM.tableHeaders         = document.getElementById(PREFIX + 'TableHeaders');
+        DOM.tableBody            = document.getElementById(PREFIX + 'TableBody');
+        DOM.tableScroll          = document.getElementById(PREFIX + 'TableScroll');
+        DOM.tableLoader          = document.getElementById(PREFIX + 'TableLoader');
+        DOM.noResults            = document.getElementById(PREFIX + 'NoResults');
+        DOM.countFiltered        = document.getElementById(PREFIX + 'CountFiltered');
+        DOM.countTotal           = document.getElementById(PREFIX + 'CountTotal');
+        DOM.filterSearch         = document.getElementById(PREFIX + 'FilterSearch');
+        DOM.filterPrincipal      = document.getElementById(PREFIX + 'FilterAsesor');
+        DOM.filterCurso          = document.getElementById(PREFIX + 'FilterCurso');
+        DOM.filterPais           = document.getElementById(PREFIX + 'FilterPais');
+        DOM.filterCiudad         = document.getElementById(PREFIX + 'FilterCiudad');
+        DOM.filterMoneda         = document.getElementById(PREFIX + 'FilterMoneda');
+        DOM.filterMetodoPago     = document.getElementById(PREFIX + 'FilterMetodoPago');
+        DOM.filterWeb            = document.getElementById(PREFIX + 'FilterWeb');
+        DOM.filterFechaDesde     = document.getElementById(PREFIX + 'FilterFechaDesde');
+        DOM.filterFechaHasta     = document.getElementById(PREFIX + 'FilterFechaHasta');
+        DOM.filterHoraDesdeH     = document.getElementById(PREFIX + 'FilterHoraDesdeH');
+        DOM.filterHoraDesdeM     = document.getElementById(PREFIX + 'FilterHoraDesdeM');
+        DOM.filterHoraHastaH     = document.getElementById(PREFIX + 'FilterHoraHastaH');
+        DOM.filterHoraHastaM     = document.getElementById(PREFIX + 'FilterHoraHastaM');
+        DOM.filterPageSize       = document.getElementById(PREFIX + 'FilterPageSize');
+        DOM.btnClear             = document.getElementById(PREFIX + 'BtnClear');
+        DOM.btnExcel             = document.getElementById(PREFIX + 'BtnExcel');
+        DOM.filtrosDinamicosRow  = document.getElementById(PREFIX + 'FiltrosDinamicosRow'); // ── NUEVO
     }
 
     function init() {
@@ -222,7 +227,6 @@ if (!defined('SISTEMA_REGISTROS')) {
         cargarRegistros(true);
         bindEvents();
         iniciarPolling();
-        // Permisos en tiempo real
         cargarYAplicarPermisos();
         STATE.permisosTimer = setInterval(cargarYAplicarPermisos, 5000);
     }
@@ -253,7 +257,7 @@ if (!defined('SISTEMA_REGISTROS')) {
     function getHoraHasta() { var h = DOM.filterHoraHastaH ? DOM.filterHoraHastaH.value : ''; var m = DOM.filterHoraHastaM ? DOM.filterHoraHastaM.value : ''; if (h === '') return ''; return h + ':' + (m || '59') + ':59'; }
 
     // =====================================================
-    // HEADERS
+    // HEADERS  ── NUEVO: incluye columnas dinámicas con mostrar_lista_asesor
     // =====================================================
     function renderHeaders() {
         var html = '';
@@ -266,6 +270,12 @@ if (!defined('SISTEMA_REGISTROS')) {
             }
             var noSortClass = esSortable ? '' : ' no-sort';
             html += '<th class="' + sc + noSortClass + '" data-column="' + col.key + '" data-sortable="' + (esSortable ? 'true' : 'false') + '">' + col.label + (esSortable ? ' ' + si : '') + '</th>';
+        });
+        // ── NUEVO: columnas dinámicas de esta vista
+        STATE.camposDinamicos.forEach(function (cd) {
+            if (cd.mostrar_lista_asesor == 1) {
+                html += '<th data-column="dyn_' + cd.nombre_campo + '" data-sortable="false" class="no-sort">' + cd.nombre_mostrar + '</th>';
+            }
         });
         DOM.tableHeaders.innerHTML = html;
     }
@@ -297,11 +307,19 @@ if (!defined('SISTEMA_REGISTROS')) {
         var hd = getHoraDesde(), hh = getHoraHasta();
         if (hd !== '') p.hora_desde = hd;
         if (hh !== '') p.hora_hasta = hh;
+        // ── NUEVO: filtros dinámicos activos
+        STATE.camposFiltroActivos.forEach(function (cf) {
+            var el = document.getElementById('filterDyn_' + cf.nombre_campo);
+            if (el && el.value !== '') p['dyn_' + cf.nombre_campo] = el.value;
+        });
         return p;
     }
 
     function hayFiltrosActivos() { var p = buildFilterParams(); delete p.vista_tipo; return Object.keys(p).length > 0; }
 
+    // =====================================================
+    // CARGAR FILTROS  ── NUEVO: procesa campos_dinamicos
+    // =====================================================
     function cargarFiltros() {
         var params = buildFilterParams();
         var qs = Object.keys(params).map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]); }).join('&');
@@ -317,8 +335,64 @@ if (!defined('SISTEMA_REGISTROS')) {
                 llenarSelect(DOM.filterMetodoPago, data.filtros.metodo_pago,  'Método de Pago');
                 llenarSelect(DOM.filterWeb,        data.filtros.web,          'Web');
                 if (data.stats) actualizarStats(data.stats);
+
+                // ── NUEVO: campos dinámicos con mostrar_filtro_asesor = 1
+                var camposNuevos = (data.campos_dinamicos || []).filter(function (c) {
+                    return c.mostrar_filtro_asesor == 1;
+                });
+                var camposActuales    = STATE.camposFiltroActivos.map(function (c) { return c.nombre_campo; });
+                var camposNuevosNames = camposNuevos.map(function (c) { return c.nombre_campo; });
+                var necesitaRedibujar = JSON.stringify(camposActuales) !== JSON.stringify(camposNuevosNames);
+
+                if (DOM.filtrosDinamicosRow) {
+                    if (camposNuevos.length > 0) {
+                        DOM.filtrosDinamicosRow.style.display = '';
+                        if (necesitaRedibujar) {
+                            STATE.camposFiltroActivos = camposNuevos;
+                            renderFiltrosDinamicos(camposNuevos);
+                        } else {
+                            camposNuevos.forEach(function (cf) {
+                                var el = document.getElementById('filterDyn_' + cf.nombre_campo);
+                                if (el) llenarSelect(el, data.filtros['dyn_' + cf.nombre_campo] || [], cf.nombre_mostrar);
+                            });
+                        }
+                    } else {
+                        DOM.filtrosDinamicosRow.style.display = 'none';
+                        DOM.filtrosDinamicosRow.innerHTML = '';
+                        STATE.camposFiltroActivos = [];
+                    }
+                }
             }
-        }).catch(function (err) { console.error('Error filtros:', err); });
+        }).catch(function (err) { console.error('Error filtros asesor:', err); });
+    }
+
+    // ── NUEVO: renderizar selects dinámicos
+    function renderFiltrosDinamicos(campos) {
+        if (!DOM.filtrosDinamicosRow) return;
+        var valoresActuales = {};
+        STATE.camposFiltroActivos.forEach(function (cf) {
+            var el = document.getElementById('filterDyn_' + cf.nombre_campo);
+            if (el) valoresActuales[cf.nombre_campo] = el.value;
+        });
+        DOM.filtrosDinamicosRow.innerHTML = '';
+        campos.forEach(function (cf) {
+            var sel = document.createElement('select');
+            sel.className = 'filter-select';
+            sel.id = 'filterDyn_' + cf.nombre_campo;
+            sel.title = cf.nombre_mostrar;
+            sel.setAttribute('data-dyn-campo', cf.nombre_campo);
+            sel.innerHTML = '<option value="">' + escapeHtml(cf.nombre_mostrar) + '</option>';
+            if (valoresActuales[cf.nombre_campo]) {
+                sel.value = valoresActuales[cf.nombre_campo];
+                sel.classList.add('active-filter');
+            }
+            sel.addEventListener('change', function () {
+                this.classList.toggle('active-filter', this.value !== '');
+                cargarFiltros();
+                cargarRegistros(true);
+            });
+            DOM.filtrosDinamicosRow.appendChild(sel);
+        });
     }
 
     function llenarSelect(el, valores, placeholder) {
@@ -376,7 +450,7 @@ if (!defined('SISTEMA_REGISTROS')) {
     }
 
     // =====================================================
-    // CREAR FILA
+    // CREAR FILA  ── NUEVO: incluye celdas dinámicas con mostrar_lista_asesor
     // =====================================================
     function crearFila(reg, isNew) {
         var tr = document.createElement('tr'); tr.setAttribute('data-id', reg.id); if (isNew) tr.classList.add('new-row');
@@ -386,6 +460,13 @@ if (!defined('SISTEMA_REGISTROS')) {
             if (col.type === 'whatsapp') html += cellWhatsApp(reg.id, col.key, val, empty);
             else if (col.type === 'file') html += cellFile(val, empty);
             else html += cellEditable(reg.id, col.key, val, empty);
+        });
+        // ── NUEVO: celdas dinámicas
+        STATE.camposDinamicos.forEach(function (cd) {
+            if (cd.mostrar_lista_asesor == 1) {
+                var dynVal = (reg.campos_extra && reg.campos_extra[cd.nombre_campo]) ? reg.campos_extra[cd.nombre_campo] : '';
+                html += cellEditable(reg.id, cd.nombre_campo, dynVal, dynVal === '' || dynVal === null);
+            }
         });
         tr.innerHTML = html; return tr;
     }
@@ -474,7 +555,6 @@ if (!defined('SISTEMA_REGISTROS')) {
         if (DOM.btnExcel) DOM.btnExcel.addEventListener('click', exportarExcel);
 
         if (DOM.tableHeaders) DOM.tableHeaders.addEventListener('click', function (e) {
-            // ── FIX: si reordenar no está permitido, ignorar clicks ──
             if (!STATE.reordenarPermitido) return;
             var th = e.target.closest('th'); if (!th || th.getAttribute('data-sortable') === 'false') return;
             var col = th.getAttribute('data-column');
@@ -497,6 +577,9 @@ if (!defined('SISTEMA_REGISTROS')) {
         if (DOM.filterFechaHasta) DOM.filterFechaHasta.value = '';
         [DOM.filterHoraDesdeH, DOM.filterHoraDesdeM, DOM.filterHoraHastaH, DOM.filterHoraHastaM].forEach(function (el) { if (el) el.value = ''; });
         if (DOM.filterPageSize) DOM.filterPageSize.value = '50';
+        // ── NUEVO: limpiar filtros dinámicos
+        STATE.camposFiltroActivos = [];
+        if (DOM.filtrosDinamicosRow) { DOM.filtrosDinamicosRow.innerHTML = ''; DOM.filtrosDinamicosRow.style.display = 'none'; }
         STATE.sortColumn = 'fecha_registro'; STATE.sortDir = 'DESC';
         renderHeaders(); cargarFiltros(); cargarRegistros(true);
     }
@@ -581,12 +664,11 @@ if (!defined('SISTEMA_REGISTROS')) {
         .then(function (data) {
             if (data.session_invalida === true) { expulsarSesion(data.message || 'Tu cuenta ya no existe en el sistema.'); return; }
             if (!data.success) return;
-            if (data.es_admin) return; // Admin ve todo
+            if (data.es_admin) return;
 
             var p  = data.permisos;
             var ad = p.asesores_delegados || {};
 
-            // === COLUMNAS: ocultar/mostrar ===
             var colMap = {
                 'nombre': 'col_nombre', 'apellidos': 'col_apellidos', 'telefono': 'col_telefono',
                 'correo': 'col_correo', 'asesor': 'col_asesor', 'curso': 'col_curso',
@@ -608,7 +690,6 @@ if (!defined('SISTEMA_REGISTROS')) {
                 }
             });
 
-            // === FILTROS FILA 3 (selectores) ===
             var filtroMap = {
                 'filtro_curso':       'asesorFilterCurso',
                 'filtro_pais':        'asesorFilterPais',
@@ -622,28 +703,21 @@ if (!defined('SISTEMA_REGISTROS')) {
                 if (el) el.style.display = (ad[permKey] !== false) ? '' : 'none';
             });
 
-            // === FILTROS FILA 1 ===
-            // filtro_formulario → label Asesores + select principal
             var labelAsesor = document.getElementById('asesorFiltroAsesorLabel');
             if (labelAsesor) labelAsesor.style.display = (ad.filtro_formulario !== false) ? '' : 'none';
             if (DOM.filterPrincipal) DOM.filterPrincipal.style.display = (ad.filtro_formulario !== false) ? '' : 'none';
 
-            // filtro_busqueda → input búsqueda
             var wBusqueda = document.getElementById('asesorFiltroBusquedaWrapper');
             if (wBusqueda) wBusqueda.style.display = (ad.filtro_busqueda !== false) ? '' : 'none';
 
-            // filtro_mostrando → contador
             var wMostrando = document.getElementById('asesorFiltroMostrandoWrapper');
             if (wMostrando) wMostrando.style.display = (ad.filtro_mostrando !== false) ? '' : 'none';
 
-            // filtro_limpiar → botón Limpiar
             if (DOM.btnClear) DOM.btnClear.style.display = (ad.filtro_limpiar !== false) ? '' : 'none';
 
-            // === FILTROS FILA 2: Fecha y Hora ===
             var row2 = document.getElementById('asesorFiltersRow2');
             if (row2) row2.style.display = (ad.filtro_fecha_hora !== false) ? '' : 'none';
 
-            // === REORDENAR COLUMNAS ===
             var nuevoReordenar = (ad.reordenar_columnas !== false);
             if (nuevoReordenar !== STATE.reordenarPermitido) {
                 STATE.reordenarPermitido = nuevoReordenar;
@@ -656,10 +730,8 @@ if (!defined('SISTEMA_REGISTROS')) {
                 });
             }
 
-            // === DESCARGAR EXCEL ===
             if (DOM.btnExcel) DOM.btnExcel.style.display = (ad.descargar_excel !== false) ? '' : 'none';
 
-            // === EDICIÓN INLINE ===
             if (ad.edicion_inline === false) {
                 document.querySelectorAll('#asesorTableBody .edit-btn').forEach(function(btn){ btn.style.visibility = 'hidden'; btn.style.pointerEvents = 'none'; });
             } else {
