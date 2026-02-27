@@ -39,7 +39,7 @@ try {
     function buildWhereExcluding($exclude, $ip, $vt) {
         $where = []; $params = [];
 
-        if ($vt === 'asesor')   $where[] = "asesor IS NOT NULL AND asesor != ''";
+        if ($vt === 'asesor')       $where[] = "asesor IS NOT NULL AND asesor != ''";
         elseif ($vt === 'delegado') $where[] = "delegado IS NOT NULL AND delegado != ''";
 
         if ($exclude !== 'search' && $ip['search'] !== '') {
@@ -79,24 +79,40 @@ try {
     }
 
     // ── Filtros dinámicos según vista_tipo ──
-    // Determinar qué columna de visibilidad usar
+    // Determinar qué columna de visibilidad usar para FILTRO y para LISTA
     if ($vistaTipo === 'asesor') {
         $colFiltro = 'mostrar_filtro_asesor';
+        $colLista  = 'mostrar_lista_asesor';
     } elseif ($vistaTipo === 'delegado') {
         $colFiltro = 'mostrar_filtro_delegado';
+        $colLista  = 'mostrar_lista_delegado';
     } else {
         $colFiltro = 'mostrar_filtro';
+        $colLista  = 'mostrar_lista';
     }
 
+    // ── MODIFICADO: SELECT incluye las columnas de visibilidad de lista y filtro ──
     $stmtDyn = $db->query(
-        "SELECT nombre_campo, nombre_mostrar FROM campos_dinamicos
-         WHERE $colFiltro = 1 AND activo = 1
+        "SELECT nombre_campo, nombre_mostrar,
+                mostrar_lista, mostrar_lista_asesor, mostrar_lista_delegado,
+                mostrar_filtro, mostrar_filtro_asesor, mostrar_filtro_delegado,
+                mostrar_filtro_estadisticas, mostrar_estadisticas
+         FROM campos_dinamicos
+         WHERE ($colFiltro = 1 OR $colLista = 1) AND activo = 1
          ORDER BY orden ASC"
     );
     $camposDinamicos = $stmtDyn->fetchAll(PDO::FETCH_ASSOC);
     $nombresCampos   = array_column($camposDinamicos, 'nombre_campo');
 
-    foreach ($nombresCampos as $nc) {
+    // Solo carga valores de filtro para campos que tienen filtro habilitado en esta vista
+    $camposConFiltro = array_column(
+        array_filter($camposDinamicos, function($c) use ($colFiltro) {
+            return !empty($c[$colFiltro]);
+        }),
+        'nombre_campo'
+    );
+
+    foreach ($camposConFiltro as $nc) {
         $w   = buildWhereExcluding('none', $inputParams, $vistaTipo);
         $bw  = $w['clause'];
         $bp  = $w['params'];
@@ -178,7 +194,7 @@ try {
         'success'          => true,
         'filtros'          => $filtros,
         'stats'            => $stats,
-        'campos_dinamicos' => $camposDinamicos, // [{nombre_campo, nombre_mostrar}, ...]
+        'campos_dinamicos' => $camposDinamicos, // [{nombre_campo, nombre_mostrar, mostrar_lista, mostrar_lista_asesor, ...}]
     ]);
 
 } catch (PDOException $e) {
